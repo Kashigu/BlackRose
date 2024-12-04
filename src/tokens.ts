@@ -1,22 +1,33 @@
-export type Token = { type: string; value: string };
-
 // Token types
-export const TOKEN_TYPES = {
-    WRITE: "WRITE",
-    READ: "READ",
-    ADD: "ADD",
-    SUB: "SUB",
-    MUL: "MUL",
-    DIV: "DIV",
-    STRING: "STRING",
-    NUMBER: "NUMBER",
-    VARIABLECONTENT: "VARIABLE", //represents a variable (ex:a)
-    TYPEOFNODE: "TYPEOF", //represents a type of node (ex: string, number, boolean)
-    VALUENODE: "VALUE", //represents a fixed value (ex:5 / "Hello")
-    VARIABLEREFENRENCENODE: "VARIABLE_REFERENCE", //represents a variable reference (ex:a)
-    OPEN_PAREN: "OPEN_PAREN",
-    CLOSE_PAREN: "CLOSE_PAREN",
-    SEMICOLON: "SEMICOLON",
-    EOF: "EOF", // End of file (input)
-    INVALID: "INVALID", // Invalid token
-};
+export enum TOKEN_TYPES  {
+    VariableDeclaration = "CREATE", // like const or let
+    WRITE = "WRITE", // console.log
+    STRING = "STRING",
+    LITERAL = "LITERAL",
+    OPEN_PAREN = "OPEN_PAREN",
+    CLOSE_PAREN = "CLOSE_PAREN",
+    SEMICOLON = "SEMICOLON",
+    LINEBREAK = "LINEBREAK",
+    AssignmentOperator = "AssignmentOperator", // =
+}
+
+//Create a TokenNode with the type of the token
+interface TokenNode <T extends TOKEN_TYPES> {
+    type: T;
+}
+
+//Create a TokenNode with the type of the token and the value
+interface TokenNodeValue<T extends TOKEN_TYPES> extends TokenNode<T> {
+    value: string;
+}
+
+export type  Token = 
+                     TokenNode<TOKEN_TYPES.VariableDeclaration> |
+                     TokenNode<TOKEN_TYPES.AssignmentOperator> |
+                     TokenNode<TOKEN_TYPES.WRITE> | TokenNodeValue<TOKEN_TYPES.STRING> | 
+                     TokenNodeValue<TOKEN_TYPES.LITERAL> | TokenNode<TOKEN_TYPES.OPEN_PAREN> | 
+                     TokenNode<TOKEN_TYPES.CLOSE_PAREN> | TokenNode<TOKEN_TYPES.SEMICOLON> | 
+                     TokenNode<TOKEN_TYPES.LINEBREAK>;
+
+
+
