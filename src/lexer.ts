@@ -5,8 +5,8 @@ const tokenStringMap: Array<{
     value: Token
   }> = [
     { key: '\n', value: { type: TOKEN_TYPES.LINEBREAK } },
-    { key: 'create', value: { type: TOKEN_TYPES.VariableDeclaration } },
-    { key: '=', value: { type: TOKEN_TYPES.AssignmentOperator } },
+    { key: 'create', value: { type: TOKEN_TYPES.VARIABLEDECLARATION } },
+    { key: '=', value: { type: TOKEN_TYPES.ASSIGNMENTOPERATOR } },
     { key: 'write', value: { type: TOKEN_TYPES.WRITE } },
     { key: '(', value: { type: TOKEN_TYPES.OPEN_PAREN } },
     { key: ')', value: { type: TOKEN_TYPES.CLOSE_PAREN } },
@@ -19,26 +19,69 @@ export function tokenize(input: string): Token[] {
     let currentPosition = 0;
 
     while (currentPosition < input.length) {
+
+        // Ignore whitespace
         if (input[currentPosition] === ' ') {
             currentPosition++;
             continue;
         }
 
+        // Handle open parenthesis
+        if (input[currentPosition] === '(') {
+            output.push({ type: TOKEN_TYPES.OPEN_PAREN });
+            currentPosition++;
+            continue;
+        }
+
+        // Handle close parenthesis
+        if (input[currentPosition] === ')') {
+            output.push({ type: TOKEN_TYPES.CLOSE_PAREN });
+            currentPosition++;
+            continue;
+        }
+
+        // Handle strings (either single or double quotes)
         if (input[currentPosition] === '"' || input[currentPosition] === "'") {
             const quoteType = input[currentPosition]; // Remember which quote type was used
             currentPosition++;
         
-            const bucket = lookAHead(new RegExp(`[^${quoteType}]`)); // Match until the same quote type is found
+            // Bucket to store the string
+            const bucket = [];
+
+            // Consume all characters until we reach the closing quote
+            while (currentPosition < input.length && input[currentPosition] !== quoteType) {
+                bucket.push(input[currentPosition]);
+                currentPosition++;
+            }
+
+            // If we reached the end of the input and the string is not closed
+            if (input[currentPosition] !== quoteType) {
+                throw new Error(`Unterminated string starting at position ${currentPosition}`);
+            }
+
+            currentPosition++ // Consume the closing quote
         
             output.push({
                 type: TOKEN_TYPES.STRING,
                 value: bucket.join('')
             });
 
-            currentPosition += bucket.length + 1;
-
             continue;
         }
+
+        // Handle numbers
+        const numberRegex = /\d/;
+        if (numberRegex.test(input[currentPosition])) {
+            const numberBucket = lookAHead(new RegExp('[0-9]')); // Collect digits
+
+            output.push({
+                type: TOKEN_TYPES.NUMBER,
+                value: numberBucket.join('')
+            });
+
+            currentPosition += numberBucket.length;
+            continue;
+        } 
 
         // Check for tokens in tokenStringMap first
         let foundToken = false;
@@ -57,8 +100,8 @@ export function tokenize(input: string): Token[] {
         }
 
         // Process LITERAL tokens only if no other token matches
-        const literalRegex = /[a-zA-Z]/;
-        const literalRegexNext = /[a-zA-Z0-9]/;
+        const literalRegex = /[a-zA-Z_]/;
+        const literalRegexNext = /[a-zA-Z0-9_]/;
 
         if (literalRegex.test(input[currentPosition])) {
             const bucket = lookAHead(literalRegex, literalRegexNext);
@@ -122,8 +165,7 @@ export function tokenize(input: string): Token[] {
 
 
 console.log(tokenize(`
-    create hello = ("world")
-    create world = ('hello')
+    create hello = "world_123 Ola"
     write (hello)
   `))
   

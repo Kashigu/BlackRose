@@ -1,14 +1,15 @@
 // Token types
 export enum TOKEN_TYPES  {
-    VariableDeclaration = "CREATE", // like const or let
-    WRITE = "WRITE", // console.log
-    STRING = "STRING",
-    LITERAL = "LITERAL",
-    OPEN_PAREN = "OPEN_PAREN",
-    CLOSE_PAREN = "CLOSE_PAREN",
-    SEMICOLON = "SEMICOLON",
-    LINEBREAK = "LINEBREAK",
-    AssignmentOperator = "AssignmentOperator", // =
+    VARIABLEDECLARATION = "Create", // like const or let
+    WRITE = "Write", // console.log
+    STRING = "String",
+    NUMBER = "Number",
+    LITERAL = "Literal",
+    OPEN_PAREN = "Open_Paren",
+    CLOSE_PAREN = "Close_Paren",
+    SEMICOLON = "Semicolon",
+    LINEBREAK = "Linebreak",
+    ASSIGNMENTOPERATOR = "AssignmentOperator", // =
 }
 
 //Create a TokenNode with the type of the token
@@ -22,12 +23,13 @@ interface TokenNodeValue<T extends TOKEN_TYPES> extends TokenNode<T> {
 }
 
 export type  Token = 
-                     TokenNode<TOKEN_TYPES.VariableDeclaration> |
-                     TokenNode<TOKEN_TYPES.AssignmentOperator> |
+                     TokenNode<TOKEN_TYPES.VARIABLEDECLARATION> |
+                     TokenNode<TOKEN_TYPES.ASSIGNMENTOPERATOR> |
                      TokenNode<TOKEN_TYPES.WRITE> | TokenNodeValue<TOKEN_TYPES.STRING> | 
                      TokenNodeValue<TOKEN_TYPES.LITERAL> | TokenNode<TOKEN_TYPES.OPEN_PAREN> | 
                      TokenNode<TOKEN_TYPES.CLOSE_PAREN> | TokenNode<TOKEN_TYPES.SEMICOLON> | 
-                     TokenNode<TOKEN_TYPES.LINEBREAK>;
+                     TokenNode<TOKEN_TYPES.LINEBREAK> | TokenNodeValue<TOKEN_TYPES.NUMBER>;
+
 
 
 
