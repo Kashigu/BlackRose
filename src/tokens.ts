@@ -1,6 +1,6 @@
 // Token types
 export enum TOKEN_TYPES  {
-    VARIABLEDECLARATION = "Create", // like const or let
+    VARIABLEDECLARATION = "VariableDeclaration", // like const or let
     WRITE = "Write", // console.log
     STRING = "String",
     NUMBER = "Number",
@@ -10,6 +10,7 @@ export enum TOKEN_TYPES  {
     SEMICOLON = "Semicolon",
     LINEBREAK = "Linebreak",
     ASSIGNMENTOPERATOR = "AssignmentOperator", // =
+    BINARYOPERATOR = "BinaryOperator" // +, -, *, /
 }
 
 //Create a TokenNode with the type of the token
@@ -28,7 +29,8 @@ export type  Token =
                      TokenNode<TOKEN_TYPES.WRITE> | TokenNodeValue<TOKEN_TYPES.STRING> | 
                      TokenNodeValue<TOKEN_TYPES.LITERAL> | TokenNode<TOKEN_TYPES.OPEN_PAREN> | 
                      TokenNode<TOKEN_TYPES.CLOSE_PAREN> | TokenNode<TOKEN_TYPES.SEMICOLON> | 
-                     TokenNode<TOKEN_TYPES.LINEBREAK> | TokenNodeValue<TOKEN_TYPES.NUMBER>;
+                     TokenNode<TOKEN_TYPES.LINEBREAK> | TokenNodeValue<TOKEN_TYPES.NUMBER> |
+                     TokenNodeValue<TOKEN_TYPES.BINARYOPERATOR>;
 
 
 

@@ -1,16 +1,23 @@
 import { Token, TOKEN_TYPES } from './tokens';
 
+
+// This is my Language Lexer
 const tokenStringMap: Array<{
     key: string,
     value: Token
-  }> = [
+}> = [
     { key: '\n', value: { type: TOKEN_TYPES.LINEBREAK } },
-    { key: 'create', value: { type: TOKEN_TYPES.VARIABLEDECLARATION } },
+    { key: 'create', value: { type: TOKEN_TYPES.VARIABLEDECLARATION } }, // if appears Create then it is a variable declaration
     { key: '=', value: { type: TOKEN_TYPES.ASSIGNMENTOPERATOR } },
     { key: 'write', value: { type: TOKEN_TYPES.WRITE } },
     { key: '(', value: { type: TOKEN_TYPES.OPEN_PAREN } },
     { key: ')', value: { type: TOKEN_TYPES.CLOSE_PAREN } },
-  ]
+    { key: '+', value: { type: TOKEN_TYPES.BINARYOPERATOR, value: '+' } },
+    { key: '-', value: { type: TOKEN_TYPES.BINARYOPERATOR, value: '-' } },
+    { key: '*', value: { type: TOKEN_TYPES.BINARYOPERATOR, value: '*' } },
+    { key: '/', value: { type: TOKEN_TYPES.BINARYOPERATOR, value: '/' } },
+    { key: ';', value: { type: TOKEN_TYPES.SEMICOLON } }
+ ]
 
 
 // Tokenize the code
@@ -36,6 +43,14 @@ export function tokenize(input: string): Token[] {
         // Handle close parenthesis
         if (input[currentPosition] === ')') {
             output.push({ type: TOKEN_TYPES.CLOSE_PAREN });
+            currentPosition++;
+            continue;
+        }
+
+        //Handle Binary Operators
+
+        if (input[currentPosition] === '+' || input[currentPosition] === '-' || input[currentPosition] === '*' || input[currentPosition] === '/') {
+            output.push({ type: TOKEN_TYPES.BINARYOPERATOR, value: input[currentPosition] });
             currentPosition++;
             continue;
         }
@@ -163,10 +178,12 @@ export function tokenize(input: string): Token[] {
     return output;
 }
 
-
+console.log("Lexer Code")
 console.log(tokenize(`
     create hello = "world_123 Ola"
     write (hello)
+
+    create X = (5 * 5) + 10
   `))
   
 

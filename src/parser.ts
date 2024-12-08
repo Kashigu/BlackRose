@@ -3,15 +3,30 @@ import { tokenize } from "./lexer";
 import { Token, TOKEN_TYPES } from "./tokens";
 
 
+function getOperatorPrecedence(operator: string): number {
+    switch (operator) {
+        case '+':
+        case '-':
+            return 1;
+        case '*':
+        case '/':
+            return 2;
+        default:
+            return 0;
+    }
+}
+
+
+
+
 function parse(tokens: Token[]): ASTNode {
 
     let currentIndex = 0;
     let parenStack: number[] = []; // Stack to keep track of open parenthesis
 
-    function process(): ASTNode | null {
+    function READ_FILE(): ASTNode | null {
         const currentToken = tokens[currentIndex]; // Get the current token
         
-    
         // Ignore line breaks
         if (currentToken.type === TOKEN_TYPES.LINEBREAK) {
             currentIndex++;
@@ -55,13 +70,20 @@ function parse(tokens: Token[]): ASTNode {
 
         // Handle numbers
         if (currentToken.type === TOKEN_TYPES.NUMBER) {
-            currentIndex++;
+            currentIndex++; // Consume the number token
             return {
                 type: ASTNodeType.NUMBER,
-                value: currentToken.value
-            };
+                value: currentToken.value,
+            } as ASTNode;
+
         }
-    
+
+        // Handle binary operators
+        if (currentToken.type === TOKEN_TYPES.BINARYOPERATOR) {
+            currentIndex++; // Consume the operator token
+            return parseExpression(getOperatorPrecedence(currentToken.value));
+        }
+
         // Handle 'write' statements
         if (currentToken.type === TOKEN_TYPES.WRITE) {
             currentIndex++; // Consume 'write'
@@ -69,7 +91,7 @@ function parse(tokens: Token[]): ASTNode {
     
             // Process content inside 'write'
             while (tokens[currentIndex] && tokens[currentIndex].type !== TOKEN_TYPES.LINEBREAK) {
-                const childNode = process();
+                const childNode = READ_FILE();
                 if (childNode) {
                     children.push(childNode);
                 }
@@ -80,44 +102,94 @@ function parse(tokens: Token[]): ASTNode {
                 children
             };
         }
-    
+
         // Handle variable declaration
         if (currentToken.type === TOKEN_TYPES.VARIABLEDECLARATION) {
             currentIndex++; // Consume 'create'
-    
-            const variableNameNode = process();
+            
+            const variableNameNode = READ_FILE();
             if (!variableNameNode || variableNameNode.type !== ASTNodeType.LITERAL) {
                 throw new Error(`Expected variable name after 'create', got ${currentToken.type}`);
             }
-    
+        
             const assignmentOperatorNode = tokens[currentIndex++];
             if (assignmentOperatorNode.type !== TOKEN_TYPES.ASSIGNMENTOPERATOR) {
                 throw new Error(`Expected '=' after variable name, got ${assignmentOperatorNode.type}`);
             }
-    
-            const variableValueNode = process();
-            if (!variableValueNode) {
-                throw new Error(`Expected value after '=', got ${currentToken.type}`);
-            }
-    
+        
+            const expr = parseExpression(0); // Parse the full expression on the RHS
+        
             return {
                 type: ASTNodeType.ASSIGNMENT,
                 name: variableNameNode.value,
-                value: variableValueNode
+                value: expr
             };
         }
+        
+
     
         // Throw error for unexpected tokens
         throw new Error(
             `Unexpected token '${currentToken.type}' of type '${currentToken.type}' at position ${currentIndex}`
         );
     }
+
+    function parseExpression(precedence: number): ASTNode {
+        let left = parsePrimary();
+        if (!left) {
+            throw new Error(`Expected expression at position ${currentIndex}`);
+        }
+
+        let operator = tokens[currentIndex];
+
+        while (
+            operator &&
+            operator.type === TOKEN_TYPES.BINARYOPERATOR &&
+            getOperatorPrecedence(operator.value) >= precedence
+        ) {
+            const currentPrecedence = getOperatorPrecedence(operator.value);
+
+            currentIndex++; // Consume the operator token
+            let right = parseExpression(currentPrecedence + 1);
+
+            left = {
+                type: ASTNodeType.BINARYOPERATOR,
+                left,
+                right,
+                value: operator.value,
+            } as ASTNode;
+
+            operator = tokens[currentIndex];
+        }
+
+        return left;
+    }
+
+    function parsePrimary(): ASTNode {
+        if (tokens[currentIndex].type === TOKEN_TYPES.NUMBER) {
+            currentIndex++;
+            return {
+                type: ASTNodeType.NUMBER,
+                value: (tokens[currentIndex - 1] as any).value,
+            } as ASTNode;
+        }
     
+        if (tokens[currentIndex].type === TOKEN_TYPES.OPEN_PAREN) {
+            currentIndex++;
+            const expr = parseExpression(0);
+            if (tokens[currentIndex].type === TOKEN_TYPES.CLOSE_PAREN) {
+                currentIndex++;
+                return expr;
+            }
+        }
+    
+        throw new Error(`Unexpected token at position ${currentIndex}`);
+    }
 
     const children: ASTNode[] = [];
 
     while (currentIndex < tokens.length) {
-        const node = process();
+        const node = READ_FILE();
         if (node) {
             children.push(node);
         }
@@ -130,13 +202,10 @@ function parse(tokens: Token[]): ASTNode {
 
 }
 
+console.log ("Parser Code")
 
 const DSL = `
-create hello = "world_123 Ola"
-    write (hello)
-
-    create X = 5
-    
+    create X = 0 * 20 + 10 / 2
 `
 
 const tokens = tokenize(DSL)

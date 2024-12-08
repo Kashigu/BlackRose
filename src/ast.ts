@@ -4,7 +4,8 @@ export enum ASTNodeType {
         STRING = 'String',
         ASSIGNMENT = 'Assignment',
         WRITE = 'Write',
-        NUMBER = 'Number'
+        NUMBER = 'Number',
+        BINARYOPERATOR = 'BinaryOperator'
 }
   
 interface ASTValueNode<T extends ASTNodeType, K> {
@@ -27,11 +28,19 @@ interface ASTWriteNode {
     type: ASTNodeType.WRITE,
     children: ASTNode[]
 }
+
+interface ASTBinaryOperatorNode {
+    type: ASTNodeType.BINARYOPERATOR,
+    left: ASTNode,
+    right: ASTNode,
+    value: string
+}
   
 export type ASTNode =
             ASTValueNode<ASTNodeType.STRING, string> |
             ASTValueNode<ASTNodeType.LITERAL, string> |
             ASTValueNode<ASTNodeType.NUMBER, string> |
+            ASTBinaryOperatorNode |
             ASTProgramNode |
             ASTAssignmentNode |
             ASTWriteNode;
