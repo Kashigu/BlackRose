@@ -103,6 +103,21 @@ function parse(tokens: Token[]): ASTNode {
             };
         }
 
+       // Handle comments
+       if (currentToken.type === TOKEN_TYPES.COMMENT) {
+            console.log("Processing comment:", currentToken);
+        
+            // Extract the value directly from the token
+            const commentContent = currentToken.value || ''; // Fallback to an empty string if value is missing
+            currentIndex++; // Move to the next token after the comment
+        
+            return {
+                type: ASTNodeType.COMMENT,
+                value: commentContent.trim() // Trim any unwanted spaces
+            };
+        }
+
+
         // Handle variable declaration
         if (currentToken.type === TOKEN_TYPES.VARIABLEDECLARATION) {
             currentIndex++; // Consume 'create'
@@ -205,7 +220,9 @@ function parse(tokens: Token[]): ASTNode {
 console.log ("Parser Code")
 
 const DSL = `
-    create X = 0 * 20 + 10 / 2
+    create X = (0 / 5) * 2
+    // "Hello, World!"
+    write "Hello, World!"
 `
 
 const tokens = tokenize(DSL)

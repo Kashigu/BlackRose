@@ -16,7 +16,9 @@ const tokenStringMap: Array<{
     { key: '-', value: { type: TOKEN_TYPES.BINARYOPERATOR, value: '-' } },
     { key: '*', value: { type: TOKEN_TYPES.BINARYOPERATOR, value: '*' } },
     { key: '/', value: { type: TOKEN_TYPES.BINARYOPERATOR, value: '/' } },
-    { key: ';', value: { type: TOKEN_TYPES.SEMICOLON } }
+    { key: ';', value: { type: TOKEN_TYPES.SEMICOLON } },
+    { key: '//', value: { type: TOKEN_TYPES.COMMENT, value: '//' } }
+    
  ]
 
 
@@ -47,8 +49,26 @@ export function tokenize(input: string): Token[] {
             continue;
         }
 
-        //Handle Binary Operators
+         // Handle comments
+         if (lookAHeadString('//')) {
+            currentPosition += 2; // Consume the `//`
+        
+            // Collect characters until a line break
+            const commentBucket = [];
+            while (currentPosition < input.length && input[currentPosition] !== '\n') {
+                commentBucket.push(input[currentPosition]);
+                currentPosition++;
+            }
+        
+            output.push({
+                type: TOKEN_TYPES.COMMENT,
+                value: commentBucket.join(''),
+            });
+        
+            continue;
+        }
 
+        //Handle Binary Operators
         if (input[currentPosition] === '+' || input[currentPosition] === '-' || input[currentPosition] === '*' || input[currentPosition] === '/') {
             output.push({ type: TOKEN_TYPES.BINARYOPERATOR, value: input[currentPosition] });
             currentPosition++;
@@ -97,6 +117,8 @@ export function tokenize(input: string): Token[] {
             currentPosition += numberBucket.length;
             continue;
         } 
+
+       
 
         // Check for tokens in tokenStringMap first
         let foundToken = false;
@@ -180,10 +202,8 @@ export function tokenize(input: string): Token[] {
 
 console.log("Lexer Code")
 console.log(tokenize(`
-    create hello = "world_123 Ola"
-    write (hello)
-
-    create X = (5 * 5) + 10
+    // This is a Math DSL
+    create X = (0 / 5) * 2
   `))
   
 
