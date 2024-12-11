@@ -17,7 +17,8 @@ const tokenStringMap: Array<{
     { key: '*', value: { type: TOKEN_TYPES.BINARYOPERATOR, value: '*' } },
     { key: '/', value: { type: TOKEN_TYPES.BINARYOPERATOR, value: '/' } },
     { key: ';', value: { type: TOKEN_TYPES.SEMICOLON } },
-    { key: '//', value: { type: TOKEN_TYPES.COMMENT, value: '//' } }
+    { key: '//', value: { type: TOKEN_TYPES.COMMENT, value: '//' } },
+    { key: 'null', value: { type: TOKEN_TYPES.NULL } }
     
  ]
 
@@ -49,8 +50,11 @@ export function tokenize(input: string): Token[] {
             continue;
         }
 
-         // Handle comments
-         if (lookAHeadString('//')) {
+       
+
+
+        // Handle comments
+        if (lookAHeadString('//')) {
             currentPosition += 2; // Consume the `//`
         
             // Collect characters until a line break

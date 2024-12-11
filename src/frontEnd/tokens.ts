@@ -11,7 +11,8 @@ export enum TOKEN_TYPES  {
     LINEBREAK = "Linebreak",
     ASSIGNMENTOPERATOR = "AssignmentOperator", // =
     BINARYOPERATOR = "BinaryOperator", // +, -, *, /
-    COMMENT = "Comment"
+    COMMENT = "Comment",
+    NULL = "null"
 }
 
 //Create a TokenNode with the type of the token
@@ -31,6 +32,7 @@ export type  Token =
                      TokenNodeValue<TOKEN_TYPES.LITERAL> | TokenNode<TOKEN_TYPES.OPEN_PAREN> | 
                      TokenNode<TOKEN_TYPES.CLOSE_PAREN> | TokenNode<TOKEN_TYPES.SEMICOLON> | 
                      TokenNode<TOKEN_TYPES.LINEBREAK> | TokenNodeValue<TOKEN_TYPES.NUMBER> |
+                     TokenNode<TOKEN_TYPES.NULL> |
                      TokenNodeValue<TOKEN_TYPES.COMMENT> |
                      TokenNodeValue<TOKEN_TYPES.BINARYOPERATOR>;
                      

@@ -103,10 +103,17 @@ function parse(tokens: Token[]): ASTNode {
             };
         }
 
-       // Handle comments
-       if (currentToken.type === TOKEN_TYPES.COMMENT) {
-            console.log("Processing comment:", currentToken);
-        
+        // Handle 'null' literals
+        if (currentToken.type === TOKEN_TYPES.NULL) {
+            currentIndex++; // Consume 'null'
+            return {
+                type: ASTNodeType.NULL,
+                value: 'null'
+            };
+        }
+
+        // Handle comments
+        if (currentToken.type === TOKEN_TYPES.COMMENT) {
             // Extract the value directly from the token
             const commentContent = currentToken.value || ''; // Fallback to an empty string if value is missing
             currentIndex++; // Move to the next token after the comment
@@ -223,6 +230,7 @@ const DSL = `
     create X = (0 / 5) * 2
     // "Hello, World!"
     write "Hello, World!"
+    null
 `
 
 const tokens = tokenize(DSL)

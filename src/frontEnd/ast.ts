@@ -6,7 +6,8 @@ export enum ASTNodeType {
         WRITE = 'Write',
         NUMBER = 'Number',
         BINARYOPERATOR = 'BinaryOperator',
-        COMMENT = 'Comment'
+        COMMENT = 'Comment',
+        NULL = 'null'
 }
   
 interface ASTValueNode<T extends ASTNodeType, K> {
@@ -46,6 +47,7 @@ export type ASTNode =
             ASTValueNode<ASTNodeType.STRING, string> |
             ASTValueNode<ASTNodeType.LITERAL, string> |
             ASTValueNode<ASTNodeType.NUMBER, string> |
+            ASTValueNode<ASTNodeType.NULL, string> |
             ASTBinaryOperatorNode |
             ASTProgramNode |
             ASTCommentNode |

@@ -1,0 +1,3 @@
+create Black = "5";
+
+write(Black);
