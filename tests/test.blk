@@ -1,3 +1,10 @@
-create Black = "5";
+// This is a Math DSL
 
-write(Black);
+    create X = 5 + 10
+
+    create Y = 1 + 5
+
+    write "Result is: " X
+
+    write "Result is: " Y
+    

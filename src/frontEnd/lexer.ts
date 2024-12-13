@@ -31,7 +31,7 @@ export function tokenize(input: string): Token[] {
     while (currentPosition < input.length) {
 
         // Ignore whitespace
-        if (input[currentPosition] === ' ') {
+        if (input[currentPosition] === ' ' || input[currentPosition] === '\t' || input[currentPosition] === '\r' || input[currentPosition] === '\n') { 
             currentPosition++;
             continue;
         }
@@ -204,10 +204,12 @@ export function tokenize(input: string): Token[] {
     return output;
 }
 
+
+/*
 console.log("Lexer Code")
-console.log(tokenize(`
-    // This is a Math DSL
-    create X = (0 / 5) * 2
+console.log(tokenize(`// This is a Math DSL
+
+    create X = 5 + 10
   `))
   
-
+*/

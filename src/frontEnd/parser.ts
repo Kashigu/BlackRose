@@ -19,7 +19,7 @@ function getOperatorPrecedence(operator: string): number {
 
 
 
-function parse(tokens: Token[]): ASTNode {
+export function parse(tokens: Token[]): ASTNode {
 
     let currentIndex = 0;
     let parenStack: number[] = []; // Stack to keep track of open parenthesis
@@ -224,13 +224,15 @@ function parse(tokens: Token[]): ASTNode {
 
 }
 
+
+
+
+/*
 console.log ("Parser Code")
 
 const DSL = `
-    create X = (0 / 5) * 2
-    // "Hello, World!"
-    write "Hello, World!"
-    null
+     (0 / 5) * 2
+    
 `
 
 const tokens = tokenize(DSL)
@@ -242,3 +244,4 @@ const AST = parse(tokens)
 console.log('AST:', JSON.stringify(AST, null, 2)); // If you want it pretty-printed
 console.log({ AST }); // To display it as a regular object
 
+*/
