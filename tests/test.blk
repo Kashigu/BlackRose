@@ -8,3 +8,6 @@
 
     write "Result is: " Y
     
+    create Z = (X + Y + 10 + 9) / 2 + (10 - 6)
+
+    write "Result of Z is: " Z

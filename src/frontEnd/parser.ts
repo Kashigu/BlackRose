@@ -90,16 +90,37 @@ export function parse(tokens: Token[]): ASTNode {
             const children: ASTNode[] = [];
     
             // Process content inside 'write'
-            while (tokens[currentIndex] && tokens[currentIndex].type !== TOKEN_TYPES.LINEBREAK) {
-                const childNode = READ_FILE();
-                if (childNode) {
-                    children.push(childNode);
+            while (tokens[currentIndex] && 
+                (tokens[currentIndex].type === TOKEN_TYPES.STRING || tokens[currentIndex].type === TOKEN_TYPES.LITERAL)) 
+                {
+
+                const token = tokens[currentIndex];
+
+                if (token.type === TOKEN_TYPES.STRING) {
+                    children.push({
+                        type: ASTNodeType.STRING,
+                        value: token.value,
+                    });
+                    currentIndex++; // Consume string token
+                } else if (token.type === TOKEN_TYPES.LITERAL) {
+                    children.push({
+                        type: ASTNodeType.LITERAL,
+                        value: token.value,
+                    });
+                    currentIndex++; // Consume literal token
+                } else {
+                    throw new Error(`Unexpected token in 'write' statement at position ${currentIndex}: ${token.type}`);
                 }
             }
     
+            // Optionally consume the LINEBREAK token if present
+            if (tokens[currentIndex]?.type === TOKEN_TYPES.LINEBREAK) {
+                currentIndex++;
+            }
+
             return {
                 type: ASTNodeType.WRITE,
-                children
+                children,
             };
         }
 
@@ -188,6 +209,16 @@ export function parse(tokens: Token[]): ASTNode {
     }
 
     function parsePrimary(): ASTNode {
+        // Handle literals
+        if (tokens[currentIndex].type === TOKEN_TYPES.LITERAL) {
+            currentIndex++;
+            return {
+                type: ASTNodeType.LITERAL,
+                value: (tokens[currentIndex - 1] as any).value,
+            } as ASTNode;
+        }
+
+        // Handle numbers
         if (tokens[currentIndex].type === TOKEN_TYPES.NUMBER) {
             currentIndex++;
             return {
@@ -195,7 +226,8 @@ export function parse(tokens: Token[]): ASTNode {
                 value: (tokens[currentIndex - 1] as any).value,
             } as ASTNode;
         }
-    
+
+        // handle parenthesis
         if (tokens[currentIndex].type === TOKEN_TYPES.OPEN_PAREN) {
             currentIndex++;
             const expr = parseExpression(0);
