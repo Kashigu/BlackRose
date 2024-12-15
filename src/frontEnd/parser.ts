@@ -1,4 +1,4 @@
-import { ASTNode, ASTNodeType } from "./ast";
+import { ASTBlockNode, ASTNode, ASTNodeType } from "./ast";
 import { Token, TOKEN_TYPES } from "./tokens";
 
 
@@ -20,7 +20,6 @@ function parsePrimary(currentIndex: {currentIndex:number}, tokens:Token[]): ASTN
 
     // Handle literals
     if (currentToken.type === TOKEN_TYPES.LITERAL) {
-        console.log("Literal", currentToken.value);
         currentIndex.currentIndex++;
         return {
             type: ASTNodeType.LITERAL,
@@ -48,36 +47,7 @@ function parsePrimary(currentIndex: {currentIndex:number}, tokens:Token[]): ASTN
 
     // Handle variable declarations (e.g., create X = 1)
     if (currentToken.type === TOKEN_TYPES.VARIABLEDECLARATION) {
-       
-        currentIndex.currentIndex++; // Consume 'create'
-       
-
-        // Fetch the variable name
-        const variableNameToken = tokens[currentIndex.currentIndex];
-        if (!variableNameToken || variableNameToken.type !== TOKEN_TYPES.LITERAL) {
-            throw new Error(`Expected variable name after 'create', but got ${variableNameToken?.type}`);
-        }
-        const variableName = variableNameToken.value;
-        currentIndex.currentIndex++; // Consume the variable name
-
-        // Fetch the assignment operator
-        const assignmentToken = tokens[currentIndex.currentIndex];
-        if (!assignmentToken || assignmentToken.type !== TOKEN_TYPES.ASSIGNMENTOPERATOR) {
-            throw new Error(`Expected '=' after variable name, but got ${assignmentToken?.type}`);
-        }
-        currentIndex.currentIndex++; // Consume '='
-
-        // Parse the value assigned to the variable
-        const value = parseExpression(0, currentIndex, tokens);
-        if (!value) {
-            throw new Error(`Expected expression after '=' for variable declaration`);
-        }
-
-        return {
-            type: ASTNodeType.ASSIGNMENT,
-            name: variableName,
-            value,
-        };
+        return parseVariableDeclaration(currentIndex, tokens);
     }
 
     // Handle parenthesis
@@ -102,6 +72,21 @@ function parseExpression(precedence: number, currentIndex: { currentIndex: numbe
 
     let operator = tokens[currentIndex.currentIndex];
 
+    // Check if the current token is a unitary operator (like ++ or --)
+    if (operator?.type === TOKEN_TYPES.UNITARYOPERATOR) {
+        // Consume the unitary operator token (e.g., '++')
+        console.log("Unitary operator found:", operator.value);
+        currentIndex.currentIndex++;  // Consume the unitary operator token
+
+        // Apply the unitary operator on the left expression
+        left = {
+            type: ASTNodeType.UNITARYOPERATOR,
+            value: operator.value,
+            operand: left,  // The operand is the left expression
+        } as ASTNode;
+    }
+
+
     while (
         operator &&
         operator.type === TOKEN_TYPES.BINARYOPERATOR &&
@@ -109,6 +94,7 @@ function parseExpression(precedence: number, currentIndex: { currentIndex: numbe
     ) {
         const currentPrecedence = getOperatorPrecedence(operator.value);
 
+        console.log("Current operator:", operator.value);
         currentIndex.currentIndex++; // Consume the operator token
         let right = parseExpression(currentPrecedence + 1, currentIndex, tokens);
 
@@ -227,6 +213,123 @@ function parseVariableDeclaration(currentIndex: { currentIndex: number }, tokens
     };
 }
 
+function parseBlock(currentIndex: { currentIndex: number }, tokens: Token[]): ASTBlockNode {
+    const block: ASTBlockNode = {
+        type: ASTNodeType.BLOCK,
+        children: []
+    };
+
+    // Ensure the body starts with '{'
+    const startToken = tokens[currentIndex.currentIndex];
+    if (!startToken || startToken.type !== TOKEN_TYPES.OPEN_BRACE) {
+        throw new Error(`Expected '{' to start block, but got '${startToken?.type}'`);
+    }
+    currentIndex.currentIndex++; // Consume '{'
+
+    // Parse all statements within the block
+    while (
+        currentIndex.currentIndex < tokens.length &&
+        tokens[currentIndex.currentIndex].type !== TOKEN_TYPES.CLOSE_BRACE
+    ) {
+        const statement = READ_FILE(currentIndex, tokens, []); // Parse each statement
+        if (statement) {
+            block.children!.push(statement);
+        }
+    }
+
+    // Ensure the block ends with '}'
+    const endToken = tokens[currentIndex.currentIndex];
+    if (!endToken || endToken.type !== TOKEN_TYPES.CLOSE_BRACE) {
+        throw new Error(`Expected '}' to end block, but got '${endToken?.type}'`);
+    }
+    currentIndex.currentIndex++; // Consume '}'
+
+    return block;
+}
+
+function parseFor(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
+    currentIndex.currentIndex++; // Advance past 'for'
+
+    if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.OPEN_PAREN) {
+        throw new Error("Expected '(' after 'for'");
+    }
+    currentIndex.currentIndex++; // Consume '('
+
+    // Parse initialization
+    let initialization = null;
+    const currentToken = tokens[currentIndex.currentIndex];
+    
+    // If the current token is a variable declaration, treat it as the initialization
+    if (currentToken.type === TOKEN_TYPES.VARIABLEDECLARATION) {
+        initialization = parseVariableDeclaration(currentIndex, tokens);
+    } else {
+        initialization = parseExpression(0, currentIndex, tokens);
+    }
+
+    // Check for semicolon after initialization
+    if (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.SEMICOLON) {
+        currentIndex.currentIndex++; // Consume ';'
+    } else {
+        throw new Error("Expected ';' after initialization in 'for' loop");
+    }
+
+    // Parse condition (this should be a comparison, e.g., X == 1)
+    const condition = parseCondition(currentIndex, tokens);
+
+    // Check for semicolon after condition (it may or may not be there)
+    if (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.SEMICOLON) {
+        currentIndex.currentIndex++; // Consume ';'
+    } else if (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.UNITARYOPERATOR) {
+        // If there's a unitary operator, consume it (like '++')
+        currentIndex.currentIndex++;
+    } else {
+        throw new Error("Expected ';' or unitary operator after condition in 'for' loop");
+    }
+
+    // Parse increment (could be a unitary operator like '++')
+    let increment = parseExpression(0, currentIndex, tokens);
+
+    // Do not expect semicolon here (this is different from the usual `for` loop parsing)
+    // The increment does not require a semicolon in this case
+
+    // Check for closing parenthesis after increment
+    if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.CLOSE_PAREN) {
+        throw new Error("Expected ')' after increment in 'for' loop");
+    }
+    currentIndex.currentIndex++; // Consume ')'
+
+    // Parse body
+    const body = parseBlock(currentIndex, tokens);
+
+    return {
+        type: ASTNodeType.FOR,
+        initialization,
+        condition,
+        increment,
+        body,
+    };
+}
+
+function parseCondition(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
+    const leftOperand = parseExpression(0, currentIndex, tokens); // Parse the left operand (e.g., X)
+    
+    const comparisonOperator = tokens[currentIndex.currentIndex];
+    if (comparisonOperator?.type !== TOKEN_TYPES.COMPARISONOPERATOR) {
+        throw new Error("Expected comparison operator in condition");
+    }
+    currentIndex.currentIndex++; // Consume the comparison operator (e.g., '==')
+    
+    const rightOperand = parseExpression(0, currentIndex, tokens); // Parse the right operand (e.g., 1)
+
+    return {
+        type: ASTNodeType.COMPARISONOPERATOR,
+        left: leftOperand,
+        right: rightOperand,
+        value: comparisonOperator.value,
+    }as ASTNode;
+}
+
+
 
 // Function to read the file
 function READ_FILE(currentIndex: { currentIndex: number }, tokens: Token[], parenStack: number[]): ASTNode | null {
@@ -310,6 +413,11 @@ function READ_FILE(currentIndex: { currentIndex: number }, tokens: Token[], pare
     // Handle variable declaration
     if (currentToken.type === TOKEN_TYPES.VARIABLEDECLARATION) {
         return parseVariableDeclaration(currentIndex, tokens);
+    }
+
+    // Handle for loops
+    if (currentToken.type === TOKEN_TYPES.FOR) {
+        return parseFor(currentIndex, tokens);
     }
 
     // Throw error for unexpected tokens

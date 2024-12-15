@@ -1,15 +1,7 @@
-// This is a For Loop
+// STFU Tex
 
-
-
-    create X = 5 + 10
-
-    create Y = 1 + 5
-
-    write "Result is: " X 
-
-    write "Result is: " Y 
-
-    create Z = (X + Y + 10 + 9) / 2 + (10 - 6)
-
-    write "Result of Z is: " Z
+    stroke (create X = 1 ; X == 1 ; X++)
+    {
+        
+    }
+    
