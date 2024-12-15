@@ -37,6 +37,15 @@ function parsePrimary(currentIndex: {currentIndex:number}, tokens:Token[]): ASTN
         };
     }
 
+    // Handle strings
+    if (currentToken.type === TOKEN_TYPES.STRING) {
+        currentIndex.currentIndex++;
+        return {
+            type: ASTNodeType.STRING,
+            value: currentToken.value,
+        };
+    }
+
     // Handle variable declarations (e.g., create X = 1)
     if (currentToken.type === TOKEN_TYPES.VARIABLEDECLARATION) {
        
