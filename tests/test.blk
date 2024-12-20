@@ -1,6 +1,6 @@
 // STFU Tex
 
-    stroke (create X = 1 ; X == 1 ; X++)
+    stroke (create X = 0 ; X <= 10 ; X++)
     {
         write X
     }

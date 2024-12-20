@@ -10,7 +10,7 @@ export enum TOKEN_TYPES  {
     SEMICOLON = "Semicolon", // ; 
     LINEBREAK = "Linebreak",
     ASSIGNMENTOPERATOR = "AssignmentOperator", // =
-    BINARYOPERATOR = "BinaryOperator", // +, -, *, /
+    BINARYOPERATOR = "BinaryOperator", // +, -, *, / , +=, -=
     COMMENT = "Comment", // //
     NULL = "Null", // null
     FOR = "For", // for loop

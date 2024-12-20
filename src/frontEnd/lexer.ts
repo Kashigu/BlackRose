@@ -25,8 +25,7 @@ const tokenStringMap: Array<{
     { key: '}', value: { type: TOKEN_TYPES.CLOSE_BRACE } },
     { key: '==', value: { type: TOKEN_TYPES.COMPARISONOPERATOR, value:"==" } },
     { key: '++', value: { type: TOKEN_TYPES.UNITARYOPERATOR, value:"++" } },
-
-    
+    { key: '+=', value: { type: TOKEN_TYPES.BINARYOPERATOR, value:"+=" } },
  ]
 
 
@@ -89,6 +88,29 @@ export function tokenize(input: string): Token[] {
         // Handle increment
         if (lookAHeadString('++')) {
             output.push({ type: TOKEN_TYPES.UNITARYOPERATOR, value: '++' });
+            currentPosition += 2; // Consume the `++`
+            continue;
+        }
+        if (lookAHeadString('--')) {
+            output.push({ type: TOKEN_TYPES.UNITARYOPERATOR, value: '--' });
+            currentPosition += 2; // Consume the `++`
+            continue;
+        }
+
+        // Handle increment with value or literal
+        if (lookAHeadString('+=')) {
+            output.push({ type: TOKEN_TYPES.BINARYOPERATOR, value: '+=' });
+            currentPosition += 2; // Consume the `++`
+            continue;
+        }
+        if (lookAHeadString('<=')) {
+            output.push({ type: TOKEN_TYPES.COMPARISONOPERATOR, value: '<=' });
+            currentPosition += 2; // Consume the `++`
+            continue;
+        }
+
+        if (lookAHeadString('>=')) {
+            output.push({ type: TOKEN_TYPES.COMPARISONOPERATOR, value: '>=' });
             currentPosition += 2; // Consume the `++`
             continue;
         }

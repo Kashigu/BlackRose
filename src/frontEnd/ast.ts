@@ -47,25 +47,31 @@ interface ASTBinaryOperatorNode {
     value: string
 }
 
+interface ASTComparisonOperatorNode {
+    type: ASTNodeType.COMPARISONOPERATOR,
+    left: ASTNode,
+    right: ASTNode,
+    value: string
+}
+
 interface ASTUnitaryOperatorNode {
     type: ASTNodeType.UNITARYOPERATOR,
     left: ASTNode,
-    right: ASTNode,
     value: string
 }
 
 
 interface ASTForNode {
     type: ASTNodeType.FOR;
-    initialization: ASTNode | null; // e.g., variable declaration or assignment
-    condition: ASTNode | null; // e.g., a binary condition
-    increment: ASTNode | null; // e.g., an increment or update operation
+    initialization: ASTNode  // e.g., variable declaration or assignment
+    condition: ASTNode // e.g., a binary condition
+    increment: ASTNode // e.g., an increment or update operation
     body: ASTBlockNode; // The loop body
 }
 
 export interface ASTBlockNode {
     type: ASTNodeType.BLOCK,
-    children?: ASTNode[] | null
+    children?: ASTNode[] 
 }
   
 export type ASTNode =
@@ -73,8 +79,7 @@ export type ASTNode =
             ASTValueNode<ASTNodeType.LITERAL, string> |
             ASTValueNode<ASTNodeType.NUMBER, string> |
             ASTValueNode<ASTNodeType.NULL, string> |
-            ASTValueNode<ASTNodeType.COMPARISONOPERATOR, string> |
-            ASTValueNode<ASTNodeType.UNITARYOPERATOR, string> |
+            ASTComparisonOperatorNode |
             ASTUnitaryOperatorNode |
             ASTForNode |
             ASTBinaryOperatorNode |

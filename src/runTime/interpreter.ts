@@ -7,7 +7,7 @@ const BinaryOperators: Record<string, (left: Value, right: Value) => Value> = {
     "+": (left, right) => {
         return {
             type: ValueTypes.NUMBER,
-            value: Number(left.value) + Number(right.value),
+            value: Number(left.value) + Number(right.value),    
         };
     },
     "-": (left, right) => ({
@@ -18,6 +18,13 @@ const BinaryOperators: Record<string, (left: Value, right: Value) => Value> = {
         type: ValueTypes.NUMBER,
         value: Number(left.value) * Number(right.value),
     }),
+    "+=": (left, right) => {
+        return {
+            type: ValueTypes.NUMBER,
+            value: Number(left.value) + Number(right.value),
+        };
+    },
+
     "/": (left, right) => {
         if (Number(right.value) === 0) {
             throw new Error("Cannot divide by zero");
@@ -29,6 +36,36 @@ const BinaryOperators: Record<string, (left: Value, right: Value) => Value> = {
         };
     },
 };
+
+const ComparisonOperators: Record<string, (left: Value, right: Value) => Value> = {
+    "==": (left, right) => {
+        return {
+            type: ValueTypes.BOOLEAN,
+            value: left.value === right.value,
+        };
+    },
+    "!=": (left, right) => ({
+        type: ValueTypes.BOOLEAN,
+        value: left.value !== right.value,
+    }),
+    "<": (left, right) => ({
+        type: ValueTypes.BOOLEAN,
+        value: left.value !== null && right.value !== null && left.value < right.value,
+    }),
+    ">": (left, right) => ({
+        type: ValueTypes.BOOLEAN,
+        value: left.value !== null && right.value !== null && left.value > right.value,
+    }),
+    "<=": (left, right) => ({
+        type: ValueTypes.BOOLEAN,
+        value: left.value !== null && right.value !== null && left.value <= right.value,
+    }),
+    ">=": (left, right) => ({
+        type: ValueTypes.BOOLEAN,
+        value: left.value !== null && right.value !== null && left.value >= right.value,
+    }),
+};
+
 
 export function interpret(node: ASTNode): Value {
     switch (node.type) {
@@ -49,9 +86,10 @@ export function interpret(node: ASTNode): Value {
         }
 
         case ASTNodeType.NUMBER:
+            const number = parseFloat(node.value); // Convert string to number
             return {
                 type: ValueTypes.NUMBER,
-                value: Number(node.value),
+                value: Number(number),
             };
 
         case ASTNodeType.STRING:
@@ -106,8 +144,137 @@ export function interpret(node: ASTNode): Value {
             console.log("Write:", output); // Log the final concatenated output
             return { type: ValueTypes.NULL, value: null }; // Return null as WRITE has no meaningful result
         }
+
+        case ASTNodeType.FOR: {
+            console.log("Interpreting FOR loop initialization");
+            console.log("Node Initialization: ", node.initialization);
+            console.log("Node Condition: ", node.condition);
+            console.log("Node Increment: ", node.increment);
+            console.log("Node Body: ", node.body);
+        
+            interpret(node.initialization); // Initialize the loop variable
+        
+            // Start with the loop body
+            let conditionResult = interpret(node.condition);
+            console.log("Initial Condition result: ", conditionResult);
+        
+            // Execute the loop as long as the condition is false
+            while (conditionResult.value == true) {
+                console.log("Interpreting FOR loop body");
+                interpret(node.body); // Execute the loop body
+        
+                console.log("Interpreting FOR loop increment");
+                interpret(node.increment); // Increment the loop variable
+        
+                // Reevaluate the condition after the increment
+                conditionResult = interpret(node.condition);
+                console.log("Updated Condition result: ", conditionResult);
+            }
+        
+            return { type: ValueTypes.NULL, value: null }; // Return null as FOR has no meaningful result
+        }
+        
+        
         
 
+        case ASTNodeType.COMPARISONOPERATOR: {
+            if (node.left.type !== ASTNodeType.LITERAL) {
+                throw new Error("Left side of comparison must be a literal");
+            }
+        
+            const leftVariableName = node.left.value;
+            const leftVariable = variables[leftVariableName];
+        
+            if (!leftVariable) {
+                throw new Error(`Variable '${leftVariableName}' is not defined.`);
+            }
+        
+            // Ensure the left variable is a number
+            if (leftVariable.type !== ValueTypes.NUMBER) {
+                throw new Error(`Left side of comparison must be a number`);
+            }
+        
+            // Ensure right side is a number
+            if (node.right.type !== ASTNodeType.NUMBER) {
+                throw new Error("Right side of comparison must be a number");
+            }
+        
+            const right = node.right.value;
+           
+            // Convert the right value to a number
+            const rightValue = parseFloat(right);  // Convert string to number
+            
+        
+            // Extract the comparison operator
+            const operator = ComparisonOperators[node.value];
+        
+            if (!operator) {
+                throw new Error(`Unknown comparison operator ${node.value}`);
+            }
+        
+            // Perform the comparison
+            const result = operator(leftVariable, { type: ValueTypes.NUMBER, value: rightValue });
+        
+            return result;
+        }
+        
+
+        case ASTNodeType.UNITARYOPERATOR: {
+            // Ensure `node.left` is a `LITERAL` node
+            if (node.left.type !== ASTNodeType.LITERAL) {
+                throw new Error(`Expected LITERAL node on the left, got ${node.left.type}`);
+            }
+        
+            // Extract the variable name from the LITERAL node
+            const variableName = node.left.value; // This should be the name of the variable, e.g., 'X'
+        
+        
+            // Retrieve the variable's value from the variables table
+            const variableEntry = variables[variableName];
+            if (!variableEntry) {
+                throw new Error(`Variable '${variableName}' is not defined.`);
+            }
+        
+            // Ensure the variable's value is a number for unitary operations
+            if (typeof variableEntry.value !== "number") {
+                throw new Error(`Unitary operation '${node.value}' is not valid for non-numeric variable '${variableName}'.`);
+            }
+        
+            // Apply the unitary operation
+            switch (node.value) {
+                case "++":
+                    variableEntry.value++;
+                    break;
+                case "--":
+                    variableEntry.value--;
+                    break;
+                default:
+                    throw new Error(`Unknown unitary operator '${node.value}'`);
+            }
+        
+            // Return a null value since unitary operators usually don't produce a new value
+            return { type: ValueTypes.NULL, value: null };
+        }
+        
+
+        case ASTNodeType.BLOCK: {
+            // Check if the block has children (it's possible that children can be null)
+            if (node.children) {
+                let lastResult: Value | null = null;
+        
+                // Iterate over each child node in the block and interpret them
+                for (const child of node.children) {
+                    console.log("Interpreting block child");
+                    lastResult = interpret(child); // Interpret each child node in the block
+                }
+        
+                // Return the last result of the block, or null if there was no result
+                return lastResult || { type: ValueTypes.NULL, value: null };
+            }
+            // If no children (null or undefined), return null as the block has no effect
+            return { type: ValueTypes.NULL, value: null };
+        }
+        
         default:
             throw new Error(`Unknown node type ${node.type}`);
     }

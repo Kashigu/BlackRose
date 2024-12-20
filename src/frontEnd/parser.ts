@@ -67,26 +67,26 @@ function parsePrimary(currentIndex: {currentIndex:number}, tokens:Token[]): ASTN
 function parseExpression(precedence: number, currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
     let left = parsePrimary(currentIndex, tokens);
     if (!left) {
-        throw new Error(`Expected expression at position ${currentIndex}`);
+        throw new Error(`Expected expression at position ${currentIndex.currentIndex}`);
     }
 
     let operator = tokens[currentIndex.currentIndex];
 
-    // Check if the current token is a unitary operator (like ++ or --)
+    // Handle unary operators like ++ and --
     if (operator?.type === TOKEN_TYPES.UNITARYOPERATOR) {
-        // Consume the unitary operator token (e.g., '++')
-        console.log("Unitary operator found:", operator.value);
-        currentIndex.currentIndex++;  // Consume the unitary operator token
+        currentIndex.currentIndex++; // Consume the unitary operator token
 
-        // Apply the unitary operator on the left expression
         left = {
             type: ASTNodeType.UNITARYOPERATOR,
-            value: operator.value,
-            operand: left,  // The operand is the left expression
+            left, 
+            right: null, 
+            value: operator.value, // Operator symbol (e.g., ++ or --)
         } as ASTNode;
+
+        return left; 
     }
 
-
+    // Handle binary operators
     while (
         operator &&
         operator.type === TOKEN_TYPES.BINARYOPERATOR &&
@@ -94,22 +94,22 @@ function parseExpression(precedence: number, currentIndex: { currentIndex: numbe
     ) {
         const currentPrecedence = getOperatorPrecedence(operator.value);
 
-        console.log("Current operator:", operator.value);
-        currentIndex.currentIndex++; // Consume the operator token
+        currentIndex.currentIndex++; // Consume the binary operator token
         let right = parseExpression(currentPrecedence + 1, currentIndex, tokens);
 
         left = {
             type: ASTNodeType.BINARYOPERATOR,
-            left,
-            right,
-            value: operator.value,
+            left, 
+            right, 
+            value: operator.value, // Operator symbol (e.g., +=, -, *)
         } as ASTNode;
 
-        operator = tokens[currentIndex.currentIndex];
+        operator = tokens[currentIndex.currentIndex]; // Update to the next operator
     }
 
     return left;
 }
+
 
 function parseIgnore(currentIndex: { currentIndex: number }, tokens: Token[]): null {
     currentIndex.currentIndex++;
@@ -320,6 +320,7 @@ function parseCondition(currentIndex: { currentIndex: number }, tokens: Token[])
     currentIndex.currentIndex++; // Consume the comparison operator (e.g., '==')
     
     const rightOperand = parseExpression(0, currentIndex, tokens); // Parse the right operand (e.g., 1)
+    console.log("Parsed condition:", leftOperand, comparisonOperator, rightOperand);
 
     return {
         type: ASTNodeType.COMPARISONOPERATOR,

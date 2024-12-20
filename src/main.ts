@@ -4,6 +4,7 @@ const path = require('path');
 
 import { tokenize } from './frontEnd/lexer'; 
 import { parse } from './frontEnd/parser'; 
+import { analyze } from './runTime/semantic';
 import { interpret } from './runTime/interpreter'; 
 
 // Function to read the .blk file
@@ -28,6 +29,10 @@ function runBLKFile(filePath: string): void {
         // Parse the tokens into an AST using your parser
         const ast = parse(tokens); 
         console.log('AST:', JSON.stringify(ast, null, 2)); // If you want it pretty-printed
+
+        analyze(ast);
+       
+
 
         // Interpret and execute the AST
         interpret(ast); 
