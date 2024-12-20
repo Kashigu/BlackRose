@@ -2,7 +2,8 @@ export enum ValueTypes {
     STRING = 'String',
     LITERAL = 'Literal',
     NUMBER = 'Number',
-    NULL = 'Null'
+    NULL = 'Null',
+    BOOLEAN = 'Boolean'
 }
 
 
@@ -17,4 +18,5 @@ export interface ValueNodeValue<T extends ValueTypes, K> extends ValueNode<T> {
 export type Value = ValueNodeValue<ValueTypes.STRING, string> |
                     ValueNodeValue<ValueTypes.LITERAL, string> |
                     ValueNodeValue<ValueTypes.NUMBER, number> |
+                    ValueNodeValue<ValueTypes.BOOLEAN, boolean> |
                     ValueNodeValue<ValueTypes.NULL, null>;

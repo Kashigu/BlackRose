@@ -2,6 +2,5 @@
 
     stroke (create X = 1 ; X == 1 ; X++)
     {
-        
+        write X
     }
-    
