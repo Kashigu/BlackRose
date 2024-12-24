@@ -1,32 +1,47 @@
 import { Token, TOKEN_TYPES } from './tokens';
+import { tokenStringMap } from './tokenStringMap';
+import { ValidBinaryOperators, ValidComparisonOperators, ValidUnitaryOperators } from "../validOperators";
 
+function lookAHeadString(str: string, currentPosition: number , input:string): boolean {
+    const parts = str.split('');
 
-// This is my Language Lexer
-const tokenStringMap: Array<{
-    key: string,
-    value: Token
-}> = [
-    { key: '\n', value: { type: TOKEN_TYPES.LINEBREAK } },
-    { key: 'create', value: { type: TOKEN_TYPES.VARIABLEDECLARATION } }, // if appears Create then it is a variable declaration
-    { key: '=', value: { type: TOKEN_TYPES.ASSIGNMENTOPERATOR } },
-    { key: 'write', value: { type: TOKEN_TYPES.WRITE } },
-    { key: 'yap', value: { type: TOKEN_TYPES.WRITE } },
-    { key: '(', value: { type: TOKEN_TYPES.OPEN_PAREN } },
-    { key: ')', value: { type: TOKEN_TYPES.CLOSE_PAREN } },
-    { key: '+', value: { type: TOKEN_TYPES.BINARYOPERATOR, value: '+' } },
-    { key: '-', value: { type: TOKEN_TYPES.BINARYOPERATOR, value: '-' } },
-    { key: '*', value: { type: TOKEN_TYPES.BINARYOPERATOR, value: '*' } },
-    { key: '/', value: { type: TOKEN_TYPES.BINARYOPERATOR, value: '/' } },
-    { key: ';', value: { type: TOKEN_TYPES.SEMICOLON } },
-    { key: '//', value: { type: TOKEN_TYPES.COMMENT, value: '//' } },
-    { key: 'null', value: { type: TOKEN_TYPES.NULL } },
-    { key: 'stroke' , value: { type: TOKEN_TYPES.FOR } },
-    { key: '{', value: { type: TOKEN_TYPES.OPEN_BRACE } },
-    { key: '}', value: { type: TOKEN_TYPES.CLOSE_BRACE } },
-    { key: '==', value: { type: TOKEN_TYPES.COMPARISONOPERATOR, value:"==" } },
-    { key: '++', value: { type: TOKEN_TYPES.UNITARYOPERATOR, value:"++" } },
-    { key: '+=', value: { type: TOKEN_TYPES.BINARYOPERATOR, value:"+=" } },
- ]
+    for (let i = 0; i < parts.length; i++) {
+        // if the current token does not match the current part of the string
+        if (input[currentPosition + i] !== parts[i]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function lookAHead(input: string, currentPosition:number ,match: RegExp, matchNext?: RegExp ): string[] {
+    const bucket: string[] = [];
+
+    while (true) {
+        // Check if we reached the end of the input
+        const nextIndex = currentPosition + bucket.length;
+        const nextToken = input[nextIndex];
+        if (!nextToken) {
+            break;
+        }
+        // m is either a string or a regex
+        let m: string | RegExp = match;
+
+        // if matchNext is provided and the bucket is not empty, use matchNext
+        if (matchNext && bucket.length) {
+            m = matchNext;
+        }
+        // if matchNext is provided and the bucket is empty, use match
+        if (m && !m.test(nextToken)) {
+            break;
+        }
+        // push the next token to the bucket
+        bucket.push(nextToken);
+    }
+
+    return bucket;
+}
 
 
 // Tokenize the code
@@ -78,45 +93,8 @@ export function tokenize(input: string): Token[] {
             continue;
         }
 
-        // Handle equal
-        if (lookAHeadString('==')) {
-            output.push({ type: TOKEN_TYPES.COMPARISONOPERATOR, value: '==' });
-            currentPosition += 2; // Consume the `==`
-            continue;
-        }
-
-        // Handle increment
-        if (lookAHeadString('++')) {
-            output.push({ type: TOKEN_TYPES.UNITARYOPERATOR, value: '++' });
-            currentPosition += 2; // Consume the `++`
-            continue;
-        }
-        if (lookAHeadString('--')) {
-            output.push({ type: TOKEN_TYPES.UNITARYOPERATOR, value: '--' });
-            currentPosition += 2; // Consume the `++`
-            continue;
-        }
-
-        // Handle increment with value or literal
-        if (lookAHeadString('+=')) {
-            output.push({ type: TOKEN_TYPES.BINARYOPERATOR, value: '+=' });
-            currentPosition += 2; // Consume the `++`
-            continue;
-        }
-        if (lookAHeadString('<=')) {
-            output.push({ type: TOKEN_TYPES.COMPARISONOPERATOR, value: '<=' });
-            currentPosition += 2; // Consume the `++`
-            continue;
-        }
-
-        if (lookAHeadString('>=')) {
-            output.push({ type: TOKEN_TYPES.COMPARISONOPERATOR, value: '>=' });
-            currentPosition += 2; // Consume the `++`
-            continue;
-        }
-
-        // Handle comments
-        if (lookAHeadString('//')) {
+        // Handle comments First of all
+        if (lookAHeadString('//', currentPosition, input)) {
             currentPosition += 2; // Consume the `//`
         
             // Collect characters until a line break
@@ -134,10 +112,29 @@ export function tokenize(input: string): Token[] {
             continue;
         }
 
-        //Handle Binary Operators
-        if (input[currentPosition] === '+' || input[currentPosition] === '-' || input[currentPosition] === '*' || input[currentPosition] === '/') {
-            output.push({ type: TOKEN_TYPES.BINARYOPERATOR, value: input[currentPosition] });
-            currentPosition++;
+
+        // Handle first the Comparison Operators
+        // Check if the value is on the list and then push it to the function
+        if (ValidComparisonOperators.some(op => lookAHeadString(op, currentPosition, input))) {
+            const matchedOperator = ValidComparisonOperators.find(op => lookAHeadString(op, currentPosition, input))!;
+            output.push({ type: TOKEN_TYPES.COMPARISONOPERATOR, value: matchedOperator });
+            currentPosition += matchedOperator.length; // Consume the matched operator
+            continue;
+        }
+
+        // Handle Secondly the Unitary Operators
+        if (ValidUnitaryOperators.some(op => lookAHeadString(op, currentPosition, input))) {
+            const matchedOperator = ValidUnitaryOperators.find(op => lookAHeadString(op, currentPosition, input))!;
+            output.push({ type: TOKEN_TYPES.UNITARYOPERATOR, value: matchedOperator });
+            currentPosition += matchedOperator.length; // Consume the matched operator
+            continue;
+        }
+
+        // Handle Thirdly the Binary Operators
+        if (ValidBinaryOperators.some(op => lookAHeadString(op, currentPosition, input))) {
+            const matchedOperator = ValidBinaryOperators.find(op => lookAHeadString(op, currentPosition, input))!;
+            output.push({ type: TOKEN_TYPES.BINARYOPERATOR, value: matchedOperator });
+            currentPosition += matchedOperator.length; // Consume the matched operator
             continue;
         }
 
@@ -173,7 +170,7 @@ export function tokenize(input: string): Token[] {
         // Handle numbers
         const numberRegex = /\d/;
         if (numberRegex.test(input[currentPosition])) {
-            const numberBucket = lookAHead(new RegExp('[0-9]')); // Collect digits
+            const numberBucket = lookAHead(input, currentPosition, new RegExp('[0-9]')); // Collect digits
 
             output.push({
                 type: TOKEN_TYPES.NUMBER,
@@ -184,12 +181,10 @@ export function tokenize(input: string): Token[] {
             continue;
         } 
 
-       
-
         // Check for tokens in tokenStringMap first
         let foundToken = false;
         for (const { key, value } of tokenStringMap) {
-            if (!lookAHeadString(key)) {
+            if (!lookAHeadString(key, currentPosition, input)) {
                 continue;
             }
 
@@ -207,7 +202,7 @@ export function tokenize(input: string): Token[] {
         const literalRegexNext = /[a-zA-Z0-9_]/;
 
         if (literalRegex.test(input[currentPosition])) {
-            const bucket = lookAHead(literalRegex, literalRegexNext);
+            const bucket = lookAHead(input, currentPosition, literalRegex, literalRegexNext);
 
             output.push({
                 type: TOKEN_TYPES.LITERAL,
@@ -222,56 +217,5 @@ export function tokenize(input: string): Token[] {
         throw new Error(`Unexpected token at position ${currentPosition}`);
     }
 
-    function lookAHeadString(str: string): boolean {
-        const parts = str.split('');
-
-        for (let i = 0; i < parts.length; i++) {
-            // if the current token does not match the current part of the string
-            if (input[currentPosition + i] !== parts[i]) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    function lookAHead(match: RegExp, matchNext?: RegExp): string[] {
-        const bucket: string[] = [];
-
-        while (true) {
-            // Check if we reached the end of the input
-            const nextIndex = currentPosition + bucket.length;
-            const nextToken = input[nextIndex];
-            if (!nextToken) {
-                break;
-            }
-            // m is either a string or a regex
-            let m: string | RegExp = match;
-
-            // if matchNext is provided and the bucket is not empty, use matchNext
-            if (matchNext && bucket.length) {
-                m = matchNext;
-            }
-            // if matchNext is provided and the bucket is empty, use match
-            if (m && !m.test(nextToken)) {
-                break;
-            }
-            // push the next token to the bucket
-            bucket.push(nextToken);
-        }
-
-        return bucket;
-    }
-
     return output;
 }
-
-
-/*
-console.log("Lexer Code")
-console.log(tokenize(`// This is a Math DSL
-
-    create X = 5 + 10
-  `))
-  
-*/

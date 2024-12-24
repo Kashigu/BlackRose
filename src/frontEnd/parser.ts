@@ -110,7 +110,6 @@ function parseExpression(precedence: number, currentIndex: { currentIndex: numbe
     return left;
 }
 
-
 function parseIgnore(currentIndex: { currentIndex: number }, tokens: Token[]): null {
     currentIndex.currentIndex++;
     return null;

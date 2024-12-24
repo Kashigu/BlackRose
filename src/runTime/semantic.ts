@@ -1,9 +1,6 @@
 import { ASTNode, ASTNodeType } from "../frontEnd/ast";
+import { ValidBinaryOperators, ValidComparisonOperators, ValidUnitaryOperators } from "../validOperators";
 
-
-const ValidBinaryOperators = ["+", "-", "*", "/", "+=","-=", "*=", "/="];
-const ValidComparisonOperators = ["==", "!=", "<", ">", "<=", ">="];
-const ValidUnitaryOperators = ["++", "--"];
 
 export function analyze(node: ASTNode): void {
     switch (node.type) {

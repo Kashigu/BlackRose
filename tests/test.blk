@@ -1,6 +1,11 @@
 // STFU Tex
 
-    stroke (create X = 0 ; X <= 10 ; X++)
+    create Y = 1
+
+    stroke (create X = 0 ; Y <= 10 ; X++)
     {
-        write X
+        
+        write "Number of the for: " X
+        create Y = Y + 1
+        write "Number of the Y variable: " Y
     }
