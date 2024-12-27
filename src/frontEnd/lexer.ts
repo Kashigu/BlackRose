@@ -201,6 +201,7 @@ export function tokenize(input: string): Token[] {
         const literalRegex = /[a-zA-Z_]/;
         const literalRegexNext = /[a-zA-Z0-9_]/;
 
+        
         if (literalRegex.test(input[currentPosition])) {
             const bucket = lookAHead(input, currentPosition, literalRegex, literalRegexNext);
 

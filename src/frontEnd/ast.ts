@@ -11,7 +11,10 @@ export enum ASTNodeType {
         FOR = 'For',
         COMPARISONOPERATOR = 'Comparison',
         UNITARYOPERATOR = 'UnitaryOperators',
-        BLOCK = 'Block' // Added for block statements
+        BLOCK = 'Block', // Added for block statements
+        IF = 'If',
+        ELSE = 'Else',
+        IFELSE = 'IfElse'
 }
   
 interface ASTValueNode<T extends ASTNodeType, K> {
@@ -69,6 +72,23 @@ interface ASTForNode {
     body: ASTBlockNode; // The loop body
 }
 
+interface ASTIfNode {
+    type: ASTNodeType.IF;
+    condition: ASTNode;
+    body: ASTBlockNode;
+}
+
+interface ASTIfElseNode {
+    type: ASTNodeType.IFELSE;
+    condition: ASTNode;
+    body: ASTBlockNode;
+}
+
+interface ASTElseNode{
+    type: ASTNodeType.ELSE;
+    body: ASTBlockNode;
+}
+
 export interface ASTBlockNode {
     type: ASTNodeType.BLOCK,
     children?: ASTNode[] 
@@ -81,6 +101,9 @@ export type ASTNode =
             ASTValueNode<ASTNodeType.NULL, string> |
             ASTComparisonOperatorNode |
             ASTUnitaryOperatorNode |
+            ASTIfNode |
+            ASTElseNode |
+            ASTIfElseNode |
             ASTForNode |
             ASTBinaryOperatorNode |
             ASTProgramNode |

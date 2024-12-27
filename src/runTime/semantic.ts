@@ -2,6 +2,9 @@ import { ASTNode, ASTNodeType } from "../frontEnd/ast";
 import { ValidBinaryOperators, ValidComparisonOperators, ValidUnitaryOperators } from "../validOperators";
 
 
+let pendingIfElse: ASTNode | null = null;
+
+
 export function analyze(node: ASTNode): void {
     switch (node.type) {
         case ASTNodeType.PROGRAM:
@@ -95,6 +98,64 @@ export function analyze(node: ASTNode): void {
                     analyze(child);
                 }
             }
+            break;
+
+        case ASTNodeType.IF:
+            
+            // Check for 'if' condition
+            if (!node.condition) {
+                throw new Error("IF statement must have a condition.");
+            }
+            
+            analyze(node.condition);
+
+            // Validate the 'if' body
+            if (!node.body) {
+                throw new Error("IF statement must have a body.");
+            }
+           
+            analyze(node.body);
+
+            // Mark this 'if' as pending for a possible 'else'
+            pendingIfElse = node;
+            break;
+
+        case ASTNodeType.ELSE:
+
+            // Check if there was a preceding 'if' or 'ifelse'
+            if (!pendingIfElse) {
+                throw new Error("ELSE must be preceded by an IF or IFELSE statement.");
+            }
+
+            // Validate the 'else' body
+            if (!node.body) {
+                throw new Error("ELSE statement must have a body.");
+            }
+        
+            analyze(node.body);
+
+            // Reset the pendingIfElse to null after processing 'else'
+            pendingIfElse = null;
+            break;
+
+        case ASTNodeType.IFELSE:
+        
+            // Check for 'ifelse' condition
+            if (!node.condition) {
+                throw new Error("IF-ELSE statement must have a condition.");
+            }
+        
+            analyze(node.condition);
+
+            // Validate the 'ifelse' body
+            if (!node.body) {
+                throw new Error("IF-ELSE statement must have a body.");
+            }
+        
+            analyze(node.body);
+
+            // Mark this 'ifelse' as pending for a possible 'else'
+            pendingIfElse = node;
             break;
 
         default:

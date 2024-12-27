@@ -18,6 +18,9 @@ export enum TOKEN_TYPES  {
     CLOSE_BRACE = "Close_Brace", // }
     COMPARISONOPERATOR = "Comparison", // ==, !=, <, >, <=, >=
     UNITARYOPERATOR = "UnitaryOperators", // ++ or --
+    IF = "If", // if statement
+    ELSE = "Else", // else statement
+    IFELSE = "IfElse" // if else statement
 }
 
 //Create a TokenNode with the type of the token
@@ -36,6 +39,9 @@ export type  Token =
                      TokenNode<TOKEN_TYPES.CLOSE_PAREN> | TokenNode<TOKEN_TYPES.SEMICOLON> | 
                      TokenNode<TOKEN_TYPES.LINEBREAK> | TokenNode<TOKEN_TYPES.NULL> |
                      TokenNode<TOKEN_TYPES.FOR> |
+                     TokenNode<TOKEN_TYPES.IF> |
+                     TokenNode<TOKEN_TYPES.ELSE> |
+                     TokenNode<TOKEN_TYPES.IFELSE> |
                      TokenNode<TOKEN_TYPES.OPEN_BRACE> | TokenNode<TOKEN_TYPES.CLOSE_BRACE> |
 
                      TokenNodeValue<TOKEN_TYPES.COMPARISONOPERATOR> | TokenNodeValue<TOKEN_TYPES.UNITARYOPERATOR> |

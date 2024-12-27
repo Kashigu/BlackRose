@@ -173,9 +173,37 @@ export function interpret(node: ASTNode): Value {
         
             return { type: ValueTypes.NULL, value: null }; // Return null as FOR has no meaningful result
         }
+
+        case ASTNodeType.IF: {
+            console.log("Interpreting IF condition");
+            const conditionResult = interpret(node.condition); // Evaluate the condition
         
+            if (conditionResult.value === true) {
+                console.log("Interpreting IF body");
+                interpret(node.body); // Execute the body if the condition is true
+            }
         
+            return { type: ValueTypes.NULL, value: null }; // Return null as IF has no meaningful result
+        }
+
+        case ASTNodeType.ELSE: {
+            console.log("Interpreting ELSE body");
+            interpret(node.body); // Execute the body
         
+            return { type: ValueTypes.NULL, value: null }; // Return null as ELSE has no meaningful result
+        }
+
+        case ASTNodeType.IFELSE: {
+            console.log("Interpreting IF condition");
+            const conditionResult = interpret(node.condition); // Evaluate the condition
+        
+            if (conditionResult.value === true) {
+                console.log("Interpreting IF body");
+                interpret(node.body); // Execute the body if the condition is true
+            }
+        
+            return { type: ValueTypes.NULL, value: null }; // Return null as IF has no meaningful result
+        }
 
         case ASTNodeType.COMPARISONOPERATOR: {
             if (node.left.type !== ASTNodeType.LITERAL) {

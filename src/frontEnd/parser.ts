@@ -309,6 +309,82 @@ function parseFor(currentIndex: { currentIndex: number }, tokens: Token[]): ASTN
     };
 }
 
+function parseIf(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode | null {
+    
+    currentIndex.currentIndex++; // Advance past 'if'
+
+    if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.OPEN_PAREN) {
+        throw new Error("Expected '(' after 'if'");
+    }
+
+    currentIndex.currentIndex++; // Consume '('
+
+    // Parse the condition
+
+    const condition = parseCondition(currentIndex, tokens);
+
+    if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.CLOSE_PAREN) {
+        throw new Error("Expected ')' after condition in 'if' statement");
+    }
+
+    currentIndex.currentIndex++; // Consume ')'
+
+    // Parse the body
+
+    const body = parseBlock(currentIndex, tokens);
+
+    return {
+        type: ASTNodeType.IF,
+        condition,
+        body,
+    };
+
+}
+
+function parseIfElse(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode | null {
+    currentIndex.currentIndex++; // Advance past 'if-else'
+
+    if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.OPEN_PAREN) {
+        throw new Error("Expected '(' after 'if-else'");
+    }
+
+    currentIndex.currentIndex++; // Consume '('
+
+    // Parse the condition
+
+    const condition = parseCondition(currentIndex, tokens);
+
+    if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.CLOSE_PAREN) {
+        throw new Error("Expected ')' after condition in 'if' statement");
+    }
+
+    currentIndex.currentIndex++; // Consume ')'
+
+    // Parse the body
+
+    const body = parseBlock(currentIndex, tokens);
+
+    return {
+        type: ASTNodeType.IFELSE,
+        condition,
+        body
+    };
+}
+
+function parseElse (currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode | null {
+    currentIndex.currentIndex++; // Advance past 'else'
+
+    // Parse the body
+
+    const body = parseBlock(currentIndex, tokens);
+
+    return {
+        type: ASTNodeType.ELSE,
+        body
+    };
+}
+
+
 function parseCondition(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
     const leftOperand = parseExpression(0, currentIndex, tokens); // Parse the left operand (e.g., X)
     
@@ -319,7 +395,6 @@ function parseCondition(currentIndex: { currentIndex: number }, tokens: Token[])
     currentIndex.currentIndex++; // Consume the comparison operator (e.g., '==')
     
     const rightOperand = parseExpression(0, currentIndex, tokens); // Parse the right operand (e.g., 1)
-    console.log("Parsed condition:", leftOperand, comparisonOperator, rightOperand);
 
     return {
         type: ASTNodeType.COMPARISONOPERATOR,
@@ -418,6 +493,22 @@ function READ_FILE(currentIndex: { currentIndex: number }, tokens: Token[], pare
     // Handle for loops
     if (currentToken.type === TOKEN_TYPES.FOR) {
         return parseFor(currentIndex, tokens);
+    }
+
+   
+    // Handle if statements 
+    if (currentToken.type === TOKEN_TYPES.IF) {
+        return parseIf(currentIndex, tokens);
+    }
+
+    // Handle else statements
+    if (currentToken.type === TOKEN_TYPES.ELSE) {
+        return parseElse(currentIndex, tokens);
+    }
+
+    // Handle if-else statements
+    if (currentToken.type === TOKEN_TYPES.IFELSE) {
+        return parseIfElse(currentIndex, tokens);
     }
 
     // Throw error for unexpected tokens

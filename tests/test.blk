@@ -1,11 +1,13 @@
-// STFU Tex
+    create Y = 10 
 
-    create Y = 7.1
-
-    stroke (create X = 0 ; Y <= 10 ; X++)
+    bet (Y > 10)
     {
-        
-        write "Number of the for: " X
-        create Y = Y + 1
-        write "Number of the Y variable: " Y
+        write " Y é maior que 10" 
+    } betagain (Y < 10)
+    {
+        yap "Y é menor que 10"
+    } badcall
+    {
+        yap "Nigger"
     }
+    
