@@ -170,7 +170,7 @@ export function tokenize(input: string): Token[] {
         // Handle numbers
         const numberRegex = /\d/;
         if (numberRegex.test(input[currentPosition])) {
-            const numberBucket = lookAHead(input, currentPosition, new RegExp('[0-9]')); // Collect digits
+            const numberBucket = lookAHead(input, currentPosition, new RegExp('[0-9]'), new RegExp('[0-9.]')); // Collect digits
 
             output.push({
                 type: TOKEN_TYPES.NUMBER,

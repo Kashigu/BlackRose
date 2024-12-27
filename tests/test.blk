@@ -1,6 +1,6 @@
 // STFU Tex
 
-    create Y = 1
+    create Y = 7.1
 
     stroke (create X = 0 ; Y <= 10 ; X++)
     {
