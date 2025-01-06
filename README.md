@@ -60,16 +60,17 @@ write X Y
 bet (Y < 15)
 {
     yap "Y is indeed less then 15 " 
-}betagain(Y > 15)
+}
+betagain(Y > 15)
 {
     write "Y is indeed more then 15 "
-}badcall
+}
+badcall
 {
     yap Y
 }
 
 
-// for loop
 stroke (create I = 0; I <= Y; I++)
 {
     write Y
