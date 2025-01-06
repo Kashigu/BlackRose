@@ -55,10 +55,8 @@ create X = "Y is equal to"
 create Y = 10
 
 write X Y
-// Y is equal to 10
 
 
-//if statement
 bet (Y < 15)
 {
     yap "Y is indeed less then 15 " 
