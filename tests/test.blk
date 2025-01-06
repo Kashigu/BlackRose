@@ -1,13 +1,23 @@
-    create Y = 10 
+create X = "Y is equal to"
 
-    bet (Y > 10)
-    {
-        write " Y é maior que 10" 
-    } betagain (Y < 10)
-    {
-        yap "Y é menor que 10"
-    } badcall
-    {
-        yap "Nigger"
-    }
-    
+create Y = 10
+
+write X Y
+// Y is equal to 10
+
+bet (Y < 15)
+{
+    yap "Y is indeed less then 15 " 
+}betagain(Y > 15)
+{
+    write "Y is indeed more then 15 "
+}badcall
+{
+    yap Y
+}
+
+stroke (create I = 0; I <= Y; I++)
+{
+    write Y
+    write I
+}
