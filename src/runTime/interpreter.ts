@@ -210,8 +210,8 @@ export function interpret(node: ASTNode): Value {
                 throw new Error("Left side of comparison must be a literal");
             }
         
-            const leftVariableName = node.left.value;
-            const leftVariable = variables[leftVariableName];
+            const leftVariableName = node.left.value; // This should be the name of the variable, e.g., 'X'
+            const leftVariable = variables[leftVariableName]; // Retrieve the variable's value from the variables table
         
             if (!leftVariable) {
                 throw new Error(`Variable '${leftVariableName}' is not defined.`);
@@ -222,15 +222,29 @@ export function interpret(node: ASTNode): Value {
                 throw new Error(`Left side of comparison must be a number`);
             }
         
-            // Ensure right side is a number
-            if (node.right.type !== ASTNodeType.NUMBER) {
-                throw new Error("Right side of comparison must be a number");
+            // Resolve the right side of the comparison
+            let rightValue: number;
+
+            // Check if the right side is a literal or a number
+            if (node.right.type === ASTNodeType.LITERAL) {
+                
+                const rightVariableName = node.right.value; // This should be the name of the variable, e.g., 'X'
+                const rightVariable = variables[rightVariableName]; // Retrive the variable's value from the variables table
+
+                if (!rightVariable) {
+                    throw new Error(`Variable '${rightVariableName}' is not defined.`);
+                }
+
+                if (rightVariable.type !== ValueTypes.NUMBER) {
+                    throw new Error(`Right side of comparison must be a number`);
+                }
+
+                rightValue = rightVariable.value;
+            } else if (node.right.type === ASTNodeType.NUMBER) {
+                rightValue = parseFloat(node.right.value); // Convert string to number
+            } else {
+                throw new Error("Right side of comparison must be a number or a literal");
             }
-        
-            const right = node.right.value;
-           
-            // Convert the right value to a number
-            const rightValue = parseFloat(right);  // Convert string to number
             
         
             // Extract the comparison operator
