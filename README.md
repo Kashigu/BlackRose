@@ -50,6 +50,7 @@ It's built using Flex (lexical analyzer) and Bison (parser generator)
 
 ## Code Example
 
+```plaintext
 create X = "Y is equal to"
 
 create Y = 10
@@ -57,6 +58,7 @@ create Y = 10
 write X Y
 
 
+// if statement
 bet (Y < 15)
 {
     yap "Y is indeed less then 15 " 
@@ -70,12 +72,13 @@ badcall
     yap Y
 }
 
-
+// for loop
 stroke (create I = 0; I <= Y; I++)
 {
     write Y
     write I
 }
+```
 
 ## Important Notice
 This project is intended for educational purposes only. It is a demonstration of my comprehension with how compilers work.
