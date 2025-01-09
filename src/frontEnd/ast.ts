@@ -14,7 +14,8 @@ export enum ASTNodeType {
         BLOCK = 'Block', // Added for block statements
         IF = 'If',
         ELSE = 'Else',
-        IFELSE = 'IfElse'
+        IFELSE = 'IfElse',
+        BREAK = 'Break'
 }
   
 interface ASTValueNode<T extends ASTNodeType, K> {
@@ -38,10 +39,6 @@ interface ASTWriteNode {
     children: ASTNode[]
 }
 
-interface ASTCommentNode {
-    type: ASTNodeType.COMMENT,
-    value: string
-}
 
 interface ASTBinaryOperatorNode {
     type: ASTNodeType.BINARYOPERATOR,
@@ -99,6 +96,7 @@ export type ASTNode =
             ASTValueNode<ASTNodeType.LITERAL, string> |
             ASTValueNode<ASTNodeType.NUMBER, string> |
             ASTValueNode<ASTNodeType.NULL, string> |
+            ASTValueNode<ASTNodeType.COMMENT, string> |
             ASTComparisonOperatorNode |
             ASTUnitaryOperatorNode |
             ASTIfNode |
@@ -107,7 +105,6 @@ export type ASTNode =
             ASTForNode |
             ASTBinaryOperatorNode |
             ASTProgramNode |
-            ASTCommentNode |
             ASTAssignmentNode |
             ASTBlockNode |
             ASTWriteNode;
