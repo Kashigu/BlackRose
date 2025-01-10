@@ -3,7 +3,8 @@ export enum ValueTypes {
     LITERAL = 'Literal',
     NUMBER = 'Number',
     NULL = 'Null',
-    BOOLEAN = 'Boolean'
+    BOOLEAN = 'Boolean',
+    BREAK = 'Break'
 }
 
 
@@ -19,4 +20,5 @@ export type Value = ValueNodeValue<ValueTypes.STRING, string> |
                     ValueNodeValue<ValueTypes.LITERAL, string> |
                     ValueNodeValue<ValueTypes.NUMBER, number> |
                     ValueNodeValue<ValueTypes.BOOLEAN, boolean> |
-                    ValueNodeValue<ValueTypes.NULL, null>;
+                    ValueNodeValue<ValueTypes.NULL, null> |
+                    ValueNodeValue<ValueTypes.BREAK, null>;

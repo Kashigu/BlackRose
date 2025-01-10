@@ -66,6 +66,8 @@ const ComparisonOperators: Record<string, (left: Value, right: Value) => Value> 
     }),
 };
 
+let loopDepth = 0;
+let blockDepth = 0;
 
 export function interpret(node: ASTNode): Value {
     switch (node.type) {
@@ -158,17 +160,31 @@ export function interpret(node: ASTNode): Value {
             let conditionResult = interpret(node.condition);
             console.log("Initial Condition result: ", conditionResult);
         
-            // Execute the loop as long as the condition is false
-            while (conditionResult.value == true) {
-                console.log("Interpreting FOR loop body");
-                interpret(node.body); // Execute the loop body
-        
-                console.log("Interpreting FOR loop increment");
-                interpret(node.increment); // Increment the loop variable
-        
-                // Reevaluate the condition after the increment
-                conditionResult = interpret(node.condition);
-                console.log("Updated Condition result: ", conditionResult);
+            loopDepth++; // Increment the loop depth
+            console.log("Loop Depth: ", loopDepth);
+            try {
+                // Execute the loop as long as the condition is false
+                while (conditionResult.value == true) {
+                    console.log("Interpreting FOR loop body");
+                    const bodyResult = interpret(node.body); // Execute the loop body
+                
+                    if (bodyResult.type === ValueTypes.BREAK) {
+                        console.log("INSIDE LOOP BREAK statement encountered");
+                        break; // Exit the loop if a BREAK statement was encountered
+                    }
+
+                    console.log("Interpreting FOR loop increment");
+                    interpret(node.increment); // Increment the loop variable
+            
+                    // Reevaluate the condition after the increment
+                    conditionResult = interpret(node.condition);
+                    console.log("Updated Condition result: ", conditionResult);
+
+                
+                }
+            }
+            finally {
+                loopDepth--; // Decrement the loop depth
             }
         
             return { type: ValueTypes.NULL, value: null }; // Return null as FOR has no meaningful result
@@ -300,6 +316,8 @@ export function interpret(node: ASTNode): Value {
         
 
         case ASTNodeType.BLOCK: {
+            blockDepth++; // Increment the block depth
+            console.log("Block Depth: ", blockDepth);
             // Check if the block has children (it's possible that children can be null)
             if (node.children) {
                 let lastResult: Value | null = null;
@@ -307,15 +325,33 @@ export function interpret(node: ASTNode): Value {
                 // Iterate over each child node in the block and interpret them
                 for (const child of node.children) {
                     console.log("Interpreting block child");
-                    lastResult = interpret(child); // Interpret each child node in the block
+                    const result = lastResult = interpret(child); // Interpret each child node in the block
+
+                    if (result.type === ValueTypes.BREAK) {
+                        console.log("BREAK statement encountered on block");
+                        blockDepth--; // Decrement the block depth
+                        return result; // Return the BREAK statement
+                    }
+                    lastResult = result;
                 }
+                blockDepth--; // Decrement the block depth
         
                 // Return the last result of the block, or null if there was no result
                 return lastResult || { type: ValueTypes.NULL, value: null };
             }
+            blockDepth--; // Decrement the block depth
             // If no children (null or undefined), return null as the block has no effect
             return { type: ValueTypes.NULL, value: null };
         }
+
+        case ASTNodeType.BREAK: {
+            if (loopDepth === 0 && blockDepth === 0) {
+                throw new Error("BREAK statement must be inside a loop");
+            }
+            return { type: ValueTypes.BREAK, value: null };
+        }
+
+        
         
         default:
             throw new Error(`Unknown node type ${node.type}`);

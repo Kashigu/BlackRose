@@ -23,12 +23,8 @@ It's built using Flex (lexical analyzer) and Bison (parser generator)
 | betagain       | else if       | ✅           |
 | badcall        | else          | ✅           |
 |         | while         | ❌           |
-|         | break         | ❌           |
+| bruh           | break         | ✅           |
 |         | continue      | ❌           |
-|         | float         | ❌           |
-|         | double        | ❌           |
-|         | char          | ❌           |
-|         | const         | ❌           |
 |         | case          | ❌           |
 |         | default       | ❌           |
 |         | do            | ❌           |
@@ -51,7 +47,7 @@ It's built using Flex (lexical analyzer) and Bison (parser generator)
 ## Code Example
 
 ```plaintext
-create X = "Y is equal to"
+create X = "Y is equal to "
 
 create Y = 10
 

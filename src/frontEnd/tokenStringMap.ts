@@ -15,4 +15,5 @@ export const tokenStringMap: Array<{
     { key: 'betagain', value: { type: TOKEN_TYPES.IFELSE } }, // if appears betagain then it is an if else statement
     { key: 'bet', value: { type: TOKEN_TYPES.IF } }, // if appears bet then it is an if statement
     { key: 'badcall', value: { type: TOKEN_TYPES.ELSE } }, // if appears badcall then it is an else statement
+    { key: 'bruh', value: { type: TOKEN_TYPES.BREAK } }, // if appears bruh then it is a break statement
  ]

@@ -158,6 +158,11 @@ export function analyze(node: ASTNode): void {
             pendingIfElse = node;
             break;
 
+        case ASTNodeType.BREAK:
+            // No further validation required for break statements
+            break;
+
+
         default:
             throw new Error(`Unknown node type ${node.type}`);
     }

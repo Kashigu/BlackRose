@@ -5,19 +5,28 @@ create Y = 10
 write X Y
 // Y is equal to 10
 
-bet (Y < 15)
-{
-    yap "Y is indeed less then 15 " 
-}betagain(Y > 15)
-{
-    write "Y is indeed more then 15 "
-}badcall
-{
-    yap Y
+bet (Y == 10){
+    yap "Hello"
+
+    stroke (create  H = 0; H <= Y; H++)
+    {
+        write Y
+        write H
+        write "Out of the loop"
+        bruh
+    }
+    
+    yap "Adeus"
+
+    bruh
+
+    stroke (create  J = 0; J <= Y; J++)
+    {
+        write Y
+        write J
+        write "Out of the loop"
+        bruh
+    }
 }
 
-stroke (create I = 0; I <= Y; I++)
-{
-    write Y
-    write I
-}
+yap "OUT of any block"

@@ -384,6 +384,15 @@ function parseElse (currentIndex: { currentIndex: number }, tokens: Token[]): AS
     };
 }
 
+function parseBreak (currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode | null {
+    currentIndex.currentIndex++; // Advance past 'break'
+
+    return {
+        type: ASTNodeType.BREAK
+    };
+}
+
+
 
 function parseCondition(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
     const leftOperand = parseExpression(0, currentIndex, tokens); // Parse the left operand (e.g., X)
@@ -488,6 +497,11 @@ function READ_FILE(currentIndex: { currentIndex: number }, tokens: Token[], pare
     // Handle variable declaration
     if (currentToken.type === TOKEN_TYPES.VARIABLEDECLARATION) {
         return parseVariableDeclaration(currentIndex, tokens);
+    }
+
+    // Handle break statements
+    if (currentToken.type === TOKEN_TYPES.BREAK) {
+        return parseBreak(currentIndex, tokens);
     }
 
     // Handle for loops

@@ -86,6 +86,11 @@ interface ASTElseNode{
     body: ASTBlockNode;
 }
 
+interface ASTBreakNode {
+    type: ASTNodeType.BREAK;
+}
+
+
 export interface ASTBlockNode {
     type: ASTNodeType.BLOCK,
     children?: ASTNode[] 
@@ -98,6 +103,7 @@ export type ASTNode =
             ASTValueNode<ASTNodeType.NULL, string> |
             ASTValueNode<ASTNodeType.COMMENT, string> |
             ASTComparisonOperatorNode |
+            ASTBreakNode |
             ASTUnitaryOperatorNode |
             ASTIfNode |
             ASTElseNode |

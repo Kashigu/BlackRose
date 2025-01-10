@@ -20,7 +20,8 @@ export enum TOKEN_TYPES  {
     UNITARYOPERATOR = "UnitaryOperators", // ++ or --
     IF = "If", // if statement
     ELSE = "Else", // else statement
-    IFELSE = "IfElse" // if else statement
+    IFELSE = "IfElse", // if else statement
+    BREAK = "Break", // break statement
 }
 
 //Create a TokenNode with the type of the token
@@ -40,6 +41,7 @@ export type  Token =
                      TokenNode<TOKEN_TYPES.LINEBREAK> | TokenNode<TOKEN_TYPES.NULL> |
                      TokenNode<TOKEN_TYPES.FOR> |
                      TokenNode<TOKEN_TYPES.IF> |
+                     TokenNode<TOKEN_TYPES.BREAK> | 
                      TokenNode<TOKEN_TYPES.ELSE> |
                      TokenNode<TOKEN_TYPES.IFELSE> |
                      TokenNode<TOKEN_TYPES.OPEN_BRACE> | TokenNode<TOKEN_TYPES.CLOSE_BRACE> |
