@@ -5,8 +5,6 @@ bet (Y == 3){
     stroke (create  H = 0; H <= Y; H++)
     {
         
-        
-        
         bet (H == 1){
             yap "Inside of bet"
             grind

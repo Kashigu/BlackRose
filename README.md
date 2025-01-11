@@ -22,9 +22,9 @@ It's built using Flex (lexical analyzer) and Bison (parser generator)
 | bet            | if            | ✅           |
 | betagain       | else if       | ✅           |
 | badcall        | else          | ✅           |
-|         | while         | ❌           |
+|                | while         | ❌           |
 | bruh           | break         | ✅           |
-|         | continue      | ❌           |
+| grind          | continue      | ✅           |
 |         | case          | ❌           |
 |         | default       | ❌           |
 |         | do            | ❌           |
