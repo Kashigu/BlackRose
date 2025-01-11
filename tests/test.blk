@@ -1,4 +1,13 @@
 create X = W
 create Y = L
 
-yap "Is it "X " that you are gay ? or is it " Y " that you are gay ?"
+create ola = 5
+
+edge (ola == 5)
+{
+    yap "ola was equal to 5"
+    bruh
+    
+}
+
+yap "now it is no more"

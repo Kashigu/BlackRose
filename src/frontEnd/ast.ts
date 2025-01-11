@@ -111,10 +111,10 @@ export type ASTNode =
             ASTValueNode<ASTNodeType.NUMBER, string> |
             ASTValueNode<ASTNodeType.NULL, string> |
             ASTValueNode<ASTNodeType.COMMENT, string> |
-            AST_X_Node<ASTNodeType.BREAK> |
-            AST_X_Node<ASTNodeType.CONTINUE> |
             ASTValueNode<ASTNodeType.TRUE, string> |
             ASTValueNode<ASTNodeType.FALSE, string> |
+            AST_X_Node<ASTNodeType.BREAK> |
+            AST_X_Node<ASTNodeType.CONTINUE> |
             ASTWhileNode |
             ASTComparisonOperatorNode |
             ASTUnitaryOperatorNode |

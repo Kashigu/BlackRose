@@ -29,7 +29,11 @@ export function analyze(node: ASTNode): void {
             break;
 
         case ASTNodeType.NUMBER:
+            break;
+        
         case ASTNodeType.STRING:
+            break;
+        
         case ASTNodeType.LITERAL:
             // No further validation required for literals
             break;
@@ -81,6 +85,7 @@ export function analyze(node: ASTNode): void {
             analyze(node.right); // Validate right operand
 
             break;
+
         case ASTNodeType.UNITARYOPERATOR:
             // Validate the unitary operator
             if (!ValidUnitaryOperators.includes(node.value)) {
@@ -168,9 +173,23 @@ export function analyze(node: ASTNode): void {
 
         case ASTNodeType.TRUE:
             break;
+
         case ASTNodeType.FALSE:
             break;
 
+        case ASTNodeType.WHILE:
+            // Validate the loop condition
+            if (!node.condition) {
+                throw new Error("WHILE loop must have a condition.");
+            }
+            analyze(node.condition);
+
+            // Validate the loop body
+            if (!node.body) {
+                throw new Error("WHILE loop must have a body.");
+            }
+            analyze(node.body);
+            break;
 
         default:
             throw new Error(`Unknown node type ${node.type}`);

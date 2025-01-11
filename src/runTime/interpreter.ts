@@ -145,6 +145,37 @@ export function interpret(node: ASTNode): Value {
             console.log("Write:", output); // Log the final concatenated output
             return { type: ValueTypes.WRITE, value: null }; // Return null as WRITE has no meaningful result
         }
+        
+        case ASTNodeType.WHILE: {
+            console.log("Interpreting WHILE loop condition");
+            let conditionResult = interpret(node.condition); // Evaluate the condition
+        
+            loopDepth++; // Increment the loop depth
+            try {
+                // Execute the loop as long as the condition is true
+                while (conditionResult.value === true) {
+                    console.log("Interpreting WHILE loop body");
+                    const result = interpret(node.body); // Execute the loop body
+        
+                    if (result.type === ValueTypes.BREAK) {
+                        console.log("INSIDE LOOP BREAK statement encountered");
+                        break; // Exit the loop if a BREAK statement was encountered
+                    }
+
+                    if (result.type === ValueTypes.CONTINUE) {
+                        console.log("INSIDE LOOP CONTINUE statement encountered");
+                        conditionResult = interpret(node.condition); // Reevaluate the condition
+                        continue; // Skip the rest of the loop body if a CONTINUE statement was encountered
+                    }
+        
+                    conditionResult = interpret(node.condition); // Reevaluate the condition
+                }
+            } finally {
+                loopDepth--; // Decrement the loop depth
+            }
+        
+            return { type: ValueTypes.NULL, value: null }; // Return null as WHILE has no meaningful result
+        }
 
         case ASTNodeType.FOR: {
             console.log("Interpreting FOR loop initialization");        
@@ -335,7 +366,6 @@ export function interpret(node: ASTNode): Value {
             return { type: ValueTypes.NULL, value: null };
         }
         
-
         case ASTNodeType.BLOCK: {
             blockDepth++; // Increment block depth
             console.log("Block Depth: ", blockDepth);
@@ -394,8 +424,6 @@ export function interpret(node: ASTNode): Value {
         case ASTNodeType.FALSE:{
             return { type: ValueTypes.BOOLEAN, value: false };
         }
-
-        
         
         default:
             throw new Error(`Unknown node type ${node.type}`);
