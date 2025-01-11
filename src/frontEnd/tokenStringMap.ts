@@ -17,4 +17,9 @@ export const tokenStringMap: Array<{
     { key: 'badcall', value: { type: TOKEN_TYPES.ELSE } }, // if appears badcall then it is an else statement
     { key: 'bruh', value: { type: TOKEN_TYPES.BREAK } }, // if appears bruh then it is a break statement
     { key: 'grind', value: { type: TOKEN_TYPES.CONTINUE } }, // if appears grind then it is a continue statement
+    { key: 'loop', value: { type: TOKEN_TYPES.WHILE } }, // if appears loop then it is a while loop
+    { key: 'W', value: { type: TOKEN_TYPES.TRUE, value: 'true'  } } , // if appears W then it is a true
+    { key: 'L', value: { type: TOKEN_TYPES.FALSE, value: 'false' } }, // if appears L then it is a false
+
+
  ]

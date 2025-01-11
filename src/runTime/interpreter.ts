@@ -125,7 +125,6 @@ export function interpret(node: ASTNode): Value {
             return { type: ValueTypes.LITERAL, value: String(variables[node.value].value) };
         }
 
-
         case ASTNodeType.WRITE: {
             let output = ""; // Initialize an empty string for the output
         
@@ -299,7 +298,6 @@ export function interpret(node: ASTNode): Value {
             return result;
         }
         
-
         case ASTNodeType.UNITARYOPERATOR: {
             // Ensure `node.left` is a `LITERAL` node
             if (node.left.type !== ASTNodeType.LITERAL) {
@@ -371,9 +369,7 @@ export function interpret(node: ASTNode): Value {
             blockDepth--; // Decrement block depth
             console.log("Returning from BLOCK: ", lastResult || { type: ValueTypes.NULL, value: null });
             return lastResult || { type: ValueTypes.NULL, value: null }; // Return the last result or NULL
-        }
-        
-        
+        } 
 
         case ASTNodeType.BREAK: {
             if (loopDepth === 0) {
@@ -389,6 +385,14 @@ export function interpret(node: ASTNode): Value {
             }
             console.log("Returning CONTINUE result");
             return { type: ValueTypes.CONTINUE, value: null };
+        }
+
+        case ASTNodeType.TRUE:{
+            return { type: ValueTypes.BOOLEAN, value: true };
+        }
+
+        case ASTNodeType.FALSE:{
+            return { type: ValueTypes.BOOLEAN, value: false };
         }
 
         

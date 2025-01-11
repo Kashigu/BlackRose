@@ -17,6 +17,9 @@ export enum ASTNodeType {
         IFELSE = 'IfElse',
         BREAK = 'Break',
         CONTINUE = 'Continue',
+        WHILE = 'While',
+        TRUE = 'True',
+        FALSE = 'False',
 }
   
 interface ASTValueNode<T extends ASTNodeType, K> {
@@ -74,6 +77,12 @@ interface ASTForNode {
     body: ASTBlockNode; // The loop body
 }
 
+interface ASTWhileNode {
+    type: ASTNodeType.WHILE;
+    condition: ASTNode;
+    body: ASTBlockNode;
+}
+
 interface ASTIfNode {
     type: ASTNodeType.IF;
     condition: ASTNode;
@@ -104,6 +113,9 @@ export type ASTNode =
             ASTValueNode<ASTNodeType.COMMENT, string> |
             AST_X_Node<ASTNodeType.BREAK> |
             AST_X_Node<ASTNodeType.CONTINUE> |
+            ASTValueNode<ASTNodeType.TRUE, string> |
+            ASTValueNode<ASTNodeType.FALSE, string> |
+            ASTWhileNode |
             ASTComparisonOperatorNode |
             ASTUnitaryOperatorNode |
             ASTIfNode |

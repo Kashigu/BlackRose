@@ -22,27 +22,27 @@ It's built using Flex (lexical analyzer) and Bison (parser generator)
 | bet            | if            | ✅           |
 | betagain       | else if       | ✅           |
 | badcall        | else          | ✅           |
-|                | while         | ❌           |
+|                | while         | ✅           |
 | bruh           | break         | ✅           |
 | grind          | continue      | ✅           |
-|         | case          | ❌           |
-|         | default       | ❌           |
-|         | do            | ❌           |
-|         | enum          | ❌           |
-|         | extern        | ❌           |
-|         | goto          | ❌           |
-|         | long          | ❌           |
-|         | short         | ❌           |
-|         | signed        | ❌           |
-|         | sizeof        | ❌           |
-|         | static        | ❌           |
-|         | struct        | ❌           |
-|         | switch        | ❌           |
-|         | union         | ❌           |
-|         | unsigned      | ❌           |
-|         | volatile      | ❌           |
-|         | true          | ❌           |
-|         | false         | ❌           |
+|                | case          | ❌           |
+|                | default       | ❌           |
+|                | do            | ❌           |
+|                | enum          | ❌           |
+|                | extern        | ❌           |
+|                | goto          | ❌           |
+|                | long          | ❌           |
+|                | short         | ❌           |
+|                | signed        | ❌           |
+|                | sizeof        | ❌           |
+|                | static        | ❌           |
+|                | struct        | ❌           |
+|                | switch        | ❌           |
+|                | union         | ❌           |
+|                | unsigned      | ❌           |
+|                | volatile      | ❌           |
+| W              | true          | ✅           |
+| L              | false         | ✅           |
 
 ## Code Example
 

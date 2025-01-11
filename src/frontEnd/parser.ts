@@ -36,6 +36,24 @@ function parsePrimary(currentIndex: {currentIndex:number}, tokens:Token[]): ASTN
         };
     }
 
+    //Handle false literals
+    if (currentToken.type === TOKEN_TYPES.FALSE) {
+        currentIndex.currentIndex++;
+        return {
+            type: ASTNodeType.FALSE,
+            value: currentToken.value
+        };
+    }
+
+    //Handle true literals
+    if (currentToken.type === TOKEN_TYPES.TRUE) {
+        currentIndex.currentIndex++;
+        return {
+            type: ASTNodeType.TRUE,
+            value: currentToken.value
+        };
+    }
+
     // Handle strings
     if (currentToken.type === TOKEN_TYPES.STRING) {
         currentIndex.currentIndex++;
@@ -399,6 +417,53 @@ function parseContinue (currentIndex: { currentIndex: number }, tokens: Token[])
     };
 }
 
+function parseWhile(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
+    currentIndex.currentIndex++; // Advance past 'while'
+
+    if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.OPEN_PAREN) {
+        throw new Error("Expected '(' after 'while'");
+    }
+
+    currentIndex.currentIndex++; // Consume '('
+
+    // Parse the condition
+
+    const condition = parseCondition(currentIndex, tokens);
+
+    if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.CLOSE_PAREN) {
+        throw new Error("Expected ')' after condition in 'while' loop");
+    }
+
+    currentIndex.currentIndex++; // Consume ')'
+
+    // Parse the body
+
+    const body = parseBlock(currentIndex, tokens);
+
+    return {
+        type: ASTNodeType.WHILE,
+        condition,
+        body,
+    };
+}
+
+
+function parseTrue (currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode | null {
+    currentIndex.currentIndex++; // Advance past 'true'
+    return {
+        type: ASTNodeType.TRUE,
+        value: 'true'
+    };
+}
+
+function parseFalse (currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode | null {
+    currentIndex.currentIndex++; // Advance past 'false'
+    return {
+        type: ASTNodeType.FALSE,
+        value: 'false'
+    };
+}
+
 
 
 function parseCondition(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
@@ -506,6 +571,16 @@ function READ_FILE(currentIndex: { currentIndex: number }, tokens: Token[], pare
         return parseVariableDeclaration(currentIndex, tokens);
     }
 
+    // Handle true literals
+    if (currentToken.type === TOKEN_TYPES.TRUE) {
+        return parseTrue(currentIndex, tokens);
+    }
+
+    // Handle false literals
+    if (currentToken.type === TOKEN_TYPES.FALSE) {
+        return parseFalse(currentIndex, tokens);
+    }
+
     // Handle break statements
     if (currentToken.type === TOKEN_TYPES.BREAK) {
         return parseBreak(currentIndex, tokens);
@@ -519,6 +594,11 @@ function READ_FILE(currentIndex: { currentIndex: number }, tokens: Token[], pare
     // Handle for loops
     if (currentToken.type === TOKEN_TYPES.FOR) {
         return parseFor(currentIndex, tokens);
+    }
+
+    // Handle while loops
+    if (currentToken.type === TOKEN_TYPES.WHILE) {
+        return parseWhile(currentIndex, tokens);
     }
 
    

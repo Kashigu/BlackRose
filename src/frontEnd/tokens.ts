@@ -22,7 +22,10 @@ export enum TOKEN_TYPES  {
     ELSE = "Else", // else statement
     IFELSE = "IfElse", // if else statement
     BREAK = "Break", // break statement
-    CONTINUE = "Continue", // continue statement
+    CONTINUE = "Continue", // continue statement,
+    WHILE = "While", // while loop
+    TRUE = "True", // true
+    FALSE = "False", // false
 }
 
 //Create a TokenNode with the type of the token
@@ -41,6 +44,7 @@ export type  Token =
                      TokenNode<TOKEN_TYPES.CLOSE_PAREN> | TokenNode<TOKEN_TYPES.SEMICOLON> | 
                      TokenNode<TOKEN_TYPES.LINEBREAK> | TokenNode<TOKEN_TYPES.NULL> |
                      TokenNode<TOKEN_TYPES.FOR> |
+                     TokenNode<TOKEN_TYPES.WHILE> |
                      TokenNode<TOKEN_TYPES.IF> |
                      TokenNode<TOKEN_TYPES.BREAK> | 
                      TokenNode<TOKEN_TYPES.CONTINUE> |
@@ -49,7 +53,7 @@ export type  Token =
                      TokenNode<TOKEN_TYPES.OPEN_BRACE> | TokenNode<TOKEN_TYPES.CLOSE_BRACE> |
 
                      TokenNodeValue<TOKEN_TYPES.COMPARISONOPERATOR> | TokenNodeValue<TOKEN_TYPES.UNITARYOPERATOR> |
-
+                     TokenNodeValue<TOKEN_TYPES.TRUE> | TokenNodeValue<TOKEN_TYPES.FALSE> |
                      TokenNodeValue<TOKEN_TYPES.NUMBER> | TokenNodeValue<TOKEN_TYPES.STRING> | 
                      TokenNodeValue<TOKEN_TYPES.LITERAL> | TokenNodeValue<TOKEN_TYPES.COMMENT> |
                      TokenNodeValue<TOKEN_TYPES.BINARYOPERATOR>;
