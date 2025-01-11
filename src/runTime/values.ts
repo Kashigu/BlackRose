@@ -5,6 +5,7 @@ export enum ValueTypes {
     NULL = 'Null',
     BOOLEAN = 'Boolean',
     BREAK = 'Break',
+    CONTINUE = 'Continue',
     WRITE = 'Write',
 }
 
@@ -23,4 +24,5 @@ export type Value = ValueNodeValue<ValueTypes.STRING, string> |
                     ValueNodeValue<ValueTypes.BOOLEAN, boolean> |
                     ValueNodeValue<ValueTypes.NULL, null> |
                     ValueNodeValue<ValueTypes.WRITE, null> |
+                    ValueNodeValue<ValueTypes.CONTINUE, null> |
                     ValueNodeValue<ValueTypes.BREAK, null>;

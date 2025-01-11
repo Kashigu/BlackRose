@@ -162,6 +162,10 @@ export function analyze(node: ASTNode): void {
             // No further validation required for break statements
             break;
 
+        case ASTNodeType.CONTINUE:
+            // No further validation required for continue statements
+            break;
+
 
         default:
             throw new Error(`Unknown node type ${node.type}`);

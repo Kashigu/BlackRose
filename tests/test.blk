@@ -4,24 +4,15 @@ bet (Y == 3){
 
     stroke (create  H = 0; H <= Y; H++)
     {
-        write Y
-        write H
         
-        bet (H == 2){
-            yap "Inside of bet"
-            bruh
-        }
-    } 
-
-    stroke (create  H = 0; H <= Y; H++)
-    {
-        write Y
-        write H
+        
         
         bet (H == 1){
             yap "Inside of bet"
-            bruh
+            grind
         }
+        write Y
+        write H
     } 
 }
 

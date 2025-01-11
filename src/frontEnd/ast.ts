@@ -15,12 +15,17 @@ export enum ASTNodeType {
         IF = 'If',
         ELSE = 'Else',
         IFELSE = 'IfElse',
-        BREAK = 'Break'
+        BREAK = 'Break',
+        CONTINUE = 'Continue',
 }
   
 interface ASTValueNode<T extends ASTNodeType, K> {
     type: T,
     value: K
+}
+
+interface AST_X_Node<X extends ASTNodeType> {
+    type: X;
 }
   
 interface ASTProgramNode {
@@ -86,11 +91,6 @@ interface ASTElseNode{
     body: ASTBlockNode;
 }
 
-interface ASTBreakNode {
-    type: ASTNodeType.BREAK;
-}
-
-
 export interface ASTBlockNode {
     type: ASTNodeType.BLOCK,
     children?: ASTNode[] 
@@ -102,8 +102,9 @@ export type ASTNode =
             ASTValueNode<ASTNodeType.NUMBER, string> |
             ASTValueNode<ASTNodeType.NULL, string> |
             ASTValueNode<ASTNodeType.COMMENT, string> |
+            AST_X_Node<ASTNodeType.BREAK> |
+            AST_X_Node<ASTNodeType.CONTINUE> |
             ASTComparisonOperatorNode |
-            ASTBreakNode |
             ASTUnitaryOperatorNode |
             ASTIfNode |
             ASTElseNode |

@@ -22,6 +22,7 @@ export enum TOKEN_TYPES  {
     ELSE = "Else", // else statement
     IFELSE = "IfElse", // if else statement
     BREAK = "Break", // break statement
+    CONTINUE = "Continue", // continue statement
 }
 
 //Create a TokenNode with the type of the token
@@ -42,6 +43,7 @@ export type  Token =
                      TokenNode<TOKEN_TYPES.FOR> |
                      TokenNode<TOKEN_TYPES.IF> |
                      TokenNode<TOKEN_TYPES.BREAK> | 
+                     TokenNode<TOKEN_TYPES.CONTINUE> |
                      TokenNode<TOKEN_TYPES.ELSE> |
                      TokenNode<TOKEN_TYPES.IFELSE> |
                      TokenNode<TOKEN_TYPES.OPEN_BRACE> | TokenNode<TOKEN_TYPES.CLOSE_BRACE> |

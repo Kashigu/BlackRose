@@ -167,10 +167,19 @@ export function interpret(node: ASTNode): Value {
                         console.log("INSIDE LOOP BREAK statement encountered");
                         break; // Exit the loop if a BREAK statement was encountered
                     }
+
+                    
         
                     console.log("Interpreting FOR loop increment");
                     interpret(node.increment); // Increment the loop variable
         
+
+                    if (bodyResult.type === ValueTypes.CONTINUE) {
+                        console.log("INSIDE LOOP CONTINUE statement encountered");
+                        conditionResult = interpret(node.condition); // Reevaluate the condition
+                        console.log("Updated Condition result: ", conditionResult);
+                        continue; // Skip the rest of the loop body if a CONTINUE statement was encountered
+                    }
                     // Reevaluate the condition after the increment
                     conditionResult = interpret(node.condition);
                     console.log("Updated Condition result: ", conditionResult);
@@ -191,6 +200,10 @@ export function interpret(node: ASTNode): Value {
                 if (result.type === ValueTypes.BREAK) {
                     return result; // Propagate BREAK if encountered
                 }
+
+                if (result.type === ValueTypes.CONTINUE) {
+                    return result; // Propagate CONTINUE if encountered
+                }
                 
             }
         
@@ -203,6 +216,10 @@ export function interpret(node: ASTNode): Value {
 
             if (result.type === ValueTypes.BREAK) {
                 return result; // Propagate BREAK if encountered
+            }
+
+            if (result.type === ValueTypes.CONTINUE) {
+                return result; // Propagate CONTINUE if encountered
             }
         
             return { type: ValueTypes.NULL, value: null }; // Return null as ELSE has no meaningful result
@@ -217,6 +234,10 @@ export function interpret(node: ASTNode): Value {
                 const result = interpret(node.body); // Execute the body if the condition is true
                 if (result.type === ValueTypes.BREAK) {
                     return result; // Propagate BREAK if encountered
+                }
+
+                if (result.type === ValueTypes.CONTINUE) {
+                    return result; // Propagate CONTINUE if encountered
                 }
             }
         
@@ -335,6 +356,13 @@ export function interpret(node: ASTNode): Value {
                         blockDepth--; // Decrement block depth
                         return result; // Immediately propagate the BREAK
                     }
+
+                    // Propagate CONTINUE if encountered
+                    if (result && result.type === ValueTypes.CONTINUE) {
+                        console.log("CONTINUE statement encountered in block");
+                        blockDepth--; // Decrement block depth
+                        return result; // Immediately propagate the CONTINUE
+                    }
         
                     lastResult = result; // Update the last result
                 }
@@ -353,6 +381,14 @@ export function interpret(node: ASTNode): Value {
             }
             console.log("Returning BREAK result");
             return { type: ValueTypes.BREAK, value: null };
+        }
+
+        case ASTNodeType.CONTINUE: {
+            if (loopDepth === 0) {
+                throw new Error("CONTINUE statement must be inside a loop");
+            }
+            console.log("Returning CONTINUE result");
+            return { type: ValueTypes.CONTINUE, value: null };
         }
 
         

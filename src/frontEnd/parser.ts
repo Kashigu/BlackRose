@@ -392,6 +392,13 @@ function parseBreak (currentIndex: { currentIndex: number }, tokens: Token[]): A
     };
 }
 
+function parseContinue (currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode | null {
+    currentIndex.currentIndex++; // Advance past 'continue'
+    return {
+        type: ASTNodeType.CONTINUE
+    };
+}
+
 
 
 function parseCondition(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
@@ -502,6 +509,11 @@ function READ_FILE(currentIndex: { currentIndex: number }, tokens: Token[], pare
     // Handle break statements
     if (currentToken.type === TOKEN_TYPES.BREAK) {
         return parseBreak(currentIndex, tokens);
+    }
+
+    // Handle continue statements
+    if (currentToken.type === TOKEN_TYPES.CONTINUE) {
+        return parseContinue(currentIndex, tokens);
     }
 
     // Handle for loops
