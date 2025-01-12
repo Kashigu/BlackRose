@@ -276,11 +276,18 @@ export function interpret(node: ASTNode): Value {
 
         case ASTNodeType.COMPARISONOPERATOR: {
             
+            // check if the left side is a boolean else check if it is a literal else // check if it is a number this needs to be done//
             if (node.left.type === ASTNodeType.TRUE) {
                 
                 return { type: ValueTypes.BOOLEAN, value: true };
-            }else{
 
+            }else if(node.left.type === ASTNodeType.LITERAL && variables[node.left.value].type === ValueTypes.BOOLEAN){
+                if (variables[node.left.value].value === false){
+                    throw new Error("It cannot be false");
+                }
+                return { type: ValueTypes.BOOLEAN, value: true };
+            }else{
+                
                 if (node.left.type !== ASTNodeType.LITERAL) {
                     throw new Error("Left side of comparison must be a literal");
                 }

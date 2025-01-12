@@ -79,10 +79,11 @@ export function analyze(node: ASTNode): void {
 
         case ASTNodeType.COMPARISONOPERATOR:
             
-            if (node.left.type === ASTNodeType.TRUE || node.left.type === ASTNodeType.FALSE) {
-                console.log(node.left.type);
+            if (node.left.type === ASTNodeType.TRUE || node.left.type === ASTNodeType.LITERAL) {
                 analyze(node.left); // Validate left operand
                 
+            }else if(node.left.type === ASTNodeType.FALSE){
+                throw new Error("The comparison operator cannot be a false value");
             }else{
                 if (!ValidComparisonOperators.includes(node.value)) {
                     throw new Error(`Unknown comparison operator ${node.value}`);

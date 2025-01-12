@@ -477,6 +477,14 @@ function parseCondition(currentIndex: { currentIndex: number }, tokens: Token[])
             right: null,
             value: leftOperand.value,
         }as ASTNode;
+    }else if (leftOperand?.type === ASTNodeType.LITERAL) {
+        return {
+            type: ASTNodeType.COMPARISONOPERATOR,
+            left: leftOperand,
+            right: null,
+            value: leftOperand.value,
+        }as ASTNode;
+    
     }else if (comparisonOperator?.type !== TOKEN_TYPES.COMPARISONOPERATOR) {
         throw new Error("Expected comparison operator in condition");
     }
