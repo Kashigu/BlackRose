@@ -3,7 +3,7 @@ create Y = L
 
 create ola = 5
 
-edge (ola == 5)
+edge (X)
 {
     yap "ola was equal to 5"
     bruh

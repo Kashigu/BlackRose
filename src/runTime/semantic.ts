@@ -78,13 +78,24 @@ export function analyze(node: ASTNode): void {
             break;
 
         case ASTNodeType.COMPARISONOPERATOR:
-            if (!ValidComparisonOperators.includes(node.value)) {
-                throw new Error(`Unknown comparison operator ${node.value}`);
+            
+            if (node.left.type === ASTNodeType.TRUE || node.left.type === ASTNodeType.FALSE) {
+                console.log(node.left.type);
+                analyze(node.left); // Validate left operand
+                
+            }else{
+                if (!ValidComparisonOperators.includes(node.value)) {
+                    throw new Error(`Unknown comparison operator ${node.value}`);
+                }
+                analyze(node.left); // Validate left operand
+                if (node.right !== null){
+                    analyze(node.right); // Validate right operand
+                }
+                
             }
-            analyze(node.left); // Validate left operand
-            analyze(node.right); // Validate right operand
-
             break;
+                
+            
 
         case ASTNodeType.UNITARYOPERATOR:
             // Validate the unitary operator

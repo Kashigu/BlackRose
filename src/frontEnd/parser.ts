@@ -470,7 +470,14 @@ function parseCondition(currentIndex: { currentIndex: number }, tokens: Token[])
     const leftOperand = parseExpression(0, currentIndex, tokens); // Parse the left operand (e.g., X)
     
     const comparisonOperator = tokens[currentIndex.currentIndex];
-    if (comparisonOperator?.type !== TOKEN_TYPES.COMPARISONOPERATOR) {
+    if (leftOperand?.type === ASTNodeType.TRUE || leftOperand?.type === ASTNodeType.FALSE) {
+        return {
+            type: ASTNodeType.COMPARISONOPERATOR,
+            left: leftOperand,
+            right: null,
+            value: leftOperand.value,
+        }as ASTNode;
+    }else if (comparisonOperator?.type !== TOKEN_TYPES.COMPARISONOPERATOR) {
         throw new Error("Expected comparison operator in condition");
     }
     currentIndex.currentIndex++; // Consume the comparison operator (e.g., '==')

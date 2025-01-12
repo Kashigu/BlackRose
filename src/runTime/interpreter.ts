@@ -275,58 +275,69 @@ export function interpret(node: ASTNode): Value {
         }
 
         case ASTNodeType.COMPARISONOPERATOR: {
-            if (node.left.type !== ASTNodeType.LITERAL) {
-                throw new Error("Left side of comparison must be a literal");
-            }
-        
-            const leftVariableName = node.left.value; // This should be the name of the variable, e.g., 'X'
-            const leftVariable = variables[leftVariableName]; // Retrieve the variable's value from the variables table
-        
-            if (!leftVariable) {
-                throw new Error(`Variable '${leftVariableName}' is not defined.`);
-            }
-        
-            // Ensure the left variable is a number
-            if (leftVariable.type !== ValueTypes.NUMBER) {
-                throw new Error(`Left side of comparison must be a number`);
-            }
-        
-            // Resolve the right side of the comparison
-            let rightValue: number;
-
-            // Check if the right side is a literal or a number
-            if (node.right.type === ASTNodeType.LITERAL) {
-                
-                const rightVariableName = node.right.value; // This should be the name of the variable, e.g., 'X'
-                const rightVariable = variables[rightVariableName]; // Retrive the variable's value from the variables table
-
-                if (!rightVariable) {
-                    throw new Error(`Variable '${rightVariableName}' is not defined.`);
-                }
-
-                if (rightVariable.type !== ValueTypes.NUMBER) {
-                    throw new Error(`Right side of comparison must be a number`);
-                }
-
-                rightValue = rightVariable.value;
-            } else if (node.right.type === ASTNodeType.NUMBER) {
-                rightValue = parseFloat(node.right.value); // Convert string to number
-            } else {
-                throw new Error("Right side of comparison must be a number or a literal");
-            }
             
-        
-            // Extract the comparison operator
-            const operator = ComparisonOperators[node.value];
-        
-            if (!operator) {
-                throw new Error(`Unknown comparison operator ${node.value}`);
+            if (node.left.type === ASTNodeType.TRUE) {
+                
+                return { type: ValueTypes.BOOLEAN, value: true };
+            }else{
+
+                if (node.left.type !== ASTNodeType.LITERAL) {
+                    throw new Error("Left side of comparison must be a literal");
+                }
+            
+                const leftVariableName = node.left.value; // This should be the name of the variable, e.g., 'X'
+                const leftVariable = variables[leftVariableName]; // Retrieve the variable's value from the variables table
+            
+                if (!leftVariable) {
+                    throw new Error(`Variable '${leftVariableName}' is not defined.`);
+                }
+            
+                // Ensure the left variable is a number
+                if (leftVariable.type !== ValueTypes.NUMBER) {
+                    throw new Error(`Left side of comparison must be a number`);
+                }
+            
+                // Resolve the right side of the comparison
+                let rightValue: number = 0;
+    
+                // Check if the right side is a literal or a number
+                if (node.right !== null) {
+                    if (node.right.type === ASTNodeType.LITERAL) {
+                        
+                        const rightVariableName = node.right.value; // This should be the name of the variable, e.g., 'X'
+                        const rightVariable = variables[rightVariableName]; // Retrive the variable's value from the variables table
+    
+                        if (!rightVariable) {
+                            throw new Error(`Variable '${rightVariableName}' is not defined.`);
+                        }
+    
+                        if (rightVariable.type !== ValueTypes.NUMBER) {
+                            throw new Error(`Right side of comparison must be a number`);
+                        }
+    
+                        rightValue = rightVariable.value;
+                    } else if (node.right.type === ASTNodeType.NUMBER) {
+                        rightValue = parseFloat(node.right.value); // Convert string to number
+                    } else {
+                        throw new Error("Right side of comparison must be a number or a literal");
+                    }
+                }
+                
+            
+                // Extract the comparison operator
+                const operator = ComparisonOperators[node.value];
+            
+                if (!operator) {
+                    throw new Error(`Unknown comparison operator ${node.value}`);
+                }
+            
+                // Perform the comparison
+                const result = operator(leftVariable, { type: ValueTypes.NUMBER, value: rightValue });
+            
+                return result;
             }
-        
-            // Perform the comparison
-            const result = operator(leftVariable, { type: ValueTypes.NUMBER, value: rightValue });
-        
-            return result;
+
+            
         }
         
         case ASTNodeType.UNITARYOPERATOR: {

@@ -58,7 +58,7 @@ interface ASTBinaryOperatorNode {
 interface ASTComparisonOperatorNode {
     type: ASTNodeType.COMPARISONOPERATOR,
     left: ASTNode,
-    right: ASTNode,
+    right: ASTNode | null,
     value: string
 }
 
