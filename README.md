@@ -1,7 +1,6 @@
 # BlackRose
 
 BlackRose is a programming language that I created to understand how compilers work
-It's built using Flex (lexical analyzer) and Bison (parser generator)
 
 ## Stacks Used
 - TypeScript
