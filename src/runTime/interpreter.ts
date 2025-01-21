@@ -274,9 +274,18 @@ export function interpret(node: ASTNode): Value {
             return { type: ValueTypes.NULL, value: null }; // Return null as IF has no meaningful result
         }
 
+
+        /*
+            Comparison Operator
+            It checks the left side if it is a boolean, literal or a number
+            If it is a boolean, it returns true
+            If it is a literal, it checks if it is a boolean and returns true
+            If it is a number, it checks if the right side is a literal or a number
+            If it is a literal, it checks if the right side is a literal or a number
+            Returns the result of the comparison
+        */
         case ASTNodeType.COMPARISONOPERATOR: {
             
-            // check if the left side is a boolean else check if it is a literal else // check if it is a number this needs to be done//
             if (node.left.type === ASTNodeType.TRUE) {
                 
                 return { type: ValueTypes.BOOLEAN, value: true };
@@ -288,22 +297,32 @@ export function interpret(node: ASTNode): Value {
                 return { type: ValueTypes.BOOLEAN, value: true };
             }else{
                 
-                if (node.left.type !== ASTNodeType.LITERAL) {
-                    throw new Error("Left side of comparison must be a literal");
+                if (node.left.type !== ASTNodeType.LITERAL && node.left.type !== ASTNodeType.NUMBER) {
+                    throw new Error("Left side of comparison must be a literal or a number");
                 }
-            
-                const leftVariableName = node.left.value; // This should be the name of the variable, e.g., 'X'
-                const leftVariable = variables[leftVariableName]; // Retrieve the variable's value from the variables table
-            
-                if (!leftVariable) {
-                    throw new Error(`Variable '${leftVariableName}' is not defined.`);
+                
+                let leftValue: number = 0;
+                if (node.left.type === ASTNodeType.LITERAL) {
+
+                    const leftVariableName = node.left.value; // This should be the name of the variable, e.g., 'X'
+                    const leftVariable = variables[leftVariableName]; // Retrieve the variable's value from the variables table
+                
+                    // This is to check if the variable exist on the table of literals
+                    if (!leftVariable) {
+                        throw new Error(`Variable '${leftVariableName}' is not defined.`);
+                    }
+                
+                    // Ensure the left variable is a number
+                    if (leftVariable.type !== ValueTypes.NUMBER) {
+                        throw new Error(`Left side of comparison must be a number`);
+                    }
+                    leftValue = leftVariable.value;
+                }else if (node.left.type === ASTNodeType.NUMBER) {
+                    leftValue = parseFloat(node.left.value); // Convert string to number
+                } else {
+                    throw new Error("Left side of comparison must be a number or a literal");
                 }
-            
-                // Ensure the left variable is a number
-                if (leftVariable.type !== ValueTypes.NUMBER) {
-                    throw new Error(`Left side of comparison must be a number`);
-                }
-            
+                
                 // Resolve the right side of the comparison
                 let rightValue: number = 0;
     
@@ -339,7 +358,7 @@ export function interpret(node: ASTNode): Value {
                 }
             
                 // Perform the comparison
-                const result = operator(leftVariable, { type: ValueTypes.NUMBER, value: rightValue });
+                const result = operator({type: ValueTypes.NUMBER, value:leftValue}, { type: ValueTypes.NUMBER, value: rightValue });
             
                 return result;
             }

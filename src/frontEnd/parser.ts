@@ -470,6 +470,8 @@ function parseCondition(currentIndex: { currentIndex: number }, tokens: Token[])
     const leftOperand = parseExpression(0, currentIndex, tokens); // Parse the left operand (e.g., X)
     
     const comparisonOperator = tokens[currentIndex.currentIndex];
+
+    console.log(comparisonOperator)
     if (leftOperand?.type === ASTNodeType.TRUE || leftOperand?.type === ASTNodeType.FALSE) {
         return {
             type: ASTNodeType.COMPARISONOPERATOR,
@@ -477,13 +479,29 @@ function parseCondition(currentIndex: { currentIndex: number }, tokens: Token[])
             right: null,
             value: leftOperand.value,
         }as ASTNode;
-    }else if (leftOperand?.type === ASTNodeType.LITERAL) {
-        return {
-            type: ASTNodeType.COMPARISONOPERATOR,
-            left: leftOperand,
-            right: null,
-            value: leftOperand.value,
-        }as ASTNode;
+    }else if (leftOperand?.type === ASTNodeType.LITERAL) { // I am checking if the literal is a variable true or false that is wrong 
+                                                            // I should check if its a literal and see if there is a right operand anyway
+            if (comparisonOperator?.type === TOKEN_TYPES.COMPARISONOPERATOR) {
+                currentIndex.currentIndex++; // Consume the comparison operator (e.g., '==')
+    
+                const rightOperand = parseExpression(0, currentIndex, tokens); // Parse the right operand (e.g., 1)
+                console.log(rightOperand);
+
+                return {
+                    type: ASTNodeType.COMPARISONOPERATOR,
+                    left: leftOperand,
+                    right: rightOperand,
+                    value: comparisonOperator.value,
+                }as ASTNode;
+            }else {
+            
+                return {
+                    type: ASTNodeType.COMPARISONOPERATOR,
+                    left: leftOperand,
+                    right: null,
+                    value: leftOperand.value,
+                }as ASTNode;
+            }
     
     }else if (comparisonOperator?.type !== TOKEN_TYPES.COMPARISONOPERATOR) {
         throw new Error("Expected comparison operator in condition");
@@ -492,6 +510,7 @@ function parseCondition(currentIndex: { currentIndex: number }, tokens: Token[])
     
     const rightOperand = parseExpression(0, currentIndex, tokens); // Parse the right operand (e.g., 1)
 
+    // this method should work for any number like 1 <= 2
     return {
         type: ASTNodeType.COMPARISONOPERATOR,
         left: leftOperand,

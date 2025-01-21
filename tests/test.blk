@@ -2,8 +2,9 @@ create X = W
 create Y = L
 
 create ola = 5
+create bolas = 6
 
-edge (X)
+edge (bolas <= ola)
 {
     yap "ola was equal to 5"
     bruh
