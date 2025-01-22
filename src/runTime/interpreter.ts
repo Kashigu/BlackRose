@@ -68,6 +68,7 @@ const ComparisonOperators: Record<string, (left: Value, right: Value) => Value> 
 
 let loopDepth = 0;
 let blockDepth = 0;
+let hasExecuted = false; // Flag to check if the if statement has been executed
 
 export function interpret(node: ASTNode): Value {
     switch (node.type) {
@@ -222,58 +223,100 @@ export function interpret(node: ASTNode): Value {
         }
 
         case ASTNodeType.IF: {
+            if (hasExecuted) {
+                return { type: ValueTypes.NULL, value: null }; // Skip this IF if another block was already executed
+            }
             console.log("Interpreting IF condition");
             const conditionResult = interpret(node.condition); // Evaluate the condition
         
             if (conditionResult.value === true) {
+                
                 const result = interpret(node.body); // Execute the body if the condition is true
-                if (result.type === ValueTypes.BREAK) {
+                hasExecuted = true; // Set the flag to true to skip other blocks
+
+                if (result.type === ValueTypes.BREAK || result.type === ValueTypes.CONTINUE) {
                     return result; // Propagate BREAK if encountered
                 }
-
-                if (result.type === ValueTypes.CONTINUE) {
-                    return result; // Propagate CONTINUE if encountered
-                }
-                
             }
         
             return { type: ValueTypes.NULL, value: null }; // Return null as IF has no meaningful result
         }
 
         case ASTNodeType.ELSE: {
+            if (hasExecuted) {
+                return { type: ValueTypes.NULL, value: null }; // Skip this IF if another block was already executed
+            }
+
             console.log("Interpreting ELSE body");
             const result = interpret(node.body); // Execute the body
 
-            if (result.type === ValueTypes.BREAK) {
-                return result; // Propagate BREAK if encountered
-            }
+            hasExecuted = true; // Set the flag to true to skip other blocks
 
-            if (result.type === ValueTypes.CONTINUE) {
-                return result; // Propagate CONTINUE if encountered
+            if (result.type === ValueTypes.BREAK || result.type === ValueTypes.CONTINUE) {
+                return result; // Propagate BREAK if encountered
             }
         
             return { type: ValueTypes.NULL, value: null }; // Return null as ELSE has no meaningful result
         }
 
         case ASTNodeType.IFELSE: {
+            if (hasExecuted) {
+                return { type: ValueTypes.NULL, value: null }; // Skip this IF if another block was already executed
+            }
+
             console.log("Interpreting IF condition");
             const conditionResult = interpret(node.condition); // Evaluate the condition
         
             if (conditionResult.value === true) {
+
                 console.log("Interpreting IF body");
                 const result = interpret(node.body); // Execute the body if the condition is true
-                if (result.type === ValueTypes.BREAK) {
-                    return result; // Propagate BREAK if encountered
-                }
+                
+                hasExecuted = true; // Set the flag to true to skip other blocks
 
-                if (result.type === ValueTypes.CONTINUE) {
-                    return result; // Propagate CONTINUE if encountered
+                if (result.type === ValueTypes.BREAK || result.type === ValueTypes.CONTINUE) {
+                    return result; // Propagate BREAK if encountered
                 }
             }
         
             return { type: ValueTypes.NULL, value: null }; // Return null as IF has no meaningful result
         }
 
+        case ASTNodeType.LOGICALOPERATOR: {
+
+            console.log("Evaluating Logical Operator: ", node.value);
+
+            // Recursively evaluate `node.left` and `node.right`
+            const leftResult = interpret(node.left);
+            const rightResult = interpret(node.right);
+
+            console.log("Left result: ", leftResult);
+            console.log("Right result: ", rightResult);
+        
+            // Ensure the results are booleans
+            if (leftResult.type !== ValueTypes.BOOLEAN || rightResult.type !== ValueTypes.BOOLEAN) {
+                throw new Error(
+                    `Logical operation '${node.value}' requires boolean operands, got ${leftResult.type} and ${rightResult.type}.`
+                );
+            }
+        
+            // Perform the logical operation
+            switch (node.value) {
+                case "&&":
+                    return {
+                        type: ValueTypes.BOOLEAN,
+                        value: leftResult.value && rightResult.value,
+                    };
+                case "||":
+                    return {
+                        type: ValueTypes.BOOLEAN,
+                        value: leftResult.value || rightResult.value,
+                    };
+                default:
+                    throw new Error(`Unknown logical operator '${node.value}'`);
+            }
+        }
+        
 
         /*
             Comparison Operator

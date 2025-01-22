@@ -1,14 +1,15 @@
-create X = W
-create Y = L
+create X = 10
+create Y = 5
 
-create ola = 5
-create bolas = 6
-
-edge (bolas <= ola)
+bet (X > 5 && Y < 3)
 {
-    yap "ola was equal to 5"
-    bruh
-    
+    yap "Both conditions are true!"
 }
-
-yap "now it is no more"
+betagain (X < 3 || Y > 6)
+{
+    yap "At least one condition is true!"
+}
+badcall
+{
+    yap "No conditions met."
+}

@@ -328,7 +328,6 @@ function parseFor(currentIndex: { currentIndex: number }, tokens: Token[]): ASTN
 }
 
 function parseIf(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode | null {
-    
     currentIndex.currentIndex++; // Advance past 'if'
 
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.OPEN_PAREN) {
@@ -337,9 +336,24 @@ function parseIf(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNo
 
     currentIndex.currentIndex++; // Consume '('
 
-    // Parse the condition
+    // Parse the first condition
+    let condition = parseCondition(currentIndex, tokens);
 
-    const condition = parseCondition(currentIndex, tokens);
+    // Check for logical operators (&&, ||) and chain conditions
+    while (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.LOGICALOPERATOR) {
+        const logicalOperator = (tokens[currentIndex.currentIndex] as Token & { value: string }).value; // Store the operator (e.g., && or ||)
+        currentIndex.currentIndex++; // Consume '&&' or '||'
+
+        const nextCondition = parseCondition(currentIndex, tokens); // Parse the second condition
+
+        // Combine the conditions into a new AST node
+        condition = {
+            type: ASTNodeType.LOGICALOPERATOR,
+            value: logicalOperator,
+            left: condition,
+            right: nextCondition,
+        };
+    }
 
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.CLOSE_PAREN) {
         throw new Error("Expected ')' after condition in 'if' statement");
@@ -348,7 +362,6 @@ function parseIf(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNo
     currentIndex.currentIndex++; // Consume ')'
 
     // Parse the body
-
     const body = parseBlock(currentIndex, tokens);
 
     return {
@@ -356,8 +369,8 @@ function parseIf(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNo
         condition,
         body,
     };
-
 }
+
 
 function parseIfElse(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode | null {
     currentIndex.currentIndex++; // Advance past 'if-else'
@@ -370,7 +383,23 @@ function parseIfElse(currentIndex: { currentIndex: number }, tokens: Token[]): A
 
     // Parse the condition
 
-    const condition = parseCondition(currentIndex, tokens);
+    let condition = parseCondition(currentIndex, tokens);
+
+    // Check for logical operators (&&, ||) and chain conditions
+    while (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.LOGICALOPERATOR) {
+        const logicalOperator = (tokens[currentIndex.currentIndex] as Token & { value: string }).value; // Store the operator (e.g., && or ||)
+        currentIndex.currentIndex++; // Consume '&&' or '||'
+
+        const nextCondition = parseCondition(currentIndex, tokens); // Parse the second condition
+
+        // Combine the conditions into a new AST node
+        condition = {
+            type: ASTNodeType.LOGICALOPERATOR,
+            value: logicalOperator,
+            left: condition,
+            right: nextCondition,
+        };
+    }
 
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.CLOSE_PAREN) {
         throw new Error("Expected ')' after condition in 'if' statement");
@@ -447,7 +476,6 @@ function parseWhile(currentIndex: { currentIndex: number }, tokens: Token[]): AS
     };
 }
 
-
 function parseTrue (currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode | null {
     currentIndex.currentIndex++; // Advance past 'true'
     return {
@@ -463,8 +491,6 @@ function parseFalse (currentIndex: { currentIndex: number }, tokens: Token[]): A
         value: 'false'
     };
 }
-
-
 
 function parseCondition(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
     const leftOperand = parseExpression(0, currentIndex, tokens); // Parse the left operand (e.g., X)
@@ -485,7 +511,6 @@ function parseCondition(currentIndex: { currentIndex: number }, tokens: Token[])
                 currentIndex.currentIndex++; // Consume the comparison operator (e.g., '==')
     
                 const rightOperand = parseExpression(0, currentIndex, tokens); // Parse the right operand (e.g., 1)
-                console.log(rightOperand);
 
                 return {
                     type: ASTNodeType.COMPARISONOPERATOR,
@@ -517,6 +542,21 @@ function parseCondition(currentIndex: { currentIndex: number }, tokens: Token[])
         right: rightOperand,
         value: comparisonOperator.value,
     }as ASTNode;
+}
+
+function parseLogicalOperator(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
+    const leftOperand = parseExpression(0, currentIndex, tokens); // Parse the left operand (e.g., true)
+    const logicalOperator = (tokens[currentIndex.currentIndex] as Token & { value: string }).value; // Get the logical operator token (e.g., '&&' or '||')
+    currentIndex.currentIndex++; // Consume the logical operator token
+
+    const rightOperand = parseExpression(0, currentIndex, tokens); // Parse the right operand (e.g., false)
+
+    return {
+        type: ASTNodeType.LOGICALOPERATOR,
+        left: leftOperand,
+        right: rightOperand,
+        value: logicalOperator
+    } as ASTNode;
 }
 
 
@@ -603,6 +643,11 @@ function READ_FILE(currentIndex: { currentIndex: number }, tokens: Token[], pare
     // Handle variable declaration
     if (currentToken.type === TOKEN_TYPES.VARIABLEDECLARATION) {
         return parseVariableDeclaration(currentIndex, tokens);
+    }
+
+    // Handle Logical Operators
+    if (currentToken.type === TOKEN_TYPES.LOGICALOPERATOR) {
+        return parseLogicalOperator(currentIndex, tokens);
     }
 
     // Handle true literals

@@ -1,5 +1,5 @@
 import { ASTNode, ASTNodeType } from "../frontEnd/ast";
-import { ValidBinaryOperators, ValidComparisonOperators, ValidUnitaryOperators } from "../validOperators";
+import { ValidBinaryOperators, ValidComparisonOperators, ValidUnitaryOperators, ValidLogicalOperators } from "../validOperators";
 
 
 let pendingIfElse: ASTNode | null = null;
@@ -96,7 +96,13 @@ export function analyze(node: ASTNode): void {
             }
             break;
                 
-            
+        case ASTNodeType.LOGICALOPERATOR:
+            if (!ValidLogicalOperators.includes(node.value)) {
+                throw new Error(`Unknown logical operator ${node.value}`);
+            }
+            analyze(node.left); // Validate left operand
+            analyze(node.right); // Validate right operand
+            break;   
 
         case ASTNodeType.UNITARYOPERATOR:
             // Validate the unitary operator

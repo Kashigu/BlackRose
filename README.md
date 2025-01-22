@@ -43,6 +43,25 @@ BlackRose is a programming language that I created to understand how compilers w
 | W              | true          | ✅           |
 | L              | false         | ✅           |
 
+
+### Operators
+
+The language supports basic arithmetic operators:
+
+- `+` Addition
+- `-` Subtraction
+- `*` Multiplication
+- `/` Division
+- `=` Assignment
+- `<` Less than
+- `<=` Less or Equal than
+- `>` Greater than
+- `>=` Greater or Equal than
+- `==` Equal
+- `!=` Different
+- `&&` Logical AND
+- `||` Logical OR
+
 ## Code Example
 
 ```plaintext

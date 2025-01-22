@@ -1,6 +1,6 @@
 import { Token, TOKEN_TYPES } from './tokens';
 import { tokenStringMap } from './tokenStringMap';
-import { ValidBinaryOperators, ValidComparisonOperators, ValidUnitaryOperators } from "../validOperators";
+import { ValidBinaryOperators, ValidComparisonOperators, ValidUnitaryOperators, ValidLogicalOperators } from "../validOperators";
 
 function lookAHeadString(str: string, currentPosition: number , input:string): boolean {
     const parts = str.split('');
@@ -109,6 +109,14 @@ export function tokenize(input: string): Token[] {
                 value: commentBucket.join(''),
             });
         
+            continue;
+        }
+
+        // Handle ValidLogicalOperators
+        if (ValidLogicalOperators.some(op => lookAHeadString(op, currentPosition, input))) {
+            const matchedOperator = ValidLogicalOperators.find(op => lookAHeadString(op, currentPosition, input))!;
+            output.push({ type: TOKEN_TYPES.LOGICALOPERATOR, value: matchedOperator });
+            currentPosition += matchedOperator.length; // Consume the matched operator
             continue;
         }
 

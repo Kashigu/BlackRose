@@ -20,6 +20,7 @@ export enum ASTNodeType {
         WHILE = 'While',
         TRUE = 'True',
         FALSE = 'False',
+        LOGICALOPERATOR = 'LogicalOperator',
 }
   
 interface ASTValueNode<T extends ASTNodeType, K> {
@@ -59,6 +60,13 @@ interface ASTComparisonOperatorNode {
     type: ASTNodeType.COMPARISONOPERATOR,
     left: ASTNode,
     right: ASTNode | null,
+    value: string
+}
+
+interface ASTLogicalOperatorNode {
+    type: ASTNodeType.LOGICALOPERATOR,
+    left: ASTNode,
+    right: ASTNode,
     value: string
 }
 
@@ -115,6 +123,7 @@ export type ASTNode =
             ASTValueNode<ASTNodeType.FALSE, string> |
             AST_X_Node<ASTNodeType.BREAK> |
             AST_X_Node<ASTNodeType.CONTINUE> |
+            ASTLogicalOperatorNode |
             ASTWhileNode |
             ASTComparisonOperatorNode |
             ASTUnitaryOperatorNode |

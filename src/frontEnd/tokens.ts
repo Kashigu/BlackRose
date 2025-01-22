@@ -26,6 +26,7 @@ export enum TOKEN_TYPES  {
     WHILE = "While", // while loop
     TRUE = "True", // true
     FALSE = "False", // false
+    LOGICALOPERATOR = "LogicalOperator", // &&, ||, !
 }
 
 //Create a TokenNode with the type of the token
@@ -51,8 +52,9 @@ export type  Token =
                      TokenNode<TOKEN_TYPES.ELSE> |
                      TokenNode<TOKEN_TYPES.IFELSE> |
                      TokenNode<TOKEN_TYPES.OPEN_BRACE> | TokenNode<TOKEN_TYPES.CLOSE_BRACE> |
-
+                     
                      TokenNodeValue<TOKEN_TYPES.COMPARISONOPERATOR> | TokenNodeValue<TOKEN_TYPES.UNITARYOPERATOR> |
+                     TokenNodeValue<TOKEN_TYPES.LOGICALOPERATOR> | 
                      TokenNodeValue<TOKEN_TYPES.TRUE> | TokenNodeValue<TOKEN_TYPES.FALSE> |
                      TokenNodeValue<TOKEN_TYPES.NUMBER> | TokenNodeValue<TOKEN_TYPES.STRING> | 
                      TokenNodeValue<TOKEN_TYPES.LITERAL> | TokenNodeValue<TOKEN_TYPES.COMMENT> |
