@@ -1,0 +1,51 @@
+```plaintext
+// Variable Creation
+create X = "Y is equal to "
+
+create Y = 10
+
+create V = W    // "W is true"
+```
+
+```plaintext
+// Print
+
+write X Y
+// Y is equal to 10
+```
+
+```plaintext
+// If statement
+bet (Y < 15)
+{
+    yap "Y is indeed less then 15 " 
+}
+betagain(Y > 15)
+{
+    write "Y is indeed more then 15 "
+}
+badcall
+{
+    yap Y
+}
+```
+
+```plaintext
+// For loop
+stroke (create I = 0; I <= Y; I++)
+{
+    write Y
+    yap I
+}
+```
+
+```plaintext
+// While Statement 
+
+edge (Y < 20)
+{
+    yap "Y is " Y     // "Y is 10"
+    bruh              // "Break"
+}
+
+
