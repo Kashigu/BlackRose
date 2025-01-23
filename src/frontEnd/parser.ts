@@ -457,7 +457,23 @@ function parseWhile(currentIndex: { currentIndex: number }, tokens: Token[]): AS
 
     // Parse the condition
 
-    const condition = parseCondition(currentIndex, tokens);
+    let condition = parseCondition(currentIndex, tokens);
+
+    // Check for logical operators (&&, ||) and chain conditions
+    while (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.LOGICALOPERATOR) {
+        const logicalOperator = (tokens[currentIndex.currentIndex] as Token & { value: string }).value; // Store the operator (e.g., && or ||)
+        currentIndex.currentIndex++; // Consume '&&' or '||'
+
+        const nextCondition = parseCondition(currentIndex, tokens); // Parse the second condition
+
+        // Combine the conditions into a new AST node
+        condition = {
+            type: ASTNodeType.LOGICALOPERATOR,
+            value: logicalOperator,
+            left: condition,
+            right: nextCondition,
+        };
+    }
 
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.CLOSE_PAREN) {
         throw new Error("Expected ')' after condition in 'while' loop");

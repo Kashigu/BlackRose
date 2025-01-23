@@ -1,15 +1,9 @@
 create X = 10
 create Y = 5
 
-bet (X > 5 && Y < 3)
+edge (X > 5 && Y < 7)
 {
-    yap "Both conditions are true!"
-}
-betagain (X < 3 || Y > 6)
-{
-    yap "At least one condition is true!"
-}
-badcall
-{
-    yap "No conditions met."
+    yap X
+    yap Y 
+    bruh
 }
