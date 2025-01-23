@@ -1,9 +1,10 @@
-create X = 10
-create Y = 5
+create X = "adeus"
 
-edge (X > 5 && Y < 7)
-{
-    yap X
-    yap Y 
-    bruh
+chat (X) {
+    if  "ola": 
+        yap X " Friends"
+        bruh
+    if  "adeus": 
+        yap X " Friends"
+        bruh
 }

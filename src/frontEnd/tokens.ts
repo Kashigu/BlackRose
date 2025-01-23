@@ -8,6 +8,7 @@ export enum TOKEN_TYPES  {
     OPEN_PAREN = "Open_Paren", // (
     CLOSE_PAREN = "Close_Paren", // )
     SEMICOLON = "Semicolon", // ; 
+    DOUBLE_DOT = "Double_Dot", // :
     LINEBREAK = "Linebreak",
     ASSIGNMENTOPERATOR = "AssignmentOperator", // =
     BINARYOPERATOR = "BinaryOperator", // +, -, *, / , +=, -=
@@ -27,6 +28,8 @@ export enum TOKEN_TYPES  {
     TRUE = "True", // true
     FALSE = "False", // false
     LOGICALOPERATOR = "LogicalOperator", // &&, ||, !
+    SWITCH = "Switch", // switch statement
+    CASE = "Case", // case statement
 }
 
 //Create a TokenNode with the type of the token
@@ -43,10 +46,13 @@ export type  Token =
                      TokenNode<TOKEN_TYPES.VARIABLEDECLARATION> | TokenNode<TOKEN_TYPES.ASSIGNMENTOPERATOR> |
                      TokenNode<TOKEN_TYPES.WRITE> | TokenNode<TOKEN_TYPES.OPEN_PAREN> | 
                      TokenNode<TOKEN_TYPES.CLOSE_PAREN> | TokenNode<TOKEN_TYPES.SEMICOLON> | 
+                     TokenNode<TOKEN_TYPES.DOUBLE_DOT> |
                      TokenNode<TOKEN_TYPES.LINEBREAK> | TokenNode<TOKEN_TYPES.NULL> |
                      TokenNode<TOKEN_TYPES.FOR> |
                      TokenNode<TOKEN_TYPES.WHILE> |
                      TokenNode<TOKEN_TYPES.IF> |
+                     TokenNode<TOKEN_TYPES.SWITCH> |
+                     TokenNode<TOKEN_TYPES.CASE> |
                      TokenNode<TOKEN_TYPES.BREAK> | 
                      TokenNode<TOKEN_TYPES.CONTINUE> |
                      TokenNode<TOKEN_TYPES.ELSE> |

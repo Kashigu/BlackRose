@@ -93,6 +93,13 @@ export function tokenize(input: string): Token[] {
             continue;
         }
 
+        // handle double dots
+        if (input[currentPosition] === ':') {
+            output.push({ type: TOKEN_TYPES.DOUBLE_DOT });
+            currentPosition++;
+            continue;
+        }
+
         // Handle comments First of all
         if (lookAHeadString('//', currentPosition, input)) {
             currentPosition += 2; // Consume the `//`

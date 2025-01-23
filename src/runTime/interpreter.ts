@@ -504,6 +504,87 @@ export function interpret(node: ASTNode): Value {
         case ASTNodeType.FALSE:{
             return { type: ValueTypes.BOOLEAN, value: false };
         }
+
+        case ASTNodeType.CASE: {
+            console.log("Interpreting CASE body");
+            const result = interpret(node.body); // Execute
+            console.log("Returning from CASE: ", result);
+            return result;
+        }
+
+        case ASTNodeType.SWITCH: {
+            console.log("Interpreting SWITCH condition");
+            
+            // Evaluate the switch condition
+            const conditionResult = interpret(node.condition); 
+            //console.log("Switch Condition: ", conditionResult);
+
+            //if the condition is a literal with a number value
+            // convert it to a number
+
+            let conditionValue;
+
+            if (node.condition.type === ASTNodeType.LITERAL && variables[node.condition.value].type === ValueTypes.NUMBER){ 
+                const variableName = node.condition.value; // This should be the name of the variable, e.g., 'X'
+                const variable = variables[variableName]; // Retrieve the variable's value from the variables table
+
+                if (!variable) {
+                    throw new Error(`Variable '${variableName}' is not defined.`);
+                }
+            
+                if (variable.type !== ValueTypes.NUMBER) {
+                    throw new Error(`Switch condition must be a number`);
+                }
+                conditionValue = variable.value;
+            }
+
+
+            //if the condition is a literal with a string value
+            // convert it to a string
+
+            if (node.condition.type === ASTNodeType.LITERAL && variables[node.condition.value].type === ValueTypes.STRING){
+                conditionValue = variables[node.condition.value].value;
+            }
+
+            //if the condition is a literal with a boolean value
+            // convert it to a boolean only accept true
+
+           /* 
+           if (node.condition.type === ASTNodeType.LITERAL && variables[node.condition.value].type === ValueTypes.BOOLEAN){
+                if (variables[node.condition.value].value === false){
+                    throw new Error("It cannot be false");
+                }
+                conditionValue = 1;
+            }
+            */
+        
+            for (const child of node.cases) { 
+                console.log("Interpreting SWITCH case");
+                
+                // Retrieve the current case's condition
+                const caseConditionResult = interpret(child.condition); 
+                console.log("Case Condition: ", caseConditionResult);
+        
+                // Check if the current case condition matches the switch condition
+                if (caseConditionResult.value === conditionValue) { 
+                    console.log("Match found. Executing case body.");
+                    
+                    // Execute the matched case body
+                    const result = interpret(child.body); 
+        
+                    // Handle `break` within the case body
+                    if (result.type === ValueTypes.BREAK) {
+                        console.log("BREAK statement encountered in SWITCH");
+                        break; // Exit the switch statement
+                    }
+                }
+            }
+        
+            // Return null as SWITCH has no meaningful result
+            return { type: ValueTypes.NULL, value: null };
+        }
+        
+            
         
         default:
             throw new Error(`Unknown node type ${node.type}`);

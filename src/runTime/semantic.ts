@@ -209,6 +209,34 @@ export function analyze(node: ASTNode): void {
             analyze(node.body);
             break;
 
+        case ASTNodeType.SWITCH:
+            // Validate the switch condition
+            if (!node.condition) {
+                throw new Error("SWITCH statement must have a condition.");
+            }
+            analyze(node.condition);
+
+            // Validate each case
+            for (const child of node.cases) {
+                analyze(child);
+            }
+            break;
+        
+        case ASTNodeType.CASE:
+            // Validate the case condition
+            if (!node.condition) {
+                throw new Error("CASE statement must have a condition.");
+            }
+            analyze(node.condition);
+
+            // Validate the case body
+            if (!node.body) {
+                throw new Error("CASE statement must have a body.");
+            }
+            analyze(node.body);
+            break;
+
+
         default:
             throw new Error(`Unknown node type ${node.type}`);
     }

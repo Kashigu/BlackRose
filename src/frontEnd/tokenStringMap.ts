@@ -20,6 +20,8 @@ export const tokenStringMap: Array<{
     { key: 'edge', value: { type: TOKEN_TYPES.WHILE } }, // if appears loop then it is a while loop
     { key: 'W', value: { type: TOKEN_TYPES.TRUE, value: 'true'  } } , // if appears W then it is a true
     { key: 'L', value: { type: TOKEN_TYPES.FALSE, value: 'false' } }, // if appears L then it is a false
+    { key: 'chat', value: { type: TOKEN_TYPES.SWITCH } }, // if appears chat then it is a switch statement
+    { key: 'if', value: { type: TOKEN_TYPES.CASE } }, // if appears if then it is a case statement
 
 
  ]
