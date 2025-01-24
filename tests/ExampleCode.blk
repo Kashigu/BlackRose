@@ -48,4 +48,16 @@ edge (Y < 20)
     bruh              // "Break"
 }
 
+```plaintext
+
+create X = "Good"
+
+chat (X) {
+    if  "Good": 
+        yap X " Friends"
+        bruh
+    if  "Bad": 
+        yap X " Friends"
+        bruh
+}
 

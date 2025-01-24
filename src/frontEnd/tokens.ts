@@ -30,6 +30,7 @@ export enum TOKEN_TYPES  {
     LOGICALOPERATOR = "LogicalOperator", // &&, ||, !
     SWITCH = "Switch", // switch statement
     CASE = "Case", // case statement
+    DEFAULT = "Default" // default statement
 }
 
 //Create a TokenNode with the type of the token
@@ -53,6 +54,7 @@ export type  Token =
                      TokenNode<TOKEN_TYPES.IF> |
                      TokenNode<TOKEN_TYPES.SWITCH> |
                      TokenNode<TOKEN_TYPES.CASE> |
+                     TokenNode<TOKEN_TYPES.DEFAULT> |
                      TokenNode<TOKEN_TYPES.BREAK> | 
                      TokenNode<TOKEN_TYPES.CONTINUE> |
                      TokenNode<TOKEN_TYPES.ELSE> |

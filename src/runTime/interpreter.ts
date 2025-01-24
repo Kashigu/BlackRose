@@ -515,9 +515,10 @@ export function interpret(node: ASTNode): Value {
         case ASTNodeType.SWITCH: {
             console.log("Interpreting SWITCH condition");
             
-            // Evaluate the switch condition
+            /* Evaluate the switch condition
             const conditionResult = interpret(node.condition); 
-            //console.log("Switch Condition: ", conditionResult);
+            console.log("Switch Condition: ", conditionResult);
+            */
 
             //if the condition is a literal with a number value
             // convert it to a number
@@ -549,13 +550,14 @@ export function interpret(node: ASTNode): Value {
             //if the condition is a literal with a boolean value
             // convert it to a boolean only accept true
 
-           /* 
-           if (node.condition.type === ASTNodeType.LITERAL && variables[node.condition.value].type === ValueTypes.BOOLEAN){
+            /*
+            if (node.condition.type === ASTNodeType.LITERAL && variables[node.condition.value].type === ValueTypes.BOOLEAN){
                 if (variables[node.condition.value].value === false){
                     throw new Error("It cannot be false");
                 }
                 conditionValue = 1;
             }
+            console.log("Switch Condition: ", conditionValue);
             */
         
             for (const child of node.cases) { 
@@ -579,6 +581,15 @@ export function interpret(node: ASTNode): Value {
                     }
                 }
             }
+
+            // Execute the default case if no match was found
+            if (node.default) { 
+                console.log("Interpreting SWITCH default");
+                const result = interpret(node.default.body); 
+                console.log("Returning from SWITCH: ", result);
+                return result;
+            }
+
         
             // Return null as SWITCH has no meaningful result
             return { type: ValueTypes.NULL, value: null };

@@ -236,6 +236,14 @@ export function analyze(node: ASTNode): void {
             analyze(node.body);
             break;
 
+        case ASTNodeType.DEFAULT:
+            // Validate the default body
+            if (!node.body) {
+                throw new Error("DEFAULT statement must have a body.");
+            }
+            analyze(node.body);
+            break;
+            
 
         default:
             throw new Error(`Unknown node type ${node.type}`);

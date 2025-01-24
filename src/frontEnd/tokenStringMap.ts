@@ -22,6 +22,7 @@ export const tokenStringMap: Array<{
     { key: 'L', value: { type: TOKEN_TYPES.FALSE, value: 'false' } }, // if appears L then it is a false
     { key: 'chat', value: { type: TOKEN_TYPES.SWITCH } }, // if appears chat then it is a switch statement
     { key: 'if', value: { type: TOKEN_TYPES.CASE } }, // if appears if then it is a case statement
+    { key: 'well', value: { type: TOKEN_TYPES.DEFAULT } }, // if appears well then it is a default statement
 
 
  ]

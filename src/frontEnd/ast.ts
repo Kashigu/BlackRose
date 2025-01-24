@@ -23,6 +23,7 @@ export enum ASTNodeType {
         LOGICALOPERATOR = 'LogicalOperator',
         SWITCH = 'Switch',
         CASE = 'Case',
+        DEFAULT = 'Default'
 }
   
 interface ASTValueNode<T extends ASTNodeType, K> {
@@ -76,11 +77,17 @@ interface ASTSwitchNode {
     type: ASTNodeType.SWITCH,
     condition: ASTNode,
     cases: ASTCaseNode[]
+    default: ASTDefaultNode | null
 }
 
 export interface ASTCaseNode {
     type: ASTNodeType.CASE,
     condition: ASTNode,
+    body: ASTBlockNode
+}
+
+export interface ASTDefaultNode { 
+    type: ASTNodeType.DEFAULT,
     body: ASTBlockNode
 }
 
@@ -150,6 +157,7 @@ export type ASTNode =
             ASTProgramNode |
             ASTAssignmentNode |
             ASTBlockNode |
+            ASTDefaultNode |
             ASTCaseNode |
             ASTWriteNode;
   

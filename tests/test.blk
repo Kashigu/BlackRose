@@ -4,7 +4,9 @@ chat (X) {
     if  "ola": 
         yap X " Friends"
         bruh
-    if  "adeus": 
+    if  "boas": 
         yap X " Friends"
         bruh
+    well:
+        yap X " Enemies"
 }

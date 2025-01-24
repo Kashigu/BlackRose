@@ -1,4 +1,4 @@
-import { ASTBlockNode, ASTNode, ASTNodeType , ASTCaseNode } from "./ast";
+import { ASTBlockNode, ASTNode, ASTNodeType , ASTCaseNode, ASTDefaultNode } from "./ast";
 import { Token, TOKEN_TYPES } from "./tokens";
 
 
@@ -626,6 +626,46 @@ function parseCase(currentIndex: { currentIndex: number }, tokens: Token[]): AST
     };
 }
 
+function parseDefault(currentIndex: { currentIndex: number }, tokens: Token[]): ASTDefaultNode {
+    currentIndex.currentIndex++; // Advance past 'default'
+
+    // Ensure the body starts with ':'
+    if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.DOUBLE_DOT) {
+        throw new Error("Expected ':' after 'default'");
+    }
+    currentIndex.currentIndex++; // Consume ':'
+
+    // Parse the body directly
+    const body: ASTBlockNode = {
+        type: ASTNodeType.BLOCK,
+        children: []
+    };
+
+    // Parse all statements within the block
+    while (
+        currentIndex.currentIndex < tokens.length &&
+        tokens[currentIndex.currentIndex].type !== TOKEN_TYPES.CLOSE_BRACE
+    ) {
+        const statement = READ_FILE(currentIndex, tokens, []); // Parse each statement
+        if (statement) {
+            body.children!.push(statement);
+        }
+    }
+
+    // Ensure the body ends with 'bruh'
+    const endToken = tokens[currentIndex.currentIndex];
+    if (!endToken || endToken.type !== TOKEN_TYPES.CLOSE_BRACE) {
+        throw new Error(`Expected '}' to end 'default' block, but got '${endToken?.type}'`);
+    }
+    // currentIndex.currentIndex++; // doesnt consume '}' so it can end 
+
+    return {
+        type: ASTNodeType.DEFAULT,
+        body,
+    };
+}
+
+
 function parseSwitch(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
     currentIndex.currentIndex++; // Advance past 'switch'
 
@@ -636,7 +676,6 @@ function parseSwitch(currentIndex: { currentIndex: number }, tokens: Token[]): A
     currentIndex.currentIndex++; // Consume '('
 
     // Parse the condition
-
     const condition = parseExpression(0, currentIndex, tokens);
 
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.CLOSE_PAREN) {
@@ -645,8 +684,7 @@ function parseSwitch(currentIndex: { currentIndex: number }, tokens: Token[]): A
 
     currentIndex.currentIndex++; // Consume ')'
 
-    // Parse the body
-
+    // Ensure the body starts with '{'
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.OPEN_BRACE) {
         throw new Error("Expected '{' after condition in 'switch' statement");
     }
@@ -654,20 +692,33 @@ function parseSwitch(currentIndex: { currentIndex: number }, tokens: Token[]): A
     currentIndex.currentIndex++; // Consume '{'
 
     const cases: ASTCaseNode[] = [];
+    let defaultCase: ASTDefaultNode | null = null;
 
-    while (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.CASE) {
-        cases.push(parseCase(currentIndex, tokens));
+    // Parse all cases and the default case
+    while (currentIndex.currentIndex < tokens.length) {
+        const currentToken = tokens[currentIndex.currentIndex];
+
+        if (currentToken.type === TOKEN_TYPES.CASE) {
+            cases.push(parseCase(currentIndex, tokens));
+        } else if (currentToken.type === TOKEN_TYPES.DEFAULT) {
+            defaultCase = parseDefault(currentIndex, tokens);
+            break; // Exit the loop after parsing the default case
+        } else {
+            throw new Error(`Unexpected token '${currentToken.type}' in 'switch' statement`);
+        }
     }
 
+    // Ensure the body ends with '}'
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.CLOSE_BRACE) {
-        throw new Error("Expected '}' after cases in 'switch' statement");
+        throw new Error("Expected '}' after cases in 'switch' statement.");
     }
     currentIndex.currentIndex++; // Consume '}'
-    
+
     return {
         type: ASTNodeType.SWITCH,
         condition,
         cases,
+        default: defaultCase,
     };
 }
 
@@ -815,6 +866,11 @@ function READ_FILE(currentIndex: { currentIndex: number }, tokens: Token[], pare
     // Handle case statements
     if (currentToken.type === TOKEN_TYPES.CASE) {
         return parseCase(currentIndex, tokens);
+    }
+
+    // Handle default statements
+    if (currentToken.type === TOKEN_TYPES.DEFAULT) {
+        return parseDefault(currentIndex, tokens);
     }
 
     // Throw error for unexpected tokens
