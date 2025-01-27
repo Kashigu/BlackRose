@@ -69,6 +69,7 @@ const ComparisonOperators: Record<string, (left: Value, right: Value) => Value> 
 let loopDepth = 0;
 let blockDepth = 0;
 let hasExecuted = false; // Flag to check if the if statement has been executed
+let matchFound = false; // Flag to check if a match was found in the switch statement
 
 export function interpret(node: ASTNode): Value {
     switch (node.type) {
@@ -539,6 +540,7 @@ export function interpret(node: ASTNode): Value {
                 conditionValue = variable.value;
             }
 
+            
 
             //if the condition is a literal with a string value
             // convert it to a string
@@ -550,15 +552,22 @@ export function interpret(node: ASTNode): Value {
             //if the condition is a literal with a boolean value
             // convert it to a boolean only accept true
 
-            /*
+            
             if (node.condition.type === ASTNodeType.LITERAL && variables[node.condition.value].type === ValueTypes.BOOLEAN){
-                if (variables[node.condition.value].value === false){
+                if (variables[node.condition.value] || variables[node.condition.value].value === false){
                     throw new Error("It cannot be false");
                 }
-                conditionValue = 1;
+                conditionValue = true;
             }
+
+            // if the condition is a boolean
+
+            if (node.condition.type === ASTNodeType.TRUE){
+                conditionValue = true;
+            }
+
             console.log("Switch Condition: ", conditionValue);
-            */
+            
         
             for (const child of node.cases) { 
                 console.log("Interpreting SWITCH case");
@@ -566,11 +575,14 @@ export function interpret(node: ASTNode): Value {
                 // Retrieve the current case's condition
                 const caseConditionResult = interpret(child.condition); 
                 console.log("Case Condition: ", caseConditionResult);
+                console.log("Condition Value: ", conditionValue);
         
-                // Check if the current case condition matches the switch condition
-                if (caseConditionResult.value === conditionValue) { 
+                // Check if the current case condition matches the switch condition and if a match has not been found
+                if (caseConditionResult.value === conditionValue && !matchFound) { 
                     console.log("Match found. Executing case body.");
                     
+                    matchFound = true; // Set the flag to true to indicate a match was found
+
                     // Execute the matched case body
                     const result = interpret(child.body); 
         
@@ -583,7 +595,7 @@ export function interpret(node: ASTNode): Value {
             }
 
             // Execute the default case if no match was found
-            if (node.default) { 
+            if (node.default && !matchFound) { 
                 console.log("Interpreting SWITCH default");
                 const result = interpret(node.default.body); 
                 console.log("Returning from SWITCH: ", result);

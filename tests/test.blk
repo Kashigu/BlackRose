@@ -1,11 +1,11 @@
-create X = "adeus"
+create X = 5
 
-chat (X) {
-    if  "ola": 
+chat (W) {
+    if  X <= 5: 
         yap X " Friends"
         bruh
-    if  "boas": 
-        yap X " Friends"
+    if  X >= 5: 
+        yap X " NO Friends"
         bruh
     well:
         yap X " Enemies"

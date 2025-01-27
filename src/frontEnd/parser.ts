@@ -104,6 +104,23 @@ function parseExpression(precedence: number, currentIndex: { currentIndex: numbe
         return left; 
     }
 
+    if (operator?.type === TOKEN_TYPES.COMPARISONOPERATOR) {
+        currentIndex.currentIndex++; // Consume the comparison operator token
+        const right = parsePrimary(currentIndex, tokens);
+        if (!right) {
+            throw new Error(`Expected expression after ${left} at position ${currentIndex.currentIndex}`);
+        }
+
+        left = {
+            type: ASTNodeType.COMPARISONOPERATOR,
+            left, 
+            right, 
+            value: operator.value, // Operator symbol (e.g., ==, !=, <, >)
+        } as ASTNode;
+
+        return left;
+    }
+
     // Handle binary operators
     while (
         operator &&
@@ -272,7 +289,7 @@ function parseCaseBlock(currentIndex: { currentIndex: number }, tokens: Token[])
 
     // Ensure the body starts with ':'
     const startToken = tokens[currentIndex.currentIndex];
-    console.log('Start Token',startToken)
+    
     if (!startToken || startToken.type !== TOKEN_TYPES.DOUBLE_DOT) {
         throw new Error(`Expected ':' to start block, but got '${startToken?.type}'`);
     }
