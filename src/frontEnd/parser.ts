@@ -631,7 +631,22 @@ function parseCase(currentIndex: { currentIndex: number }, tokens: Token[]): AST
     currentIndex.currentIndex++; // Advance past 'case'
 
     // Parse the condition
-    const condition = parseExpression(0, currentIndex, tokens);
+    let condition = parseExpression(0, currentIndex, tokens);
+
+    while (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.LOGICALOPERATOR) {
+        const logicalOperator = (tokens[currentIndex.currentIndex] as Token & { value: string }).value; // Store the operator (e.g., && or ||)
+        currentIndex.currentIndex++; // Consume '&&' or '||'
+
+        const nextCondition = parseExpression(0, currentIndex, tokens); // Parse the second condition
+
+        // Combine the conditions into a new AST node
+        condition = {
+            type: ASTNodeType.LOGICALOPERATOR,
+            value: logicalOperator,
+            left: condition,
+            right: nextCondition,
+        };
+    }
 
     // Parse the body
     const body = parseCaseBlock(currentIndex, tokens);

@@ -1,10 +1,10 @@
 create X = 5
 
 chat (W) {
-    if  X <= 5: 
+    if  X <= 3 && X <= 6: 
         yap X " Friends"
         bruh
-    if  X >= 5: 
+    if  X > 5 || X == 5: 
         yap X " NO Friends"
         bruh
     well:
