@@ -244,6 +244,19 @@ export function analyze(node: ASTNode): void {
             analyze(node.body);
             break;
             
+        case ASTNodeType.DO:
+            // Validate the loop condition
+            if (!node.condition) {
+                throw new Error("DO loop must have a condition.");
+            }
+            analyze(node.condition);
+
+            // Validate the loop body
+            if (!node.body) {
+                throw new Error("DO loop must have a body.");
+            }
+            analyze(node.body);
+            break;
 
         default:
             throw new Error(`Unknown node type ${node.type}`);

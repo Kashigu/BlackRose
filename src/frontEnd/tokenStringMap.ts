@@ -23,6 +23,7 @@ export const tokenStringMap: Array<{
     { key: 'chat', value: { type: TOKEN_TYPES.SWITCH } }, // if appears chat then it is a switch statement
     { key: 'if', value: { type: TOKEN_TYPES.CASE } }, // if appears if then it is a case statement
     { key: 'well', value: { type: TOKEN_TYPES.DEFAULT } }, // if appears well then it is a default statement
+    { key: 'slay', value: { type: TOKEN_TYPES.DO } }, // if appears slay then it is a do statement
 
 
  ]

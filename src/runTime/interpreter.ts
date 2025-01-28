@@ -606,6 +606,35 @@ export function interpret(node: ASTNode): Value {
             // Return null as SWITCH has no meaningful result
             return { type: ValueTypes.NULL, value: null };
         }
+
+        case ASTNodeType.DO: {
+            console.log("Interpreting DO body");
+            
+            loopDepth++; // Increment the loop depth
+            let result = interpret(node.body); // Execute
+            console.log("Interpreting DO condition");
+            
+            let conditionResult = interpret(node.condition); // Evaluate the condition
+            
+            try {
+                while (conditionResult.value === true) {
+                    console.log("Interpreting DO loop body");
+                    result = interpret(node.body); // Execute the loop body
+        
+                    if (result.type === ValueTypes.BREAK) {
+                        console.log("BREAK statement encountered in DO");
+                        break; // Exit the loop if a BREAK statement was encountered
+                    }
+        
+                    console.log("Interpreting DO loop condition");
+                    conditionResult = interpret(node.condition); // Reevaluate the condition
+                }
+            } finally {
+                loopDepth--; // Decrement the loop depth
+            }
+
+            return { type: ValueTypes.NULL, value: null }; // Return null as DO has no meaningful result
+        }
         
             
         

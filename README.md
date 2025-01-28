@@ -26,7 +26,7 @@ BlackRose is a programming language that I created to understand how compilers w
 | grind          | continue      | ✅           |
 | if             | case          | ✅           |
 | well           | default       | ✅           |
-|                | do            | ❌           |
+| slay           | do            | ✅           |
 |                | enum          | ❌           |
 |                | extern        | ❌           |
 |                | goto          | ❌           |

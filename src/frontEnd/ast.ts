@@ -23,7 +23,8 @@ export enum ASTNodeType {
         LOGICALOPERATOR = 'LogicalOperator',
         SWITCH = 'Switch',
         CASE = 'Case',
-        DEFAULT = 'Default'
+        DEFAULT = 'Default',
+        DO = 'Do'
 }
   
 interface ASTValueNode<T extends ASTNodeType, K> {
@@ -78,6 +79,12 @@ interface ASTSwitchNode {
     condition: ASTNode,
     cases: ASTCaseNode[]
     default: ASTDefaultNode | null
+}
+
+interface ASTDoNode {
+    type: ASTNodeType.DO,
+    condition: ASTNode,
+    body: ASTBlockNode
 }
 
 export interface ASTCaseNode {
@@ -145,6 +152,7 @@ export type ASTNode =
             AST_X_Node<ASTNodeType.BREAK> |
             AST_X_Node<ASTNodeType.CONTINUE> |
             ASTLogicalOperatorNode |
+            ASTDoNode |
             ASTWhileNode |
             ASTSwitchNode |
             ASTComparisonOperatorNode |

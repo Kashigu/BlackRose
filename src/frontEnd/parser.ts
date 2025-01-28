@@ -82,8 +82,31 @@ function parsePrimary(currentIndex: {currentIndex:number}, tokens:Token[]): ASTN
     throw new Error(`Unexpected token '${currentToken.type}' at position ${currentIndex}`);
 }
 
+function parseComparisonExpression(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
+    const left = parsePrimary(currentIndex, tokens);
+    const operator = tokens[currentIndex.currentIndex];
+
+    if (operator?.type !== TOKEN_TYPES.COMPARISONOPERATOR) {
+        throw new Error(`Expected comparison operator at position ${currentIndex.currentIndex}`);
+    }
+
+    currentIndex.currentIndex++; // Consume the comparison operator token
+
+    const right = parsePrimary(currentIndex, tokens);
+
+    return {
+        type: ASTNodeType.COMPARISONOPERATOR,
+        left,
+        right,
+        value: operator.value,
+    };
+}
+
 function parseExpression(precedence: number, currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
     let left = parsePrimary(currentIndex, tokens);
+
+    console.log("left",left)
+    
     if (!left) {
         throw new Error(`Expected expression at position ${currentIndex.currentIndex}`);
     }
@@ -102,23 +125,6 @@ function parseExpression(precedence: number, currentIndex: { currentIndex: numbe
         } as ASTNode;
 
         return left; 
-    }
-
-    if (operator?.type === TOKEN_TYPES.COMPARISONOPERATOR) {
-        currentIndex.currentIndex++; // Consume the comparison operator token
-        const right = parsePrimary(currentIndex, tokens);
-        if (!right) {
-            throw new Error(`Expected expression after ${left} at position ${currentIndex.currentIndex}`);
-        }
-
-        left = {
-            type: ASTNodeType.COMPARISONOPERATOR,
-            left, 
-            right, 
-            value: operator.value, // Operator symbol (e.g., ==, !=, <, >)
-        } as ASTNode;
-
-        return left;
     }
 
     // Handle binary operators
@@ -565,7 +571,6 @@ function parseCondition(currentIndex: { currentIndex: number }, tokens: Token[])
     
     const comparisonOperator = tokens[currentIndex.currentIndex];
 
-    console.log(comparisonOperator)
     if (leftOperand?.type === ASTNodeType.TRUE || leftOperand?.type === ASTNodeType.FALSE) {
         return {
             type: ASTNodeType.COMPARISONOPERATOR,
@@ -630,14 +635,14 @@ function parseLogicalOperator(currentIndex: { currentIndex: number }, tokens: To
 function parseCase(currentIndex: { currentIndex: number }, tokens: Token[]): ASTCaseNode {
     currentIndex.currentIndex++; // Advance past 'case'
 
-    // Parse the condition
-    let condition = parseExpression(0, currentIndex, tokens);
+    // Parse the condition by getting the comparison expression
+    let condition = parseComparisonExpression(currentIndex, tokens);
 
     while (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.LOGICALOPERATOR) {
         const logicalOperator = (tokens[currentIndex.currentIndex] as Token & { value: string }).value; // Store the operator (e.g., && or ||)
         currentIndex.currentIndex++; // Consume '&&' or '||'
 
-        const nextCondition = parseExpression(0, currentIndex, tokens); // Parse the second condition
+        const nextCondition = parseComparisonExpression( currentIndex, tokens); // Parse the second condition
 
         // Combine the conditions into a new AST node
         condition = {
@@ -751,6 +756,41 @@ function parseSwitch(currentIndex: { currentIndex: number }, tokens: Token[]): A
         condition,
         cases,
         default: defaultCase,
+    };
+}
+
+function parseDo(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
+    currentIndex.currentIndex++; // Advance past 'do'
+
+    // Parse the body
+    const body = parseBlock(currentIndex, tokens);
+
+
+    if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.WHILE) {
+        throw new Error("Expected 'while' after 'do' block");
+    }
+
+    currentIndex.currentIndex++; // Consume 'while'
+
+    if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.OPEN_PAREN) {
+        throw new Error("Expected '(' after 'while'");
+    }
+
+    currentIndex.currentIndex++; // Consume '('
+
+    // Parse the condition
+    const condition = parseCondition(currentIndex, tokens);
+
+    if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.CLOSE_PAREN) {
+        throw new Error("Expected ')' after condition in 'do-while' loop");
+    }
+
+    currentIndex.currentIndex++; // Consume ')'
+
+    return {
+        type: ASTNodeType.DO,
+        condition,
+        body,
     };
 }
 
@@ -874,6 +914,10 @@ function READ_FILE(currentIndex: { currentIndex: number }, tokens: Token[], pare
         return parseWhile(currentIndex, tokens);
     }
 
+    // Handle do-while loops
+    if (currentToken.type === TOKEN_TYPES.DO) {
+        return parseDo(currentIndex, tokens);
+    }
    
     // Handle if statements 
     if (currentToken.type === TOKEN_TYPES.IF) {
