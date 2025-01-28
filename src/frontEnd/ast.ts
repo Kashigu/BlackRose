@@ -35,29 +35,45 @@ interface ASTValueNode<T extends ASTNodeType, K> {
 interface AST_X_Node<X extends ASTNodeType> {
     type: X;
 }
-  
-interface ASTProgramNode {
-    type: ASTNodeType.PROGRAM,
+
+interface AST_X_Children<X extends ASTNodeType> {
+    type: X,
     children: ASTNode[]
+}
+
+interface AST_X_BODY_NODE<X extends ASTNodeType> {
+    type: X,
+    body: ASTBlockNode
+}
+
+interface AST_X_OPERATOR_NODE<X extends ASTNodeType> {
+    type: X,
+    left: ASTNode,
+    right: ASTNode,
+    value: string
+}
+  
+interface AST_X_CONDITION_NODE<X extends ASTNodeType> {
+    type: X,
+    condition: ASTNode
+    body: ASTBlockNode
+}
+
+// This one is special because I dont wanna change the whole code (I will do it later I swear)
+export interface ASTCaseNode {
+    type: ASTNodeType.CASE,
+    condition: ASTNode,
+    body: ASTBlockNode
+}
+export interface ASTDefaultNode{
+    type: ASTNodeType.DEFAULT,
+    body: ASTBlockNode
 }
   
 interface ASTAssignmentNode {
     type: ASTNodeType.ASSIGNMENT,
     name: string,
     value: ASTNode
-}
-  
-interface ASTWriteNode {
-    type: ASTNodeType.WRITE,
-    children: ASTNode[]
-}
-
-
-interface ASTBinaryOperatorNode {
-    type: ASTNodeType.BINARYOPERATOR,
-    left: ASTNode,
-    right: ASTNode,
-    value: string
 }
 
 interface ASTComparisonOperatorNode {
@@ -67,35 +83,12 @@ interface ASTComparisonOperatorNode {
     value: string
 }
 
-interface ASTLogicalOperatorNode {
-    type: ASTNodeType.LOGICALOPERATOR,
-    left: ASTNode,
-    right: ASTNode,
-    value: string
-}
 
 interface ASTSwitchNode {
     type: ASTNodeType.SWITCH,
     condition: ASTNode,
-    cases: ASTCaseNode[]
-    default: ASTDefaultNode | null
-}
-
-interface ASTDoNode {
-    type: ASTNodeType.DO,
-    condition: ASTNode,
-    body: ASTBlockNode
-}
-
-export interface ASTCaseNode {
-    type: ASTNodeType.CASE,
-    condition: ASTNode,
-    body: ASTBlockNode
-}
-
-export interface ASTDefaultNode { 
-    type: ASTNodeType.DEFAULT,
-    body: ASTBlockNode
+    cases: AST_X_CONDITION_NODE<ASTNodeType.CASE>[],
+    default: AST_X_BODY_NODE<ASTNodeType.DEFAULT> | null
 }
 
 interface ASTUnitaryOperatorNode {
@@ -104,36 +97,12 @@ interface ASTUnitaryOperatorNode {
     value: string
 }
 
-
 interface ASTForNode {
     type: ASTNodeType.FOR;
     initialization: ASTNode  // e.g., variable declaration or assignment
     condition: ASTNode // e.g., a binary condition
     increment: ASTNode // e.g., an increment or update operation
     body: ASTBlockNode; // The loop body
-}
-
-interface ASTWhileNode {
-    type: ASTNodeType.WHILE;
-    condition: ASTNode;
-    body: ASTBlockNode;
-}
-
-interface ASTIfNode {
-    type: ASTNodeType.IF;
-    condition: ASTNode;
-    body: ASTBlockNode;
-}
-
-interface ASTIfElseNode {
-    type: ASTNodeType.IFELSE;
-    condition: ASTNode;
-    body: ASTBlockNode;
-}
-
-interface ASTElseNode{
-    type: ASTNodeType.ELSE;
-    body: ASTBlockNode;
 }
 
 export interface ASTBlockNode {
@@ -151,21 +120,21 @@ export type ASTNode =
             ASTValueNode<ASTNodeType.FALSE, string> |
             AST_X_Node<ASTNodeType.BREAK> |
             AST_X_Node<ASTNodeType.CONTINUE> |
-            ASTLogicalOperatorNode |
-            ASTDoNode |
-            ASTWhileNode |
+            AST_X_Children<ASTNodeType.PROGRAM> |
+            AST_X_Children<ASTNodeType.WRITE> |
+            AST_X_CONDITION_NODE<ASTNodeType.CASE> |
+            AST_X_CONDITION_NODE<ASTNodeType.DO> |
+            AST_X_CONDITION_NODE<ASTNodeType.WHILE> |
+            AST_X_CONDITION_NODE<ASTNodeType.IF> |
+            AST_X_CONDITION_NODE<ASTNodeType.IFELSE> |
+            AST_X_OPERATOR_NODE<ASTNodeType.LOGICALOPERATOR> |
+            AST_X_OPERATOR_NODE<ASTNodeType.BINARYOPERATOR> |
+            AST_X_BODY_NODE<ASTNodeType.ELSE> |
+            AST_X_BODY_NODE<ASTNodeType.DEFAULT> |
             ASTSwitchNode |
             ASTComparisonOperatorNode |
             ASTUnitaryOperatorNode |
-            ASTIfNode |
-            ASTElseNode |
-            ASTIfElseNode |
             ASTForNode |
-            ASTBinaryOperatorNode |
-            ASTProgramNode |
             ASTAssignmentNode |
-            ASTBlockNode |
-            ASTDefaultNode |
-            ASTCaseNode |
-            ASTWriteNode;
+            ASTBlockNode ;
   

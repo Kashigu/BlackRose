@@ -1,4 +1,4 @@
-import { ASTBlockNode, ASTNode, ASTNodeType , ASTCaseNode, ASTDefaultNode } from "./ast";
+import { ASTBlockNode, ASTNode, ASTNodeType , ASTCaseNode , ASTDefaultNode} from "./ast";
 import { Token, TOKEN_TYPES } from "./tokens";
 
 
@@ -632,7 +632,7 @@ function parseLogicalOperator(currentIndex: { currentIndex: number }, tokens: To
     } as ASTNode;
 }
 
-function parseCase(currentIndex: { currentIndex: number }, tokens: Token[]): ASTCaseNode {
+function parseCase(currentIndex: { currentIndex: number }, tokens: Token[]): ASTCaseNode{
     currentIndex.currentIndex++; // Advance past 'case'
 
     // Parse the condition by getting the comparison expression
