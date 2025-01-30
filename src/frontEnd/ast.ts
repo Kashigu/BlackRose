@@ -3,6 +3,7 @@ export enum ASTNodeType {
         LITERAL = 'Literal',
         STRING = 'String',
         ASSIGNMENT = 'Assignment',
+        ASSIGNMENTOPERATOR = 'AssignmentOperator',
         WRITE = 'Write',
         NUMBER = 'Number',
         BINARYOPERATOR = 'BinaryOperator',

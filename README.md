@@ -91,8 +91,8 @@ badcall
 // for loop
 stroke (create I = 0; I <= Y; I++)
 {
-    write Y
-    write I
+    write (Y)
+    write (I)
 }
 ```
 

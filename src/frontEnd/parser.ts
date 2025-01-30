@@ -19,8 +19,14 @@ function parsePrimary(currentIndex: {currentIndex:number}, tokens:Token[]): ASTN
     const currentToken = tokens[currentIndex.currentIndex];
 
     // Handle literals
-    if (currentToken.type === TOKEN_TYPES.LITERAL) {
-        currentIndex.currentIndex++;
+    if (currentToken.type === TOKEN_TYPES.LITERAL) {    
+        currentIndex.currentIndex++; // Consume the literal token
+
+        // Check if the next token is an assignment operator
+        if (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.ASSIGNMENTOPERATOR) {
+            return parseAssignmentDeclaration(currentIndex, tokens);
+        }
+
         return {
             type: ASTNodeType.LITERAL,
             value: currentToken.value,
@@ -41,16 +47,16 @@ function parsePrimary(currentIndex: {currentIndex:number}, tokens:Token[]): ASTN
         currentIndex.currentIndex++;
         return {
             type: ASTNodeType.FALSE,
-            value: currentToken.value
+            value: 'false'
         };
     }
 
     //Handle true literals
     if (currentToken.type === TOKEN_TYPES.TRUE) {
-        currentIndex.currentIndex++;
+        currentIndex.currentIndex++; // Advance past 'true'
         return {
             type: ASTNodeType.TRUE,
-            value: currentToken.value
+            value: 'true'
         };
     }
 
@@ -109,7 +115,6 @@ function parseUnitaryExpression(currentIndex: { currentIndex: number }, tokens: 
 
     const operator = tokens[currentIndex.currentIndex];
 
-    console.log("Operator",operator)
     if (operator?.type !== TOKEN_TYPES.UNITARYOPERATOR) {
         throw new Error(`Expected unitary operator at position ${currentIndex.currentIndex}`);
     }
@@ -125,7 +130,6 @@ function parseUnitaryExpression(currentIndex: { currentIndex: number }, tokens: 
 
 function parseExpression(precedence: number, currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
     let left = parsePrimary(currentIndex, tokens);
-    
     if (!left) {
         throw new Error(`Expected expression at position ${currentIndex.currentIndex}`);
     }
@@ -260,12 +264,12 @@ function parseBraceAndParen(currentIndex: { currentIndex: number }, tokens: Toke
 }
 
 function parseVariableDeclaration(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
-    currentIndex.currentIndex++;
-    const variableNameToken = tokens[currentIndex.currentIndex];
+    currentIndex.currentIndex++; // Advance past 'create'
+    const variableNameToken = tokens[currentIndex.currentIndex]; 
     if (!variableNameToken || variableNameToken.type !== TOKEN_TYPES.LITERAL) {
         throw new Error(`Expected variable name after 'create', but got ${variableNameToken?.type}`);
     }
-    const variableName = variableNameToken.value;
+    const variableName = variableNameToken.value; 
     currentIndex.currentIndex++; // Consume the variable name
     const assignmentToken = tokens[currentIndex.currentIndex];
     if (!assignmentToken || assignmentToken.type
@@ -277,6 +281,46 @@ function parseVariableDeclaration(currentIndex: { currentIndex: number }, tokens
     if (!value) {
         throw new Error(`Expected expression after '=' for variable declaration`);
     }
+    return {
+        type: ASTNodeType.ASSIGNMENT,
+        name: variableName,
+        value,
+    };
+}
+
+function parseAssignmentDeclaration(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
+
+    //I need to go back to get the literal
+    currentIndex.currentIndex--; // Go back to the previous token
+    const token = tokens[currentIndex.currentIndex];
+
+    if (token.type !== TOKEN_TYPES.LITERAL) {
+        throw new Error(`Expected variable name, but got ${token.type}`);
+    }
+
+    // Otherwise, it should be a variable assignment (X = 6)
+    const variableNameToken = tokens[currentIndex.currentIndex]; 
+    
+    if (!variableNameToken || variableNameToken.type !== TOKEN_TYPES.LITERAL) {
+        throw new Error(`Expected variable name, but got ${variableNameToken?.type}`);
+    }
+    const variableName = variableNameToken.value; 
+
+    currentIndex.currentIndex++; // Consume variable name
+
+    // Ensure next token is '='
+    const assignmentToken = tokens[currentIndex.currentIndex];
+    if (!assignmentToken || assignmentToken.type !== TOKEN_TYPES.ASSIGNMENTOPERATOR) {
+        throw new Error(`Expected '=', but got ${assignmentToken?.type}`);
+    }
+    currentIndex.currentIndex++; // Consume '='
+
+    // Parse the right-hand side expression
+    const value = parseExpression(0, currentIndex, tokens);
+    if (!value) {
+        throw new Error(`Expected expression after '='`);
+    }
+
     return {
         type: ASTNodeType.ASSIGNMENT,
         name: variableName,
@@ -345,7 +389,7 @@ function parseCaseBlock(currentIndex: { currentIndex: number }, tokens: Token[])
 
     // Ensure the block ends with 'bruh'
     const endToken = tokens[currentIndex.currentIndex];
-    console.log('EndToken',endToken)
+    
     if (!endToken || endToken.type !== TOKEN_TYPES.BREAK) {
         throw new Error(`Expected 'bruh' to end block, but got '${endToken?.type}'`);
     }
@@ -581,21 +625,6 @@ function parseWhile(currentIndex: { currentIndex: number }, tokens: Token[]): AS
     };
 }
 
-function parseTrue (currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode | null {
-    currentIndex.currentIndex++; // Advance past 'true'
-    return {
-        type: ASTNodeType.TRUE,
-        value: 'true'
-    };
-}
-
-function parseFalse (currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode | null {
-    currentIndex.currentIndex++; // Advance past 'false'
-    return {
-        type: ASTNodeType.FALSE,
-        value: 'false'
-    };
-}
 
 function parseCondition(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
     const leftOperand = parseExpression(0, currentIndex, tokens); // Parse the left operand (e.g., X)
@@ -857,22 +886,9 @@ function READ_FILE(currentIndex: { currentIndex: number }, tokens: Token[], pare
         parseBraceAndParen(currentIndex, tokens, parenStack);
     }
 
-    // Handle literals
-    if (currentToken.type === TOKEN_TYPES.LITERAL) {
-        currentIndex.currentIndex++;
-        return {
-            type: ASTNodeType.LITERAL,
-            value: currentToken.value
-        };
-    }
-    
     // Handle strings
     if (currentToken.type === TOKEN_TYPES.STRING) {
-        currentIndex.currentIndex++;
-        return {
-            type: ASTNodeType.STRING,
-            value: currentToken.value
-        };
+        return parsePrimary(currentIndex, tokens);
     }
 
     // Handle numbers
@@ -926,6 +942,11 @@ function READ_FILE(currentIndex: { currentIndex: number }, tokens: Token[], pare
         return parseVariableDeclaration(currentIndex, tokens);
     }
 
+    // Handle literals
+    if (currentToken.type === TOKEN_TYPES.LITERAL) {
+        return parsePrimary(currentIndex, tokens);
+    }
+
     // Handle Logical Operators
     if (currentToken.type === TOKEN_TYPES.LOGICALOPERATOR) {
         return parseLogicalOperator(currentIndex, tokens);
@@ -933,12 +954,12 @@ function READ_FILE(currentIndex: { currentIndex: number }, tokens: Token[], pare
 
     // Handle true literals
     if (currentToken.type === TOKEN_TYPES.TRUE) {
-        return parseTrue(currentIndex, tokens);
+        return parsePrimary(currentIndex, tokens);
     }
 
     // Handle false literals
     if (currentToken.type === TOKEN_TYPES.FALSE) {
-        return parseFalse(currentIndex, tokens);
+        return parsePrimary(currentIndex, tokens);
     }
 
     // Handle break statements
