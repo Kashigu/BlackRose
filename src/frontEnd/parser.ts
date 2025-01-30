@@ -102,10 +102,29 @@ function parseComparisonExpression(currentIndex: { currentIndex: number }, token
     };
 }
 
+function parseUnitaryExpression(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
+    // Goes back to the previous token to get left 
+    currentIndex.currentIndex--; // Go back to the previous token
+    const left = parsePrimary(currentIndex, tokens);
+
+    const operator = tokens[currentIndex.currentIndex];
+
+    console.log("Operator",operator)
+    if (operator?.type !== TOKEN_TYPES.UNITARYOPERATOR) {
+        throw new Error(`Expected unitary operator at position ${currentIndex.currentIndex}`);
+    }
+
+    currentIndex.currentIndex++; // Consume the unitary operator token
+
+    return {
+        type: ASTNodeType.UNITARYOPERATOR,
+        left,
+        value: operator.value,
+    };
+}
+
 function parseExpression(precedence: number, currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
     let left = parsePrimary(currentIndex, tokens);
-
-    console.log("left",left)
     
     if (!left) {
         throw new Error(`Expected expression at position ${currentIndex.currentIndex}`);
@@ -113,7 +132,9 @@ function parseExpression(precedence: number, currentIndex: { currentIndex: numbe
 
     let operator = tokens[currentIndex.currentIndex];
 
-    // Handle unary operators like ++ and --
+    // Handle unary operators like ++ and -- // Dont rembember if this is necessary or not so its gonna be commented 
+    // I think it does the same as ParseUnitaryExpression
+    /*
     if (operator?.type === TOKEN_TYPES.UNITARYOPERATOR) {
         currentIndex.currentIndex++; // Consume the unitary operator token
 
@@ -126,6 +147,7 @@ function parseExpression(precedence: number, currentIndex: { currentIndex: numbe
 
         return left; 
     }
+        */
 
     // Handle binary operators
     while (
@@ -152,13 +174,21 @@ function parseExpression(precedence: number, currentIndex: { currentIndex: numbe
 }
 
 function parseIgnore(currentIndex: { currentIndex: number }, tokens: Token[]): null {
-    currentIndex.currentIndex++;
+    while (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.LINEBREAK ||
+        tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.SEMICOLON) {
+     currentIndex.currentIndex++; // Skip all consecutive LINEBREAK and SEMICOLON tokens
+    }
     return null;
 }
 
 function parseWrite(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
-    currentIndex.currentIndex++;
+    currentIndex.currentIndex++; // Advance past 'write'
     const children: ASTNode[] = [];
+
+    if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.OPEN_PAREN) {
+        throw new Error("Expected '(' after 'write' or 'yap' statement");
+    }
+    currentIndex.currentIndex++; // Consume '('
 
     while (tokens[currentIndex.currentIndex] && 
         (tokens[currentIndex.currentIndex].type === TOKEN_TYPES.STRING || tokens[currentIndex.currentIndex].type === TOKEN_TYPES.LITERAL)) 
@@ -183,10 +213,11 @@ function parseWrite(currentIndex: { currentIndex: number }, tokens: Token[]): AS
         }
     }
 
-    // Optionally consume the LINEBREAK token if present
-    if (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.LINEBREAK) {
-        currentIndex.currentIndex++;
+    // Consume the line break token after the write statement only consume one line break
+    if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.CLOSE_PAREN) {
+        throw new Error(`Expected ')' after 'write' statement`);
     }
+    currentIndex.currentIndex++; // Consume ')'
 
     return {
         type: ASTNodeType.WRITE,
@@ -779,7 +810,23 @@ function parseDo(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNo
     currentIndex.currentIndex++; // Consume '('
 
     // Parse the condition
-    const condition = parseCondition(currentIndex, tokens);
+    let condition = parseCondition(currentIndex, tokens);
+
+    //Logical operators
+    while (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.LOGICALOPERATOR) {
+        const logicalOperator = (tokens[currentIndex.currentIndex] as Token & { value: string }).value; // Store the operator (e.g., && or ||)
+        currentIndex.currentIndex++; // Consume '&&' or '||'
+
+        const nextCondition = parseCondition(currentIndex, tokens); // Parse the second condition
+
+        // Combine the conditions into a new AST node
+        condition = {
+            type: ASTNodeType.LOGICALOPERATOR,
+            value: logicalOperator,
+            left: condition,
+            right: nextCondition,
+        };
+    }
 
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.CLOSE_PAREN) {
         throw new Error("Expected ')' after condition in 'do-while' loop");
@@ -799,7 +846,7 @@ function parseDo(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNo
 function READ_FILE(currentIndex: { currentIndex: number }, tokens: Token[], parenStack: number[]): ASTNode | null {
     const currentToken = tokens[currentIndex.currentIndex]; // Get the current token
 
-    // Ignore linebreaks and semicolons
+    // Ignore linebreaks and semicolons (they are not needed in the AST)
     if (currentToken.type === TOKEN_TYPES.LINEBREAK || currentToken.type === TOKEN_TYPES.SEMICOLON) {
         parseIgnore(currentIndex, tokens);
     }
@@ -947,6 +994,11 @@ function READ_FILE(currentIndex: { currentIndex: number }, tokens: Token[], pare
     // Handle default statements
     if (currentToken.type === TOKEN_TYPES.DEFAULT) {
         return parseDefault(currentIndex, tokens);
+    }
+
+    // Unitary operators
+    if (currentToken.type === TOKEN_TYPES.UNITARYOPERATOR) {
+        return parseUnitaryExpression(currentIndex, tokens);
     }
 
     // Throw error for unexpected tokens

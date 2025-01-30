@@ -9,7 +9,7 @@ export enum TOKEN_TYPES  {
     CLOSE_PAREN = "Close_Paren", // )
     SEMICOLON = "Semicolon", // ; 
     DOUBLE_DOT = "Double_Dot", // :
-    LINEBREAK = "Linebreak",
+    LINEBREAK = "Linebreak", // \n
     ASSIGNMENTOPERATOR = "AssignmentOperator", // =
     BINARYOPERATOR = "BinaryOperator", // +, -, *, / , +=, -=
     COMMENT = "Comment", // //

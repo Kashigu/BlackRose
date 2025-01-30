@@ -69,22 +69,23 @@ create X = "Y is equal to "
 
 create Y = 10
 
-write X Y
+write (X Y)
 // Y is equal to 10
 
 
 // if statement
 bet (Y < 15)
 {
-    yap "Y is indeed less then 15 " 
+    yap ("Y is indeed less then 15 ")
+    // yap is the same as write
 }
 betagain(Y > 15)
 {
-    write "Y is indeed more then 15 "
+    write ("Y is indeed more then 15 ")
 }
 badcall
 {
-    yap Y
+    yap (Y)
 }
 
 // for loop

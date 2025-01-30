@@ -1,8 +1,8 @@
-create X = 5
+create X = 3
 
 slay
 {
-    yap X
-    
-    create X = 6
-} edge (X == 5)
+    yap ("The value is "X)
+
+    X++
+} edge (X == 5 || X <= 6)
