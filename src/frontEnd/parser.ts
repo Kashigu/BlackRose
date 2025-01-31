@@ -282,7 +282,7 @@ function parseVariableDeclaration(currentIndex: { currentIndex: number }, tokens
         throw new Error(`Expected expression after '=' for variable declaration`);
     }
     return {
-        type: ASTNodeType.ASSIGNMENT,
+        type: ASTNodeType.VARIABLEDECLARATION,
         name: variableName,
         value,
     };

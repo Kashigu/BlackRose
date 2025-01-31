@@ -1,3 +1,6 @@
-create X = L
+create X = 3
+create Y = W
 
-write (X)
+Y = 6 + 7 + X
+
+write (X" "Y)

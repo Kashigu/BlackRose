@@ -20,6 +20,14 @@ export function analyze(node: ASTNode): void {
             analyze(node.value); // Validate the assigned value
             break;
 
+        case ASTNodeType.VARIABLEDECLARATION:
+            if (!node.name) {
+                throw new Error("Variable declaration must have a variable name.");
+            }
+            analyze(node.value); // Validate the assigned value
+            break;
+            
+
         case ASTNodeType.BINARYOPERATOR:
             analyze(node.left); // Validate left operand
             analyze(node.right); // Validate right operand

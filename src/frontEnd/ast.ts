@@ -3,7 +3,7 @@ export enum ASTNodeType {
         LITERAL = 'Literal',
         STRING = 'String',
         ASSIGNMENT = 'Assignment',
-        ASSIGNMENTOPERATOR = 'AssignmentOperator',
+        VARIABLEDECLARATION = 'VariableDeclaration',
         WRITE = 'Write',
         NUMBER = 'Number',
         BINARYOPERATOR = 'BinaryOperator',
@@ -12,7 +12,7 @@ export enum ASTNodeType {
         FOR = 'For',
         COMPARISONOPERATOR = 'Comparison',
         UNITARYOPERATOR = 'UnitaryOperators',
-        BLOCK = 'Block', // Added for block statements
+        BLOCK = 'Block', 
         IF = 'If',
         ELSE = 'Else',
         IFELSE = 'IfElse',
@@ -60,6 +60,13 @@ interface AST_X_CONDITION_NODE<X extends ASTNodeType> {
     body: ASTBlockNode
 }
 
+interface AST_X_Declaration_Assignment_Node<X extends ASTNodeType> {
+    type: X
+    name: string,
+    value: ASTNode
+}
+
+
 // This one is special because I dont wanna change the whole code (I will do it later I swear)
 export interface ASTCaseNode {
     type: ASTNodeType.CASE,
@@ -69,12 +76,6 @@ export interface ASTCaseNode {
 export interface ASTDefaultNode{
     type: ASTNodeType.DEFAULT,
     body: ASTBlockNode
-}
-  
-interface ASTAssignmentNode {
-    type: ASTNodeType.ASSIGNMENT,
-    name: string,
-    value: ASTNode
 }
 
 interface ASTComparisonOperatorNode {
@@ -132,10 +133,11 @@ export type ASTNode =
             AST_X_OPERATOR_NODE<ASTNodeType.BINARYOPERATOR> |
             AST_X_BODY_NODE<ASTNodeType.ELSE> |
             AST_X_BODY_NODE<ASTNodeType.DEFAULT> |
+            AST_X_Declaration_Assignment_Node<ASTNodeType.VARIABLEDECLARATION> |
+            AST_X_Declaration_Assignment_Node<ASTNodeType.ASSIGNMENT> |
             ASTSwitchNode |
             ASTComparisonOperatorNode |
             ASTUnitaryOperatorNode |
             ASTForNode |
-            ASTAssignmentNode |
             ASTBlockNode ;
   

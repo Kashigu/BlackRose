@@ -2,6 +2,15 @@ import { ValueTypes, Value } from "./values";
 import { ASTNode, ASTNodeType } from "../frontEnd/ast";
 
 const variables: Record<string, Value> = {}; // Variable storage
+const declaredVariables = new Set<string>(); // Tracks explicitly created variables // This should be changed to the semantic.ts
+
+/* Because My language is not dynamically typed
+So it means I cannot create a variable without the create behind it
+
+create X = 10 // This is valid
+X = 10 // This is invalid unless X is already declared
+
+*/
 
 const BinaryOperators: Record<string, (left: Value, right: Value) => Value> = {
     "+": (left, right) => {
@@ -83,11 +92,34 @@ export function interpret(node: ASTNode): Value {
 
         case ASTNodeType.ASSIGNMENT: {
             const variableName = node.name;
+            // Should be changed to the semantic.ts
+            if (!declaredVariables.has(variableName)) {
+                throw new Error(`Variable '${variableName}' is not defined.`);
+            }
             const value = interpret(node.value);
             console.log(`Variable ${variableName} to ${value.value}`);
             variables[variableName] = value; // Store variable
             return value;
         }
+
+
+        case ASTNodeType.VARIABLEDECLARATION: {
+            const variableName = node.name;
+
+            // Should be changed to the semantic.ts
+            if (declaredVariables.has(variableName)) {
+                throw new Error(`Variable '${variableName}' is already declared.`);
+            }
+            //
+            const value = interpret(node.value);
+            // Should be changed to the semantic.ts
+            declaredVariables.add(variableName);
+            //
+            variables[variableName] = value;
+            console.log(`Variable '${variableName}' created with value ${value.value}`);
+            return value;
+        }
+
 
         case ASTNodeType.NUMBER:
             const number = parseFloat(node.value); // Convert string to number
@@ -123,6 +155,13 @@ export function interpret(node: ASTNode): Value {
 
         case ASTNodeType.LITERAL: {
             // Handle literal node, return as a ValueTypes.LITERAL type
+
+            // Should be changed to the semantic.ts
+            if (!declaredVariables.has(node.value)) {
+                throw new Error(`Variable '${node.value}' is not defined.`);
+            }
+            //
+
             console.log("Literal: ",node.value);
             return { type: ValueTypes.LITERAL, value: String(variables[node.value].value) };
         }
