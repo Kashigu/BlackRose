@@ -3,6 +3,7 @@ import { ValidBinaryOperators, ValidComparisonOperators, ValidUnitaryOperators, 
 
 
 let pendingIfElse: ASTNode | null = null;
+const declaredVariables = new Set<string>(); // Tracks explicitly created variables 
 
 
 export function analyze(node: ASTNode): void {
@@ -17,6 +18,9 @@ export function analyze(node: ASTNode): void {
             if (!node.name) {
                 throw new Error("Assignment must have a variable name.");
             }
+            if (!declaredVariables.has(node.name)) {
+                throw new Error(`Variable ${node.name} is not declared.`);
+            }
             analyze(node.value); // Validate the assigned value
             break;
 
@@ -24,6 +28,10 @@ export function analyze(node: ASTNode): void {
             if (!node.name) {
                 throw new Error("Variable declaration must have a variable name.");
             }
+            if (declaredVariables.has(node.name)) {
+                throw new Error(`Variable ${node.name} is already declared.`);
+            }
+            declaredVariables.add(node.name); // Add the declared variable to the set
             analyze(node.value); // Validate the assigned value
             break;
             
@@ -269,4 +277,9 @@ export function analyze(node: ASTNode): void {
         default:
             throw new Error(`Unknown node type ${node.type}`);
     }
+}
+
+// function to send the declared variables to the interpreter
+export function DeclaredVariables(): Set<string> {
+    return declaredVariables;
 }
