@@ -3,15 +3,6 @@ import { ASTNode, ASTNodeType } from "../frontEnd/ast";
 import { DeclaredVariables } from "./semantic";
 
 const variables: Record<string, Value> = {}; // Variable storage
-const declaredVariables = DeclaredVariables(); // get the declared variables from the semantic.ts
-
-/* Because My language is not dynamically typed
-So it means I cannot create a variable without the create behind it
-
-create X = 10 // This is valid
-X = 10 // This is invalid unless X is already declared
-
-*/
 
 const BinaryOperators: Record<string, (left: Value, right: Value) => Value> = {
     "+": (left, right) => {

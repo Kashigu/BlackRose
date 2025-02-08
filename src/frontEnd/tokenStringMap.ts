@@ -7,7 +7,6 @@ export const tokenStringMap: Array<{
 }> = [
     { key: '\n', value: { type: TOKEN_TYPES.LINEBREAK } },
     { key: 'create', value: { type: TOKEN_TYPES.VARIABLEDECLARATION } }, // if appears Create then it is a variable declaration
-    { key: '=', value: { type: TOKEN_TYPES.ASSIGNMENTOPERATOR } }, // if appears = then it is an assignment operator
     { key: 'write', value: { type: TOKEN_TYPES.WRITE } }, // if appears write then it is a console.log
     { key: 'yap', value: { type: TOKEN_TYPES.WRITE } }, // if appears yap then it is a console.log
     { key: 'null', value: { type: TOKEN_TYPES.NULL } }, // if appears null then it is a null

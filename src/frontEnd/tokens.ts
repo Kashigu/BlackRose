@@ -10,7 +10,7 @@ export enum TOKEN_TYPES  {
     SEMICOLON = "Semicolon", // ; 
     DOUBLE_DOT = "Double_Dot", // :
     LINEBREAK = "Linebreak", // \n
-    ASSIGNMENTOPERATOR = "AssignmentOperator", // =
+    ASSIGNMENTOPERATOR = "AssignmentOperator", // = , +=, -=, *=, /=
     BINARYOPERATOR = "BinaryOperator", // +, -, *, / , +=, -=
     COMMENT = "Comment", // //
     NULL = "Null", // null
@@ -45,7 +45,7 @@ interface TokenNodeValue<T extends TOKEN_TYPES> extends TokenNode<T> {
 }
 
 export type  Token = 
-                     TokenNode<TOKEN_TYPES.VARIABLEDECLARATION> | TokenNode<TOKEN_TYPES.ASSIGNMENTOPERATOR> |
+                     TokenNode<TOKEN_TYPES.VARIABLEDECLARATION> | 
                      TokenNode<TOKEN_TYPES.WRITE> | TokenNode<TOKEN_TYPES.OPEN_PAREN> | 
                      TokenNode<TOKEN_TYPES.CLOSE_PAREN> | TokenNode<TOKEN_TYPES.SEMICOLON> | 
                      TokenNode<TOKEN_TYPES.DOUBLE_DOT> |
@@ -68,7 +68,8 @@ export type  Token =
                      TokenNodeValue<TOKEN_TYPES.TRUE> | TokenNodeValue<TOKEN_TYPES.FALSE> |
                      TokenNodeValue<TOKEN_TYPES.NUMBER> | TokenNodeValue<TOKEN_TYPES.STRING> | 
                      TokenNodeValue<TOKEN_TYPES.LITERAL> | TokenNodeValue<TOKEN_TYPES.COMMENT> |
-                     TokenNodeValue<TOKEN_TYPES.BINARYOPERATOR>;
+                     TokenNodeValue<TOKEN_TYPES.BINARYOPERATOR> |
+                     TokenNodeValue<TOKEN_TYPES.ASSIGNMENTOPERATOR> ;
                      
 
 

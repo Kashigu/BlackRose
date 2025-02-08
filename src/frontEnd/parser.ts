@@ -1,5 +1,6 @@
 import { ASTBlockNode, ASTNode, ASTNodeType , ASTCaseNode , ASTDefaultNode} from "./ast";
 import { Token, TOKEN_TYPES } from "./tokens";
+import { ValidAssignmentOperators } from "../validOperators";
 
 
 function getOperatorPrecedence(operator: string): number {
@@ -136,23 +137,6 @@ function parseExpression(precedence: number, currentIndex: { currentIndex: numbe
 
     let operator = tokens[currentIndex.currentIndex];
 
-    // Handle unary operators like ++ and -- // Dont rembember if this is necessary or not so its gonna be commented 
-    // I think it does the same as ParseUnitaryExpression
-    /*
-    if (operator?.type === TOKEN_TYPES.UNITARYOPERATOR) {
-        currentIndex.currentIndex++; // Consume the unitary operator token
-
-        left = {
-            type: ASTNodeType.UNITARYOPERATOR,
-            left, 
-            right: null, 
-            value: operator.value, // Operator symbol (e.g., ++ or --)
-        } as ASTNode;
-
-        return left; 
-    }
-        */
-
     // Handle binary operators
     while (
         operator &&
@@ -168,7 +152,7 @@ function parseExpression(precedence: number, currentIndex: { currentIndex: numbe
             type: ASTNodeType.BINARYOPERATOR,
             left, 
             right, 
-            value: operator.value, // Operator symbol (e.g., +=, -, *)
+            value: operator.value, // Operator symbol (e.g., +,/,*,- *) but it doesnt work with (+=, -=, *=, /=)
         } as ASTNode;
 
         operator = tokens[currentIndex.currentIndex]; // Update to the next operator
@@ -289,44 +273,61 @@ function parseVariableDeclaration(currentIndex: { currentIndex: number }, tokens
 }
 
 function parseAssignmentDeclaration(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
-
-    //I need to go back to get the literal
-    currentIndex.currentIndex--; // Go back to the previous token
+    // Go back to get the variable name (literal)
+    currentIndex.currentIndex--;
     const token = tokens[currentIndex.currentIndex];
 
     if (token.type !== TOKEN_TYPES.LITERAL) {
         throw new Error(`Expected variable name, but got ${token.type}`);
     }
 
-    // Otherwise, it should be a variable assignment (X = 6)
-    const variableNameToken = tokens[currentIndex.currentIndex]; 
-    
+    const variableNameToken = tokens[currentIndex.currentIndex];
     if (!variableNameToken || variableNameToken.type !== TOKEN_TYPES.LITERAL) {
         throw new Error(`Expected variable name, but got ${variableNameToken?.type}`);
     }
-    const variableName = variableNameToken.value; 
 
+    const variableName = variableNameToken.value;
     currentIndex.currentIndex++; // Consume variable name
 
-    // Ensure next token is '='
+    // Ensure next token is an Assignment Operator
     const assignmentToken = tokens[currentIndex.currentIndex];
     if (!assignmentToken || assignmentToken.type !== TOKEN_TYPES.ASSIGNMENTOPERATOR) {
-        throw new Error(`Expected '=', but got ${assignmentToken?.type}`);
+        throw new Error(`Expected assignment operator, but got ${assignmentToken?.type}`);
     }
-    currentIndex.currentIndex++; // Consume '='
+
+    const operator = assignmentToken.value; // Capture operator (`=`, `+=`, `-=`, etc.)
+    currentIndex.currentIndex++; // Consume assignment operator
 
     // Parse the right-hand side expression
     const value = parseExpression(0, currentIndex, tokens);
     if (!value) {
-        throw new Error(`Expected expression after '='`);
+        throw new Error(`Expected expression after '${operator}'`);
     }
 
+    // Handle compound assignments (+=, -=, *=, /=)
+    if (operator !== "=") {
+        const actualOperator = operator[0]; // Extract the arithmetic operator (+, -, *, /)
+        
+        return {
+            type: ASTNodeType.ASSIGNMENT,
+            name: variableName,
+            value: {
+                type: ASTNodeType.BINARYOPERATOR,
+                left: { type: ASTNodeType.LITERAL, value: variableName },
+                right: value,
+                value: actualOperator, // Use the extracted operator
+            },
+        };
+    }
+
+    // Normal assignment `X = 6`
     return {
         type: ASTNodeType.ASSIGNMENT,
         name: variableName,
         value,
     };
 }
+
 
 function parseBlock(currentIndex: { currentIndex: number }, tokens: Token[]): ASTBlockNode {
     const block: ASTBlockNode = {

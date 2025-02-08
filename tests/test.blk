@@ -1,6 +1,6 @@
 create X = 3
-create Y = W
+create Y = 3
 
-Y = 6 + 7 + X
+Y += 3
 
 write (X" "Y)
