@@ -61,6 +61,11 @@ The language supports basic arithmetic operators:
 - `!=` Different
 - `&&` Logical AND
 - `||` Logical OR
+- `+=` Addition Assignment
+- `-=` Subtraction Assignment
+- `*=` Multiplication Assignment
+- `/=` Division Assignment
+- `!`  Logical Negation
 
 ## Code Example
 

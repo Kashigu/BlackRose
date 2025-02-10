@@ -1,6 +1,7 @@
-create X = 3
-create Y = 3
-
-Y += 3
-
-write (X" "Y)
+create Y = 5
+create I = 0
+stroke (I = 0; I <= Y; I--)
+{
+    write (Y)
+    write (I)
+}

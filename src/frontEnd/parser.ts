@@ -1,6 +1,5 @@
 import { ASTBlockNode, ASTNode, ASTNodeType , ASTCaseNode , ASTDefaultNode} from "./ast";
 import { Token, TOKEN_TYPES } from "./tokens";
-import { ValidAssignmentOperators } from "../validOperators";
 
 
 function getOperatorPrecedence(operator: string): number {
@@ -419,32 +418,36 @@ function parseFor(currentIndex: { currentIndex: number }, tokens: Token[]): ASTN
     }
 
     // Check for semicolon after initialization
-    if (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.SEMICOLON) {
-        currentIndex.currentIndex++; // Consume ';'
-    } else {
+    if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.SEMICOLON) {
         throw new Error("Expected ';' after initialization in 'for' loop");
     }
+    currentIndex.currentIndex++; // Consume ';'
 
     // Parse condition (this should be a comparison, e.g., X == 1)
     const condition = parseCondition(currentIndex, tokens);
+    console.log(condition);
 
-    // Check for semicolon after condition (it may or may not be there)
-    if (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.SEMICOLON) {
-        currentIndex.currentIndex++; // Consume ';'
-    } else if (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.UNITARYOPERATOR) {
-        // If there's a unitary operator, consume it (like '++')
-        currentIndex.currentIndex++;
-    } else {
-        throw new Error("Expected ';' or unitary operator after condition in 'for' loop");
+    if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.SEMICOLON) {
+        throw new Error("Expected ';' after condition in 'for' loop");
+    }
+    currentIndex.currentIndex++; // Consume ';' after condition
+
+    // Now to parse the increment I need to know two steps ahead so I can know if it is a unitary operator or a assignment operator
+    currentIndex.currentIndex++; // Advance past the Literal (ex: I)
+    console.log(tokens[currentIndex.currentIndex]); // this should be an operator
+
+    let increment = null;
+    if (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.ASSIGNMENTOPERATOR) {
+        increment = parseAssignmentDeclaration(currentIndex, tokens);
+    }else if (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.UNITARYOPERATOR) {
+        increment = parseUnitaryExpression(currentIndex, tokens);
+    }
+    console.log(increment);
+    if (increment === null) {
+        throw new Error("Expected increment in 'for' loop");
     }
 
-    // Parse increment (could be a unitary operator like '++')
-    let increment = parseExpression(0, currentIndex, tokens);
-
-    // Do not expect semicolon here (this is different from the usual `for` loop parsing)
-    // The increment does not require a semicolon in this case
-
-    // Check for closing parenthesis after increment
+    console.log(tokens[currentIndex.currentIndex]);
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.CLOSE_PAREN) {
         throw new Error("Expected ')' after increment in 'for' loop");
     }
