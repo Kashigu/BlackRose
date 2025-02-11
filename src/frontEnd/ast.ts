@@ -22,6 +22,7 @@ export enum ASTNodeType {
         TRUE = 'True',
         FALSE = 'False',
         LOGICALOPERATOR = 'LogicalOperator',
+        UNARYOPERATOR = 'UnaryOperator',
         SWITCH = 'Switch',
         CASE = 'Case',
         DEFAULT = 'Default',
@@ -95,16 +96,22 @@ interface ASTSwitchNode {
 
 interface ASTUnitaryOperatorNode {
     type: ASTNodeType.UNITARYOPERATOR,
-    left: ASTNode,
-    value: string
+    left: ASTNode,          // e.g., variable or value
+    value: string           // e.g., ++ or --
 }
 
 interface ASTForNode {
     type: ASTNodeType.FOR;
-    initialization: ASTNode  // e.g., variable declaration or assignment
-    condition: ASTNode // e.g., a binary condition
-    increment: ASTNode // e.g., an increment or update operation
-    body: ASTBlockNode; // The loop body
+    initialization: ASTNode     // e.g., variable declaration or assignment
+    condition: ASTNode          // e.g., a binary condition
+    increment: ASTNode          // e.g., an increment or update operation
+    body: ASTBlockNode;         // The loop body
+}
+
+interface ASTUnaryOperator {
+    type: ASTNodeType.UNARYOPERATOR, 
+    operator: string,               // e.g., !
+    operand: ASTNode                // e.g., a Literal
 }
 
 export interface ASTBlockNode {
@@ -139,5 +146,6 @@ export type ASTNode =
             ASTComparisonOperatorNode |
             ASTUnitaryOperatorNode |
             ASTForNode |
+            ASTUnaryOperator |
             ASTBlockNode ;
   

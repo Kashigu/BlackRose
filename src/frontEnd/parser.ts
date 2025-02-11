@@ -18,6 +18,21 @@ function getOperatorPrecedence(operator: string): number {
 function parsePrimary(currentIndex: {currentIndex:number}, tokens:Token[]): ASTNode {
     const currentToken = tokens[currentIndex.currentIndex];
 
+    // Handle Unary operators
+    if (currentToken.type === TOKEN_TYPES.UNARYOPERATOR) {
+
+        currentIndex.currentIndex++; // Consume the unary operator token
+        // Parse the expression that follows the unary operator
+        const expr = parseExpression(0, currentIndex, tokens); // ex: !true
+
+        return {
+            type: ASTNodeType.UNARYOPERATOR,
+            operator: currentToken.value,           // ex: !
+            operand: expr,                          // ex: true
+        };
+        
+    }
+
     // Handle literals
     if (currentToken.type === TOKEN_TYPES.LITERAL) {    
         currentIndex.currentIndex++; // Consume the literal token

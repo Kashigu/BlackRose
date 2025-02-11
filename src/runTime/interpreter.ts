@@ -648,6 +648,33 @@ export function interpret(node: ASTNode): Value {
             return { type: ValueTypes.NULL, value: null }; // Return null as DO has no meaningful result
         }
         
+        case ASTNodeType.UNARYOPERATOR: {
+        
+            // The operand should be a variable reference, NOT its evaluated value.
+            const operand = node.operand; 
+        
+            if (operand.type !== ASTNodeType.LITERAL) {
+                throw new Error(`Unary operator (!) expects a variable, got ${operand.type}`);
+            }
+        
+            const variableName = operand.value; // This should be 'Y'
+    
+
+            if (!(variableName in variables)) {
+                throw new Error(`Variable '${variableName}' is not defined.`);
+            }
+        
+            const variable = variables[variableName]; // Retrieve stored value
+        
+            if (typeof variable.value !== "boolean") {
+                throw new Error(`Cannot negate non-boolean variable '${variableName}'`);
+            }
+        
+            // Apply negation and store the new value
+            variables[variableName] = { type: ValueTypes.BOOLEAN, value: !variable.value };
+            return variables[variableName]; // Return new value
+        }
+        
             
         
         default:

@@ -1,6 +1,6 @@
 import { Token, TOKEN_TYPES } from './tokens';
 import { tokenStringMap } from './tokenStringMap';
-import { ValidBinaryOperators, ValidComparisonOperators, ValidUnitaryOperators, ValidLogicalOperators, ValidAssignmentOperators } from "../validOperators";
+import { ValidBinaryOperators, ValidComparisonOperators, ValidUnitaryOperators, ValidLogicalOperators, ValidAssignmentOperators, ValidUnaryOperators } from "../validOperators";
 
 function lookAHeadString(str: string, currentPosition: number , input:string): boolean {
     const parts = str.split('');
@@ -123,6 +123,14 @@ export function tokenize(input: string): Token[] {
         if (ValidAssignmentOperators.some(op => lookAHeadString(op, currentPosition, input))) {
             const matchedOperator = ValidAssignmentOperators.find(op => lookAHeadString(op, currentPosition, input))!;
             output.push({ type: TOKEN_TYPES.ASSIGNMENTOPERATOR, value: matchedOperator });
+            currentPosition += matchedOperator.length; // Consume the matched operator
+            continue;
+        }
+
+        // Handle Unary Operators
+        if (ValidUnaryOperators.some(op => lookAHeadString(op, currentPosition, input))) {
+            const matchedOperator = ValidUnaryOperators.find(op => lookAHeadString(op, currentPosition, input))!;
+            output.push({ type: TOKEN_TYPES.UNARYOPERATOR, value: matchedOperator });
             currentPosition += matchedOperator.length; // Consume the matched operator
             continue;
         }

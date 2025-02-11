@@ -60,4 +60,15 @@ chat (X) {
         yap X " Friends"
         bruh
 }
+```
+
+```plaintext
+
+create Y = W
+
+Y = !Y
+
+write ("The value of Y is " Y)
+
+```
 

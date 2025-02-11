@@ -1,5 +1,6 @@
 import { ASTNode, ASTNodeType } from "../frontEnd/ast";
-import { ValidBinaryOperators, ValidComparisonOperators, ValidUnitaryOperators, ValidLogicalOperators } from "../validOperators";
+import { TOKEN_TYPES } from "../frontEnd/tokens";
+import { ValidBinaryOperators, ValidComparisonOperators, ValidUnitaryOperators, ValidLogicalOperators, ValidUnaryOperators, ValidAssignmentOperators } from "../validOperators";
 
 
 let pendingIfElse: ASTNode | null = null;
@@ -35,7 +36,6 @@ export function analyze(node: ASTNode): void {
             analyze(node.value); // Validate the assigned value
             break;
             
-
         case ASTNodeType.BINARYOPERATOR:
             analyze(node.left); // Validate left operand
             analyze(node.right); // Validate right operand
@@ -272,6 +272,14 @@ export function analyze(node: ASTNode): void {
                 throw new Error("DO loop must have a body.");
             }
             analyze(node.body);
+            break;
+
+        case ASTNodeType.UNARYOPERATOR:
+            // Validate the unary operator
+            if (!ValidUnaryOperators.includes(node.operator)) {
+                throw new Error(`Unknown unary operator ${node.operator}`);
+            }
+            analyze(node.operand); // Validate the operand
             break;
 
         default:

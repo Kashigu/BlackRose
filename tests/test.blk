@@ -1,7 +1,5 @@
-create Y = 5
-create I = 0
-stroke (I = 0; I <= Y; I--)
-{
-    write (Y)
-    write (I)
-}
+create Y = W
+
+Y = !Y
+
+write ("The value of Y is " Y)
