@@ -85,7 +85,7 @@ export function interpret(node: ASTNode): Value {
         case ASTNodeType.ASSIGNMENT: {
             const variableName = node.name;
             const value = interpret(node.value);
-            console.log(`Variable ${variableName} to ${value.value}`);
+            //console.log(`Variable ${variableName} to ${value.value}`);
             variables[variableName] = value; // Store variable
             return value;
         }
@@ -95,7 +95,7 @@ export function interpret(node: ASTNode): Value {
             const variableName = node.name;
             const value = interpret(node.value);
             variables[variableName] = value;
-            console.log(`Variable '${variableName}' created with value ${value.value}`);
+            //console.log(`Variable '${variableName}' created with value ${value.value}`);
             return value;
         }
 
@@ -128,14 +128,14 @@ export function interpret(node: ASTNode): Value {
 
         case ASTNodeType.COMMENT: {
             // Handle comment node, return as a ValueTypes.STRING type
-            console.log("Comment: ",node.value);
+            //console.log("Comment: ",node.value);
             return { type: ValueTypes.STRING, value: node.value };
         }
 
         case ASTNodeType.LITERAL: {
             // Handle literal node, return as a ValueTypes.LITERAL type
 
-            console.log("Literal: ",node.value);
+            //console.log("Literal: ",node.value);
             return { type: ValueTypes.LITERAL, value: String(variables[node.value].value) };
         }
 
@@ -156,28 +156,28 @@ export function interpret(node: ASTNode): Value {
                 }
             }
         
-            console.log("Write:", output); // Log the final concatenated output
+            console.log(output); // Log the final concatenated output
             return { type: ValueTypes.WRITE, value: null }; // Return null as WRITE has no meaningful result
         }
         
         case ASTNodeType.WHILE: {
-            console.log("Interpreting WHILE loop condition");
+            //console.log("Interpreting WHILE loop condition");
             let conditionResult = interpret(node.condition); // Evaluate the condition
         
             loopDepth++; // Increment the loop depth
             try {
                 // Execute the loop as long as the condition is true
                 while (conditionResult.value === true) {
-                    console.log("Interpreting WHILE loop body");
+                    //console.log("Interpreting WHILE loop body");
                     const result = interpret(node.body); // Execute the loop body
         
                     if (result.type === ValueTypes.BREAK) {
-                        console.log("INSIDE LOOP BREAK statement encountered");
+                        //console.log("INSIDE LOOP BREAK statement encountered");
                         break; // Exit the loop if a BREAK statement was encountered
                     }
 
                     if (result.type === ValueTypes.CONTINUE) {
-                        console.log("INSIDE LOOP CONTINUE statement encountered");
+                        //console.log("INSIDE LOOP CONTINUE statement encountered");
                         conditionResult = interpret(node.condition); // Reevaluate the condition
                         continue; // Skip the rest of the loop body if a CONTINUE statement was encountered
                     }
@@ -192,41 +192,41 @@ export function interpret(node: ASTNode): Value {
         }
 
         case ASTNodeType.FOR: {
-            console.log("Interpreting FOR loop initialization");        
+            //console.log("Interpreting FOR loop initialization");        
             interpret(node.initialization); // Initialize the loop variable
         
             // Start with the loop body
             let conditionResult = interpret(node.condition);
-            console.log("Initial Condition result: ", conditionResult);
+            //console.log("Initial Condition result: ", conditionResult);
         
             loopDepth++; // Increment the loop depth
             try {
                 // Execute the loop as long as the condition is true
                 while (conditionResult.value == true) {
-                    console.log("Interpreting FOR loop body");
+                    //console.log("Interpreting FOR loop body");
 
                     const bodyResult = interpret(node.body); // Execute the loop body
         
                     if (bodyResult.type === ValueTypes.BREAK) {
-                        console.log("INSIDE LOOP BREAK statement encountered");
+                        //console.log("INSIDE LOOP BREAK statement encountered");
                         break; // Exit the loop if a BREAK statement was encountered
                     }
 
                     
         
-                    console.log("Interpreting FOR loop increment");
+                    //console.log("Interpreting FOR loop increment");
                     interpret(node.increment); // Increment the loop variable
         
 
                     if (bodyResult.type === ValueTypes.CONTINUE) {
-                        console.log("INSIDE LOOP CONTINUE statement encountered");
+                        //console.log("INSIDE LOOP CONTINUE statement encountered");
                         conditionResult = interpret(node.condition); // Reevaluate the condition
-                        console.log("Updated Condition result: ", conditionResult);
+                        //console.log("Updated Condition result: ", conditionResult);
                         continue; // Skip the rest of the loop body if a CONTINUE statement was encountered
                     }
                     // Reevaluate the condition after the increment
                     conditionResult = interpret(node.condition);
-                    console.log("Updated Condition result: ", conditionResult);
+                    //console.log("Updated Condition result: ", conditionResult);
                 }
             } finally {
                 loopDepth--; // Decrement the loop depth
@@ -239,7 +239,7 @@ export function interpret(node: ASTNode): Value {
             if (hasExecuted) {
                 return { type: ValueTypes.NULL, value: null }; // Skip this IF if another block was already executed
             }
-            console.log("Interpreting IF condition");
+            //console.log("Interpreting IF condition");
             const conditionResult = interpret(node.condition); // Evaluate the condition
         
             if (conditionResult.value === true) {
@@ -260,7 +260,7 @@ export function interpret(node: ASTNode): Value {
                 return { type: ValueTypes.NULL, value: null }; // Skip this IF if another block was already executed
             }
 
-            console.log("Interpreting ELSE body");
+            //console.log("Interpreting ELSE body");
             const result = interpret(node.body); // Execute the body
 
             hasExecuted = true; // Set the flag to true to skip other blocks
@@ -277,12 +277,12 @@ export function interpret(node: ASTNode): Value {
                 return { type: ValueTypes.NULL, value: null }; // Skip this IF if another block was already executed
             }
 
-            console.log("Interpreting IF condition");
+            //console.log("Interpreting IF condition");
             const conditionResult = interpret(node.condition); // Evaluate the condition
         
             if (conditionResult.value === true) {
 
-                console.log("Interpreting IF body");
+                //console.log("Interpreting IF body");
                 const result = interpret(node.body); // Execute the body if the condition is true
                 
                 hasExecuted = true; // Set the flag to true to skip other blocks
@@ -297,14 +297,14 @@ export function interpret(node: ASTNode): Value {
 
         case ASTNodeType.LOGICALOPERATOR: {
 
-            console.log("Evaluating Logical Operator: ", node.value);
+            //console.log("Evaluating Logical Operator: ", node.value);
 
             // Recursively evaluate `node.left` and `node.right`
             const leftResult = interpret(node.left);
             const rightResult = interpret(node.right);
 
-            console.log("Left result: ", leftResult);
-            console.log("Right result: ", rightResult);
+            //console.log("Left result: ", leftResult);
+            //console.log("Right result: ", rightResult);
         
             // Ensure the results are booleans
             if (leftResult.type !== ValueTypes.BOOLEAN || rightResult.type !== ValueTypes.BOOLEAN) {
@@ -461,26 +461,26 @@ export function interpret(node: ASTNode): Value {
         
         case ASTNodeType.BLOCK: {
             blockDepth++; // Increment block depth
-            console.log("Block Depth: ", blockDepth);
+            //console.log("Block Depth: ", blockDepth);
         
             let lastResult: Value | null = null;
         
             if (node.children) {
                 for (const child of node.children) {
-                    console.log("Interpreting block child");
+                    //console.log("Interpreting block child");
                     const result = interpret(child); // Interpret the child node
-                    console.log("Child result: ", result);
+                    //console.log("Child result: ", result);
         
                     // Propagate BREAK if encountered
                     if (result && result.type === ValueTypes.BREAK) {
-                        console.log("BREAK statement encountered in block");
+                        //console.log("BREAK statement encountered in block");
                         blockDepth--; // Decrement block depth
                         return result; // Immediately propagate the BREAK
                     }
 
                     // Propagate CONTINUE if encountered
                     if (result && result.type === ValueTypes.CONTINUE) {
-                        console.log("CONTINUE statement encountered in block");
+                        //console.log("CONTINUE statement encountered in block");
                         blockDepth--; // Decrement block depth
                         return result; // Immediately propagate the CONTINUE
                     }
@@ -490,7 +490,7 @@ export function interpret(node: ASTNode): Value {
             }
         
             blockDepth--; // Decrement block depth
-            console.log("Returning from BLOCK: ", lastResult || { type: ValueTypes.NULL, value: null });
+            //console.log("Returning from BLOCK: ", lastResult || { type: ValueTypes.NULL, value: null });
             return lastResult || { type: ValueTypes.NULL, value: null }; // Return the last result or NULL
         } 
 
@@ -498,7 +498,7 @@ export function interpret(node: ASTNode): Value {
             if (loopDepth === 0) {
                 throw new Error("BREAK statement must be inside a loop");
             }
-            console.log("Returning BREAK result");
+            //console.log("Returning BREAK result");
             return { type: ValueTypes.BREAK, value: null };
         }
 
@@ -519,9 +519,9 @@ export function interpret(node: ASTNode): Value {
         }
 
         case ASTNodeType.CASE: {
-            console.log("Interpreting CASE body");
+            //console.log("Interpreting CASE body");
             const result = interpret(node.body); // Execute
-            console.log("Returning from CASE: ", result);
+            //console.log("Returning from CASE: ", result);
             return result;
         }
 
@@ -620,25 +620,25 @@ export function interpret(node: ASTNode): Value {
         }
 
         case ASTNodeType.DO: {
-            console.log("Interpreting DO body");
+            //console.log("Interpreting DO body");
             
             loopDepth++; // Increment the loop depth
             let result = interpret(node.body); // Execute
-            console.log("Interpreting DO condition");
+            //console.log("Interpreting DO condition");
             
             let conditionResult = interpret(node.condition); // Evaluate the condition
             
             try {
                 while (conditionResult.value === true) {
-                    console.log("Interpreting DO loop body");
+                   // console.log("Interpreting DO loop body");
                     result = interpret(node.body); // Execute the loop body
         
                     if (result.type === ValueTypes.BREAK) {
-                        console.log("BREAK statement encountered in DO");
+                     //   console.log("BREAK statement encountered in DO");
                         break; // Exit the loop if a BREAK statement was encountered
                     }
         
-                    console.log("Interpreting DO loop condition");
+                   // console.log("Interpreting DO loop condition");
                     conditionResult = interpret(node.condition); // Reevaluate the condition
                 }
             } finally {

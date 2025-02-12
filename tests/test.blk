@@ -1,5 +1,21 @@
-create Y = W
+create Y = 6
 
-Y = !Y
+stroke (create I = 0; I <= Y; I++)
+{
+    write (Y)
+    yap (I)
+}
 
-write ("The value of Y is " Y)
+
+bet (Y < 15)
+{
+    yap ("Y is indeed less then 15 " )
+}
+betagain(Y > 15)
+{
+    write ("Y is indeed more then 15 ")
+}
+badcall
+{
+    yap (Y)
+}

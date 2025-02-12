@@ -32,10 +32,11 @@ badcall
 
 ```plaintext
 // For loop
+create Y = 5
 stroke (create I = 0; I <= Y; I++)
 {
-    write Y
-    yap I
+    write (Y)
+    yap (I)
 }
 ```
 

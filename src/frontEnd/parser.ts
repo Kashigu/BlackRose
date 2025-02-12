@@ -440,7 +440,7 @@ function parseFor(currentIndex: { currentIndex: number }, tokens: Token[]): ASTN
 
     // Parse condition (this should be a comparison, e.g., X == 1)
     const condition = parseCondition(currentIndex, tokens);
-    console.log(condition);
+    //console.log(condition);
 
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.SEMICOLON) {
         throw new Error("Expected ';' after condition in 'for' loop");
@@ -449,7 +449,7 @@ function parseFor(currentIndex: { currentIndex: number }, tokens: Token[]): ASTN
 
     // Now to parse the increment I need to know two steps ahead so I can know if it is a unitary operator or a assignment operator
     currentIndex.currentIndex++; // Advance past the Literal (ex: I)
-    console.log(tokens[currentIndex.currentIndex]); // this should be an operator
+    //console.log(tokens[currentIndex.currentIndex]); // this should be an operator
 
     let increment = null;
     if (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.ASSIGNMENTOPERATOR) {
@@ -457,12 +457,12 @@ function parseFor(currentIndex: { currentIndex: number }, tokens: Token[]): ASTN
     }else if (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.UNITARYOPERATOR) {
         increment = parseUnitaryExpression(currentIndex, tokens);
     }
-    console.log(increment);
+    //console.log(increment);
     if (increment === null) {
         throw new Error("Expected increment in 'for' loop");
     }
 
-    console.log(tokens[currentIndex.currentIndex]);
+    //console.log(tokens[currentIndex.currentIndex]);
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.CLOSE_PAREN) {
         throw new Error("Expected ')' after increment in 'for' loop");
     }
