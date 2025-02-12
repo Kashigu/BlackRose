@@ -119,6 +119,16 @@ export function tokenize(input: string): Token[] {
             continue;
         }
 
+
+        // Handle first the Comparison Operators
+        // Check if the value is on the list and then push it to the function
+        if (ValidComparisonOperators.some(op => lookAHeadString(op, currentPosition, input))) {
+            const matchedOperator = ValidComparisonOperators.find(op => lookAHeadString(op, currentPosition, input))!;
+            output.push({ type: TOKEN_TYPES.COMPARISONOPERATOR, value: matchedOperator });
+            currentPosition += matchedOperator.length; // Consume the matched operator
+            continue;
+        }
+
         // Handle Valid Assignment Operators
         if (ValidAssignmentOperators.some(op => lookAHeadString(op, currentPosition, input))) {
             const matchedOperator = ValidAssignmentOperators.find(op => lookAHeadString(op, currentPosition, input))!;
@@ -145,14 +155,7 @@ export function tokenize(input: string): Token[] {
         }
 
 
-        // Handle first the Comparison Operators
-        // Check if the value is on the list and then push it to the function
-        if (ValidComparisonOperators.some(op => lookAHeadString(op, currentPosition, input))) {
-            const matchedOperator = ValidComparisonOperators.find(op => lookAHeadString(op, currentPosition, input))!;
-            output.push({ type: TOKEN_TYPES.COMPARISONOPERATOR, value: matchedOperator });
-            currentPosition += matchedOperator.length; // Consume the matched operator
-            continue;
-        }
+       
 
         // Handle Secondly the Unitary Operators
         if (ValidUnitaryOperators.some(op => lookAHeadString(op, currentPosition, input))) {

@@ -1,21 +1,9 @@
 create Y = 6
 
-stroke (create I = 0; I <= Y; I++)
+bet (Y != 6)
 {
     write (Y)
-    yap (I)
-}
-
-
-bet (Y < 15)
+}badcall
 {
-    yap ("Y is indeed less then 15 " )
-}
-betagain(Y > 15)
-{
-    write ("Y is indeed more then 15 ")
-}
-badcall
-{
-    yap (Y)
+    write("já tá ?")
 }
