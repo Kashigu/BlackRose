@@ -1,7 +1,6 @@
 const fs = require('fs');
 const path = require('path');
 
-
 import { tokenize } from './frontEnd/lexer'; 
 import { parse } from './frontEnd/parser'; 
 import { analyze } from './runTime/semantic';
@@ -22,25 +21,30 @@ function readBLKFile(filePath: string): string | null {
 function runBLKFile(filePath: string): void {
     const code = readBLKFile(filePath);
     if (code) {
-        // Tokenize the code using your lexer
-        const tokens = tokenize(code); 
-        console.log({ tokens }); // It's good for debugging
+        try {
+            // Tokenize the code using your lexer
+            const tokens = tokenize(code); 
+            //console.log({ tokens }); // It's good for debugging
 
-        // Parse the tokens into an AST using your parser
-        const ast = parse(tokens); 
-        console.log('AST:', JSON.stringify(ast, null, 2)); // It's good for debugging
+            // Parse the tokens into an AST using your parser
+            const ast = parse(tokens); 
+            //console.log('AST:', JSON.stringify(ast, null, 2)); // It's good for debugging
 
-        analyze(ast);
-       
+            analyze(ast);
 
-
-        // Interpret and execute the AST
-        interpret(ast); 
+            // Interpret and execute the AST
+            interpret(ast); 
+        } catch (error) {
+            if (error instanceof Error) {
+                console.error(error.message); // Only log the error message, not the stack trace
+            } else {
+                console.error("An unknown error occurred");
+            }
+        }
     }
 }
-
 
 const filePath = path.resolve(__dirname, '..', 'tests', 'test.blk'); // Navigate up one level from src and go into tests
 
 // Run the code from a .blk file
-runBLKFile(filePath); 
+runBLKFile(filePath);
