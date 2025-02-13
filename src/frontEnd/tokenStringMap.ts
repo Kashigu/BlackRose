@@ -10,7 +10,7 @@ export const tokenStringMap: Array<{
     { key: 'write', value: { type: TOKEN_TYPES.WRITE } }, // if appears write then it is a console.log
     { key: 'yap', value: { type: TOKEN_TYPES.WRITE } }, // if appears yap then it is a console.log
     { key: 'null', value: { type: TOKEN_TYPES.NULL } }, // if appears null then it is a null
-    { key: 'stroke' , value: { type: TOKEN_TYPES.FOR } }, // if appears stroke then it is a for loop
+    { key: 'stroke' , value: { type: TOKEN_TYPES.FOR }  }, // if appears stroke then it is a for loop
     { key: 'betagain', value: { type: TOKEN_TYPES.IFELSE } }, // if appears betagain then it is an if else statement
     { key: 'bet', value: { type: TOKEN_TYPES.IF } }, // if appears bet then it is an if statement
     { key: 'badcall', value: { type: TOKEN_TYPES.ELSE } }, // if appears badcall then it is an else statement
@@ -23,6 +23,5 @@ export const tokenStringMap: Array<{
     { key: 'if', value: { type: TOKEN_TYPES.CASE } }, // if appears if then it is a case statement
     { key: 'well', value: { type: TOKEN_TYPES.DEFAULT } }, // if appears well then it is a default statement
     { key: 'slay', value: { type: TOKEN_TYPES.DO } }, // if appears slay then it is a do statement
-
 
  ]

@@ -506,7 +506,7 @@ export function interpret(node: ASTNode): Value {
             if (loopDepth === 0) {
                 throw new Error("CONTINUE statement must be inside a loop");
             }
-            console.log("Returning CONTINUE result");
+            //console.log("Returning CONTINUE result");
             return { type: ValueTypes.CONTINUE, value: null };
         }
 
@@ -526,7 +526,7 @@ export function interpret(node: ASTNode): Value {
         }
 
         case ASTNodeType.SWITCH: {
-            console.log("Interpreting SWITCH condition");
+            //console.log("Interpreting SWITCH condition");
             
             /* Evaluate the switch condition
             const conditionResult = interpret(node.condition); 
@@ -578,20 +578,22 @@ export function interpret(node: ASTNode): Value {
                 conditionValue = true;
             }
 
-            console.log("Switch Condition: ", conditionValue);
+            //console.log("Switch Condition: ", conditionValue);
             
         
             for (const child of node.cases) { 
-                console.log("Interpreting SWITCH case");
+                //console.log("Interpreting SWITCH case");
                 
                 // Retrieve the current case's condition
                 const caseConditionResult = interpret(child.condition); 
-                console.log("Case Condition: ", caseConditionResult);
-                console.log("Condition Value: ", conditionValue);
+                //console.log("Case Condition Value: ", caseConditionResult.value);
+                //console.log("Condition Value: ", caseConditionResult);
+                //console.log("Condition Value: ", conditionValue);
         
                 // Check if the current case condition matches the switch condition and if a match has not been found
-                if (caseConditionResult.value === conditionValue && !matchFound) { 
-                    console.log("Match found. Executing case body.");
+
+                if ((caseConditionResult.value === conditionValue || caseConditionResult.value === true )&& !matchFound) { 
+                    //console.log("Match found. Executing case body.");
                     
                     matchFound = true; // Set the flag to true to indicate a match was found
 
@@ -600,7 +602,7 @@ export function interpret(node: ASTNode): Value {
         
                     // Handle `break` within the case body
                     if (result.type === ValueTypes.BREAK) {
-                        console.log("BREAK statement encountered in SWITCH");
+                        //console.log("BREAK statement encountered in SWITCH");
                         break; // Exit the switch statement
                     }
                 }
@@ -608,9 +610,9 @@ export function interpret(node: ASTNode): Value {
 
             // Execute the default case if no match was found
             if (node.default && !matchFound) { 
-                console.log("Interpreting SWITCH default");
+                //console.log("Interpreting SWITCH default");
                 const result = interpret(node.default.body); 
-                console.log("Returning from SWITCH: ", result);
+                //console.log("Returning from SWITCH: ", result);
                 return result;
             }
 

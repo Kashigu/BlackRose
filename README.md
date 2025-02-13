@@ -5,9 +5,6 @@ BlackRose is a programming language that I created to understand how compilers w
 ## Stacks Used
 - TypeScript
 
-## Screenshots
-
-
 
 ## 📚 Language Reference
 
