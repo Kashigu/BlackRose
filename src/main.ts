@@ -24,7 +24,7 @@ function runBLKFile(filePath: string): void {
         try {
             // Tokenize the code using your lexer
             const tokens = tokenize(code); 
-            //console.log({ tokens }); // It's good for debugging
+            console.log({ tokens }); // It's good for debugging
 
             // Parse the tokens into an AST using your parser
             const ast = parse(tokens); 

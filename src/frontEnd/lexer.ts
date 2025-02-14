@@ -48,55 +48,72 @@ function lookAHead(input: string, currentPosition:number ,match: RegExp, matchNe
 export function tokenize(input: string): Token[] {
     const output: Token[] = [];
     let currentPosition = 0;
+    let currentLine = 1;
+    let currentColumn = 1;
 
     while (currentPosition < input.length) {
 
         // Ignore whitespace
-        if (input[currentPosition] === ' ' || input[currentPosition] === '\t' || input[currentPosition] === '\r' || input[currentPosition] === '\n') { 
+        if (input[currentPosition] === ' ' || input[currentPosition] === '\t' || input[currentPosition] === '\r') { 
             currentPosition++;
+            currentColumn++;
+            continue;
+        }
+
+        // Handle line breaks
+        if (input[currentPosition] === '\n') {
+            currentPosition++;
+            currentLine++;
+            currentColumn = 1;
             continue;
         }
 
         // Handle open parenthesis
         if (input[currentPosition] === '(') {
-            output.push({ type: TOKEN_TYPES.OPEN_PAREN });
+            output.push({ type: TOKEN_TYPES.OPEN_PAREN, line: currentLine, column: currentColumn });
             currentPosition++;
+            currentColumn++;
             continue;
         }
 
         // Handle close parenthesis
         if (input[currentPosition] === ')') {
-            output.push({ type: TOKEN_TYPES.CLOSE_PAREN });
+            output.push({ type: TOKEN_TYPES.CLOSE_PAREN , line: currentLine, column: currentColumn });
             currentPosition++;
+            currentColumn++;
             continue;
         }
 
         // Handle open brace
         if (input[currentPosition] === '{') {
-            output.push({ type: TOKEN_TYPES.OPEN_BRACE });
+            output.push({ type: TOKEN_TYPES.OPEN_BRACE , line: currentLine, column: currentColumn });
             currentPosition++;
+            currentColumn++;
             continue;
         }
 
         // Handle close brace
         if (input[currentPosition] === '}') {
-            output.push({ type: TOKEN_TYPES.CLOSE_BRACE });
+            output.push({ type: TOKEN_TYPES.CLOSE_BRACE, line: currentLine, column: currentColumn });
             currentPosition++;
+            currentColumn++;
             continue;
         }
 
        
         // Handle semi-colons
         if (input[currentPosition] === ';') {
-            output.push({ type: TOKEN_TYPES.SEMICOLON });
+            output.push({ type: TOKEN_TYPES.SEMICOLON , line: currentLine, column: currentColumn });
             currentPosition++;
+            currentColumn++;
             continue;
         }
 
         // handle double dots
         if (input[currentPosition] === ':') {
-            output.push({ type: TOKEN_TYPES.DOUBLE_DOT });
+            output.push({ type: TOKEN_TYPES.DOUBLE_DOT, line: currentLine, column: currentColumn });
             currentPosition++;
+            currentColumn++;
             continue;
         }
 
@@ -109,67 +126,71 @@ export function tokenize(input: string): Token[] {
             while (currentPosition < input.length && input[currentPosition] !== '\n') {
                 commentBucket.push(input[currentPosition]);
                 currentPosition++;
+                currentColumn++;
             }
         
             output.push({
                 type: TOKEN_TYPES.COMMENT,
                 value: commentBucket.join(''),
+                line: currentLine,
+                column: currentColumn
             });
         
             continue;
         }
 
-
         // Handle first the Comparison Operators
         // Check if the value is on the list and then push it to the function
         if (ValidComparisonOperators.some(op => lookAHeadString(op, currentPosition, input))) {
             const matchedOperator = ValidComparisonOperators.find(op => lookAHeadString(op, currentPosition, input))!;
-            output.push({ type: TOKEN_TYPES.COMPARISONOPERATOR, value: matchedOperator });
+            output.push({ type: TOKEN_TYPES.COMPARISONOPERATOR, value: matchedOperator , line: currentLine, column: currentColumn });
             currentPosition += matchedOperator.length; // Consume the matched operator
+            currentColumn += matchedOperator.length;
             continue;
         }
 
         // Handle Valid Assignment Operators
         if (ValidAssignmentOperators.some(op => lookAHeadString(op, currentPosition, input))) {
             const matchedOperator = ValidAssignmentOperators.find(op => lookAHeadString(op, currentPosition, input))!;
-            output.push({ type: TOKEN_TYPES.ASSIGNMENTOPERATOR, value: matchedOperator });
+            output.push({ type: TOKEN_TYPES.ASSIGNMENTOPERATOR, value: matchedOperator , line: currentLine, column: currentColumn });
             currentPosition += matchedOperator.length; // Consume the matched operator
+            currentColumn += matchedOperator.length;
             continue;
         }
 
         // Handle Unary Operators
         if (ValidUnaryOperators.some(op => lookAHeadString(op, currentPosition, input))) {
             const matchedOperator = ValidUnaryOperators.find(op => lookAHeadString(op, currentPosition, input))!;
-            output.push({ type: TOKEN_TYPES.UNARYOPERATOR, value: matchedOperator });
+            output.push({ type: TOKEN_TYPES.UNARYOPERATOR, value: matchedOperator , line: currentLine, column: currentColumn });
             currentPosition += matchedOperator.length; // Consume the matched operator
+            currentColumn += matchedOperator.length;
             continue;
         }
-
 
         // Handle ValidLogicalOperators
         if (ValidLogicalOperators.some(op => lookAHeadString(op, currentPosition, input))) {
             const matchedOperator = ValidLogicalOperators.find(op => lookAHeadString(op, currentPosition, input))!;
-            output.push({ type: TOKEN_TYPES.LOGICALOPERATOR, value: matchedOperator });
+            output.push({ type: TOKEN_TYPES.LOGICALOPERATOR, value: matchedOperator , line: currentLine, column: currentColumn });
             currentPosition += matchedOperator.length; // Consume the matched operator
+            currentColumn += matchedOperator.length;
             continue;
         }
-
-
-       
 
         // Handle Secondly the Unitary Operators
         if (ValidUnitaryOperators.some(op => lookAHeadString(op, currentPosition, input))) {
             const matchedOperator = ValidUnitaryOperators.find(op => lookAHeadString(op, currentPosition, input))!;
-            output.push({ type: TOKEN_TYPES.UNITARYOPERATOR, value: matchedOperator });
+            output.push({ type: TOKEN_TYPES.UNITARYOPERATOR, value: matchedOperator , line: currentLine, column: currentColumn });
             currentPosition += matchedOperator.length; // Consume the matched operator
+            currentColumn += matchedOperator.length;
             continue;
         }
 
         // Handle Thirdly the Binary Operators
         if (ValidBinaryOperators.some(op => lookAHeadString(op, currentPosition, input))) {
             const matchedOperator = ValidBinaryOperators.find(op => lookAHeadString(op, currentPosition, input))!;
-            output.push({ type: TOKEN_TYPES.BINARYOPERATOR, value: matchedOperator });
+            output.push({ type: TOKEN_TYPES.BINARYOPERATOR, value: matchedOperator , line: currentLine, column: currentColumn });
             currentPosition += matchedOperator.length; // Consume the matched operator
+            currentColumn += matchedOperator.length;
             continue;
         }
 
@@ -177,6 +198,7 @@ export function tokenize(input: string): Token[] {
         if (input[currentPosition] === '"' || input[currentPosition] === "'") {
             const quoteType = input[currentPosition]; // Remember which quote type was used
             currentPosition++;
+            currentColumn++;
         
             // Bucket to store the string
             const bucket = [];
@@ -185,18 +207,22 @@ export function tokenize(input: string): Token[] {
             while (currentPosition < input.length && input[currentPosition] !== quoteType) {
                 bucket.push(input[currentPosition]);
                 currentPosition++;
+                currentColumn++;
             }
 
             // If we reached the end of the input and the string is not closed
             if (input[currentPosition] !== quoteType) {
-                throw new Error(`Unterminated string starting at position ${currentPosition}`);
+                throw new Error(`Unterminated string at line ${currentLine} and column ${currentColumn}`);
             }
 
             currentPosition++ // Consume the closing quote
+            currentColumn++;
         
             output.push({
                 type: TOKEN_TYPES.STRING,
-                value: bucket.join('')
+                value: bucket.join(''),
+                line: currentLine,
+                column: currentColumn
             });
 
             continue;
@@ -209,10 +235,13 @@ export function tokenize(input: string): Token[] {
 
             output.push({
                 type: TOKEN_TYPES.NUMBER,
-                value: numberBucket.join('')
+                value: numberBucket.join(''),
+                line: currentLine,
+                column: currentColumn
             });
 
             currentPosition += numberBucket.length;
+            currentColumn += numberBucket.length;
             continue;
         } 
 
@@ -223,8 +252,15 @@ export function tokenize(input: string): Token[] {
                 continue;
             }
 
-            output.push(value);
+            // push the token to the output with the line and column
+            output.push({
+                ...value,
+                line: currentLine,
+                column: currentColumn
+            });
+
             currentPosition += key.length;
+            currentColumn += key.length;
             foundToken = true;
             break; // Exit the loop once a token is matched
         }
@@ -242,15 +278,18 @@ export function tokenize(input: string): Token[] {
 
             output.push({
                 type: TOKEN_TYPES.LITERAL,
-                value: bucket.join('')
+                value: bucket.join(''),
+                line: currentLine,
+                column: currentColumn
             });
 
             currentPosition += bucket.length;
+            currentColumn += bucket.length;
 
             continue;
         }
 
-        throw new Error(`Unexpected token at position ${currentPosition}`);
+        throw new Error(`Unexpected token at line ${currentLine} and column ${currentColumn}`);
     }
 
     return output;

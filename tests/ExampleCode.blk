@@ -10,7 +10,7 @@ create V = W    // "W is true"
 ```plaintext
 // Print
 
-write X Y
+write (X Y)
 // Y is equal to 10
 ```
 
@@ -18,15 +18,15 @@ write X Y
 // If statement
 bet (Y < 15)
 {
-    yap "Y is indeed less then 15 " 
+    yap ("Y is indeed less then 15 ")
 }
 betagain(Y > 15)
 {
-    write "Y is indeed more then 15 "
+    write ("Y is indeed more then 15 ")
 }
 badcall
 {
-    yap Y
+    yap (Y)
 }
 ```
 
@@ -45,8 +45,8 @@ stroke (create I = 0; I <= Y; I++)
 
 edge (Y < 20)
 {
-    yap "Y is " Y     // "Y is 10"
-    bruh              // "Break"
+    yap ("Y is " Y)     // "Y is 10"
+    bruh                // "Break"
 }
 
 ```plaintext
@@ -55,10 +55,10 @@ create X = "Good"
 
 chat (X) {
     if  "Good": 
-        yap X " Friends"
+        yap (X " Friends")
         bruh
     if  "Bad": 
-        yap X " Friends"
+        yap (X " Friends")
         bruh
 }
 ```
@@ -73,3 +73,50 @@ write ("The value of Y is " Y)
 
 ```
 
+```plaintext
+
+create ola = "2231231"
+
+write (ola
+ " friends"
+)
+
+```
+
+```plaintext
+
+create X = 3
+
+slay
+{
+    yap (X)
+    
+    X++
+} edge (X <= 5)
+
+yap (X)
+
+```
+
+```plaintext
+
+create X = "Good"
+create Y = 6
+
+chat (X) {
+    if "bad":
+        bruh
+    if  "Good":
+        yap (X " Friends")
+        chat (Y) {
+            if  Y <= 5 : 
+                yap (Y " Friends")
+                bruh
+            if Y >= 3:
+                yap (Y " is indeed more than 3")
+                bruh
+        }
+        bruh
+}
+
+```

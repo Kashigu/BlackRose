@@ -1,7 +1,7 @@
 // Token types
 export enum TOKEN_TYPES  {
     VARIABLEDECLARATION = "VariableDeclaration", // like const or let
-    WRITE = "Write", // console.log
+    WRITE = "write", // console.log
     STRING = "String", // "Hello, World!"
     NUMBER = "Number", // 1, 2, 3, etc
     LITERAL = "Literal", // variable name
@@ -14,7 +14,7 @@ export enum TOKEN_TYPES  {
     BINARYOPERATOR = "BinaryOperator", // +, -, *, / , +=, -=
     COMMENT = "Comment", // //
     NULL = "Null", // null
-    FOR = "For", // for loop
+    FOR = "Stroke", // for loop
     OPEN_BRACE = "Open_Brace", // {
     CLOSE_BRACE = "Close_Brace", // }
     COMPARISONOPERATOR = "Comparison", // ==, !=, <, >, <=, >=
@@ -38,6 +38,9 @@ export enum TOKEN_TYPES  {
 //Create a TokenNode with the type of the token
 interface TokenNode <T extends TOKEN_TYPES> {
     type: T;
+    line?: number;
+    column?: number;
+    value?: string; // this is making the function below useless
 }
 
 //Create a TokenNode with the type of the token and the value

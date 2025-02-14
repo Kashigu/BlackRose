@@ -595,11 +595,12 @@ export function interpret(node: ASTNode): Value {
                 if ((caseConditionResult.value === conditionValue || caseConditionResult.value === true )&& !matchFound) { 
                     //console.log("Match found. Executing case body.");
                     
-                    matchFound = true; // Set the flag to true to indicate a match was found
+                    
 
                     // Execute the matched case body
                     const result = interpret(child.body); 
         
+                    matchFound = true; // Set the flag to true to indicate a match was found
                     // Handle `break` within the case body
                     if (result.type === ValueTypes.BREAK) {
                         //console.log("BREAK statement encountered in SWITCH");
