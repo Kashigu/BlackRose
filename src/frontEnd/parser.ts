@@ -95,11 +95,8 @@ function parsePrimary(currentIndex: {currentIndex:number}, tokens:Token[]): ASTN
 
     // Handle parenthesis
     if (currentToken.type === TOKEN_TYPES.OPEN_PAREN) {
-        console.log("Open Parenthesis: ", currentToken);
         currentIndex.currentIndex++; // Consume '('
         const expr = parseExpression(0,currentIndex, tokens);
-        console.log("Expression: ", expr);
-        console.log("Current Token: ", tokens[currentIndex.currentIndex]);
         if (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.CLOSE_PAREN) {
             currentIndex.currentIndex++; // Consume ')'
             return expr;
@@ -116,40 +113,6 @@ function parsePrimary(currentIndex: {currentIndex:number}, tokens:Token[]): ASTN
         throw new Error(`Unexpected "${tokens[currentIndex.currentIndex].value}" at line ${tokens[currentIndex.currentIndex].line} and column ${tokens[currentIndex.currentIndex].column}`);
     }
  }
-
- /*
-function parseComparisonExpression(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
-    let left = parsePrimary(currentIndex, tokens); 
-    let operator = tokens[currentIndex.currentIndex];
-    
-    if (operator?.type === TOKEN_TYPES.DOUBLE_DOT) {
-        return left;
-    }
-
-    while (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.LOGICALOPERATOR) {
-        const logicalOperator = (tokens[currentIndex.currentIndex] as Token & { value: string }).value; // Store the operator (e.g., && or ||)
-        currentIndex.currentIndex++; // Consume '&&' or '||'
-
-        const nextCondition = parseComparisonExpression( currentIndex, tokens); // Parse the second condition
-        console.log("Proxima condição no while do ParseCase",nextCondition);
-
-        // Combine the conditions into a new AST node
-        left = {
-            type: ASTNodeType.LOGICALOPERATOR,
-            value: logicalOperator,
-            left: left,
-            right: nextCondition,
-        };
-        console.log("left dentro do parseComparisonExpression",left);
-    }
-
-    return left;
-    //return comparisonExpression;
-    // Y
-    // 5
-    // ==
-}
-    */
 
 function parseUnitaryExpression(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
     // Goes back to the previous token to get left 
@@ -177,9 +140,7 @@ function parseExpression(precedence: number, currentIndex: { currentIndex: numbe
         throw new Error(`Expected Expression at position ${currentIndex.currentIndex} at line ${tokens[currentIndex.currentIndex].line}`);
     }
 
-    console.log("Left on Parse Expression: ", left);
     let operator = tokens[currentIndex.currentIndex];
-    console.log("Operator: ", operator);
 
     //Comparison Operator first
     if (operator?.type === TOKEN_TYPES.COMPARISONOPERATOR) {
@@ -778,8 +739,6 @@ function parseCase(currentIndex: { currentIndex: number }, tokens: Token[]): AST
     }
     
     let condition = parseExpression(0,currentIndex, tokens);
-
-    console.log("Final Condition: ", condition);
 
     if (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.CLOSE_PAREN) {
         currentIndex.currentIndex++; // Consume ')'
