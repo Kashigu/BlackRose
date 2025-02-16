@@ -4,12 +4,16 @@ import { Token, TOKEN_TYPES } from "./tokens";
 
 function getOperatorPrecedence(operator: string): number {
     switch (operator) {
+        case '||':
+            return 1;
+        case '&&':
+            return 2;
         case '+':
         case '-':
-            return 1;
+            return 3;
         case '*':
         case '/':
-            return 2;
+            return 4;
         default:
             return 0;
     }
@@ -91,37 +95,61 @@ function parsePrimary(currentIndex: {currentIndex:number}, tokens:Token[]): ASTN
 
     // Handle parenthesis
     if (currentToken.type === TOKEN_TYPES.OPEN_PAREN) {
+        console.log("Open Parenthesis: ", currentToken);
         currentIndex.currentIndex++; // Consume '('
-        const expr = parseExpression(0, currentIndex, tokens);
+        const expr = parseExpression(0,currentIndex, tokens);
+        console.log("Expression: ", expr);
+        console.log("Current Token: ", tokens[currentIndex.currentIndex]);
         if (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.CLOSE_PAREN) {
             currentIndex.currentIndex++; // Consume ')'
             return expr;
         }
-        throw new Error(`Expected ')' after expression`);
+    
+        throw new Error(`Expected ')' after expression at line ${currentToken.line} and column ${currentToken.column}`);
     }
+    
 
-    throw new Error(`Unexpected token '${currentToken.type}' at position ${currentIndex}`);
-}
+    if ( tokens[currentIndex.currentIndex].value === undefined)
+    {
+        throw new Error(`Unexpected "${tokens[currentIndex.currentIndex].type}" at line ${tokens[currentIndex.currentIndex].line} and column ${tokens[currentIndex.currentIndex].column}`);
+    }else {
+        throw new Error(`Unexpected "${tokens[currentIndex.currentIndex].value}" at line ${tokens[currentIndex.currentIndex].line} and column ${tokens[currentIndex.currentIndex].column}`);
+    }
+ }
 
+ /*
 function parseComparisonExpression(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
-    const left = parsePrimary(currentIndex, tokens);
-    const operator = tokens[currentIndex.currentIndex];
-
-    if (operator?.type !== TOKEN_TYPES.COMPARISONOPERATOR) {
-        throw new Error(`Expected comparison operator at position ${currentIndex.currentIndex}`);
+    let left = parsePrimary(currentIndex, tokens); 
+    let operator = tokens[currentIndex.currentIndex];
+    
+    if (operator?.type === TOKEN_TYPES.DOUBLE_DOT) {
+        return left;
     }
 
-    currentIndex.currentIndex++; // Consume the comparison operator token
+    while (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.LOGICALOPERATOR) {
+        const logicalOperator = (tokens[currentIndex.currentIndex] as Token & { value: string }).value; // Store the operator (e.g., && or ||)
+        currentIndex.currentIndex++; // Consume '&&' or '||'
 
-    const right = parsePrimary(currentIndex, tokens);
+        const nextCondition = parseComparisonExpression( currentIndex, tokens); // Parse the second condition
+        console.log("Proxima condição no while do ParseCase",nextCondition);
 
-    return {
-        type: ASTNodeType.COMPARISONOPERATOR,
-        left,
-        right,
-        value: operator.value,
-    };
+        // Combine the conditions into a new AST node
+        left = {
+            type: ASTNodeType.LOGICALOPERATOR,
+            value: logicalOperator,
+            left: left,
+            right: nextCondition,
+        };
+        console.log("left dentro do parseComparisonExpression",left);
+    }
+
+    return left;
+    //return comparisonExpression;
+    // Y
+    // 5
+    // ==
 }
+    */
 
 function parseUnitaryExpression(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
     // Goes back to the previous token to get left 
@@ -131,7 +159,7 @@ function parseUnitaryExpression(currentIndex: { currentIndex: number }, tokens: 
     const operator = tokens[currentIndex.currentIndex];
 
     if (operator?.type !== TOKEN_TYPES.UNITARYOPERATOR) {
-        throw new Error(`Expected unitary operator at position ${currentIndex.currentIndex}`);
+        throw new Error(`Unexpected "${operator.value}" at line ${operator.line} and column ${operator.column}`);
     }
 
     currentIndex.currentIndex++; // Consume the unitary operator token
@@ -146,31 +174,47 @@ function parseUnitaryExpression(currentIndex: { currentIndex: number }, tokens: 
 function parseExpression(precedence: number, currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
     let left = parsePrimary(currentIndex, tokens);
     if (!left) {
-        throw new Error(`Expected expression at position ${currentIndex.currentIndex}`);
+        throw new Error(`Expected Expression at position ${currentIndex.currentIndex} at line ${tokens[currentIndex.currentIndex].line}`);
     }
 
+    console.log("Left on Parse Expression: ", left);
     let operator = tokens[currentIndex.currentIndex];
+    console.log("Operator: ", operator);
 
-    // Handle binary operators
+    //Comparison Operator first
+    if (operator?.type === TOKEN_TYPES.COMPARISONOPERATOR) {
+        currentIndex.currentIndex++; // Consume the comparison operator token
+        let right = parsePrimary(currentIndex, tokens);
+        left = {
+            type: ASTNodeType.COMPARISONOPERATOR,
+            left,
+            right,
+            value: operator.value,
+        };
+        operator = tokens[currentIndex.currentIndex];
+    }
+
+    // Handle binary, comparison, and logical operators in the same loop
     while (
         operator &&
-        operator.type === TOKEN_TYPES.BINARYOPERATOR &&
+        (operator.type === TOKEN_TYPES.BINARYOPERATOR ||
+         operator.type === TOKEN_TYPES.LOGICALOPERATOR) &&
         getOperatorPrecedence(operator.value) >= precedence
     ) {
         const currentPrecedence = getOperatorPrecedence(operator.value);
 
-        currentIndex.currentIndex++; // Consume the binary operator token
-        let right = parseExpression(currentPrecedence + 1, currentIndex, tokens);
+        currentIndex.currentIndex++; // Consume the operator token
+        let right = parseExpression(currentPrecedence + 1, currentIndex, tokens); // Ensure right-hand side is parsed correctly
 
         left = {
-            type: ASTNodeType.BINARYOPERATOR,
+            type: operator.type === TOKEN_TYPES.BINARYOPERATOR ? ASTNodeType.BINARYOPERATOR : ASTNodeType.LOGICALOPERATOR, // Handle all cases in one place
             left, 
             right, 
-            value: operator.value, // Operator symbol (e.g., +,/,*,- *) but it doesnt work with (+=, -=, *=, /=)
+            value: operator.value, 
         } as ASTNode;
 
         operator = tokens[currentIndex.currentIndex]; // Update to the next operator
-    }
+    }    
 
     return left;
 }
@@ -188,8 +232,12 @@ function parseWrite(currentIndex: { currentIndex: number }, tokens: Token[]): AS
     const children: ASTNode[] = [];
 
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.OPEN_PAREN) {
-        throw new Error("Expected '(' after 'write' or 'yap' statement");
+        throw new Error("Expected '(' after 'write' or 'yap' statement at line " + tokens[currentIndex.currentIndex].line + " and column " + tokens[currentIndex.currentIndex].column);
     }
+
+    //save the line so it can be used in the error message
+    const line = tokens[currentIndex.currentIndex].line;
+
     currentIndex.currentIndex++; // Consume '('
 
     while (tokens[currentIndex.currentIndex] && 
@@ -211,13 +259,13 @@ function parseWrite(currentIndex: { currentIndex: number }, tokens: Token[]): AS
             });
             currentIndex.currentIndex++; // Consume literal token
         } else {
-            throw new Error(`Unexpected token in 'write' statement at position ${currentIndex}: ${token.type}`);
+            throw new Error(`Unauthorized value '${token.value}' at line ${token.line}`);
         }
     }
 
     // Consume the line break token after the write statement only consume one line break
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.CLOSE_PAREN) {
-        throw new Error(`Expected ')' after 'write' statement`);
+        throw new Error(`Expected ')' at the end of 'write' or 'yap' statement at line ${line}`);
     }
     currentIndex.currentIndex++; // Consume ')'
 
@@ -238,7 +286,7 @@ function parseBraceAndParen(currentIndex: { currentIndex: number }, tokens: Toke
             currentIndex.currentIndex++; // Consume ')'
             return expr;
         }
-        throw new Error(`Expected ')' after expression`);
+        throw new Error(`Expected ')' after expression at line ${currentToken.line} and column ${currentToken.column} ` );
     }
 
     // Handle open brace
@@ -265,19 +313,19 @@ function parseVariableDeclaration(currentIndex: { currentIndex: number }, tokens
     currentIndex.currentIndex++; // Advance past 'create'
     const variableNameToken = tokens[currentIndex.currentIndex]; 
     if (!variableNameToken || variableNameToken.type !== TOKEN_TYPES.LITERAL) {
-        throw new Error(`Expected variable name after 'create', but got ${variableNameToken?.type}`);
+        throw new Error(`Expected Variable Name after 'create', but got ${variableNameToken?.type} at line ${variableNameToken?.line} and column ${variableNameToken?.column}`);
     }
     const variableName = variableNameToken.value; 
     currentIndex.currentIndex++; // Consume the variable name
     const assignmentToken = tokens[currentIndex.currentIndex];
     if (!assignmentToken || assignmentToken.type
         !== TOKEN_TYPES.ASSIGNMENTOPERATOR) {
-        throw new Error(`Expected '=' after variable name, but got ${assignmentToken?.type}`);
+        throw new Error(`Expected '=' after Variable Name, but got ${assignmentToken?.type} at line ${assignmentToken?.line} and column ${assignmentToken?.column}`);
     }
     currentIndex.currentIndex++; // Consume '='
     const value = parseExpression(0, currentIndex, tokens);
     if (!value) {
-        throw new Error(`Expected expression after '=' for variable declaration`);
+        throw new Error(`Expected Expression after '=' for Variable Declaration at line ${assignmentToken.line} and column ${assignmentToken.column}`);
     }
     return {
         type: ASTNodeType.VARIABLEDECLARATION,
@@ -289,15 +337,11 @@ function parseVariableDeclaration(currentIndex: { currentIndex: number }, tokens
 function parseAssignmentDeclaration(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
     // Go back to get the variable name (literal)
     currentIndex.currentIndex--;
-    const token = tokens[currentIndex.currentIndex];
-
-    if (token.type !== TOKEN_TYPES.LITERAL) {
-        throw new Error(`Expected variable name, but got ${token.type}`);
-    }
 
     const variableNameToken = tokens[currentIndex.currentIndex];
+
     if (!variableNameToken || variableNameToken.type !== TOKEN_TYPES.LITERAL) {
-        throw new Error(`Expected variable name, but got ${variableNameToken?.type}`);
+        throw new Error(`Expected Variable Name, but got ${variableNameToken?.type} at line ${variableNameToken?.line} and column ${variableNameToken?.column}`);
     }
 
     const variableName = variableNameToken.value;
@@ -306,7 +350,7 @@ function parseAssignmentDeclaration(currentIndex: { currentIndex: number }, toke
     // Ensure next token is an Assignment Operator
     const assignmentToken = tokens[currentIndex.currentIndex];
     if (!assignmentToken || assignmentToken.type !== TOKEN_TYPES.ASSIGNMENTOPERATOR) {
-        throw new Error(`Expected assignment operator, but got ${assignmentToken?.type}`);
+        throw new Error(`Expected Assignment Operator, but got ${assignmentToken?.type} at line ${assignmentToken?.line} and column ${assignmentToken?.column}`);
     }
 
     const operator = assignmentToken.value; // Capture operator (`=`, `+=`, `-=`, etc.)
@@ -315,7 +359,7 @@ function parseAssignmentDeclaration(currentIndex: { currentIndex: number }, toke
     // Parse the right-hand side expression
     const value = parseExpression(0, currentIndex, tokens);
     if (!value) {
-        throw new Error(`Expected expression after '${operator}'`);
+        throw new Error(`Expected Expression after '${operator}' at line ${assignmentToken.line} and column ${assignmentToken.column}`);
     }
 
     // Handle compound assignments (+=, -=, *=, /=)
@@ -342,7 +386,6 @@ function parseAssignmentDeclaration(currentIndex: { currentIndex: number }, toke
     };
 }
 
-
 function parseBlock(currentIndex: { currentIndex: number }, tokens: Token[]): ASTBlockNode {
     const block: ASTBlockNode = {
         type: ASTNodeType.BLOCK,
@@ -352,7 +395,7 @@ function parseBlock(currentIndex: { currentIndex: number }, tokens: Token[]): AS
     // Ensure the body starts with '{'
     const startToken = tokens[currentIndex.currentIndex];
     if (!startToken || startToken.type !== TOKEN_TYPES.OPEN_BRACE) {
-        throw new Error(`Expected '{' to start block, but got '${startToken?.type}'`);
+        throw new Error(`Expected '{' but got '${startToken?.type}' at line ${startToken?.line} and column ${startToken?.column}`);
     }
     currentIndex.currentIndex++; // Consume '{'
 
@@ -369,8 +412,11 @@ function parseBlock(currentIndex: { currentIndex: number }, tokens: Token[]): AS
 
     // Ensure the block ends with '}'
     const endToken = tokens[currentIndex.currentIndex];
+
     if (!endToken || endToken.type !== TOKEN_TYPES.CLOSE_BRACE) {
-        throw new Error(`Expected '}' to end block, but got '${endToken?.type}'`);
+        currentIndex.currentIndex--; // Go back to the previous token
+        const preveiousToken = tokens[currentIndex.currentIndex]
+        throw new Error(`Expected '}' but got '${preveiousToken?.type}' at line ${preveiousToken?.line} and column ${preveiousToken?.column}`);
     }
     currentIndex.currentIndex++; // Consume '}'
 
@@ -385,9 +431,8 @@ function parseCaseBlock(currentIndex: { currentIndex: number }, tokens: Token[])
 
     // Ensure the body starts with ':'
     const startToken = tokens[currentIndex.currentIndex];
-    
     if (!startToken || startToken.type !== TOKEN_TYPES.DOUBLE_DOT) {
-        throw new Error(`Expected ':' to start block, but got '${startToken?.type}'`);
+        throw new Error(`Expected ':' but got '${startToken?.type}' at line ${startToken?.line} and column ${startToken?.column}`);
     }
     currentIndex.currentIndex++; // Consume ':'
 
@@ -401,13 +446,7 @@ function parseCaseBlock(currentIndex: { currentIndex: number }, tokens: Token[])
             block.children!.push(statement);
         }
     }
-
-    // Ensure the block ends with 'bruh'
-    const endToken = tokens[currentIndex.currentIndex];
-    
-    if (!endToken || endToken.type !== TOKEN_TYPES.BREAK) {
-        throw new Error(`Expected 'bruh' to end block, but got '${endToken?.type}'`);
-    }
+    // As the block only can end with bruh as the while above says I dont need to check if the block ends with bruh
     currentIndex.currentIndex++; // Consume 'bruh'
 
     return block;
@@ -417,7 +456,7 @@ function parseFor(currentIndex: { currentIndex: number }, tokens: Token[]): ASTN
     currentIndex.currentIndex++; // Advance past 'for'
 
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.OPEN_PAREN) {
-        throw new Error("Expected '(' after 'for'");
+        throw new Error(`Expected '(' after 'stroke' at line ${tokens[currentIndex.currentIndex].line} and column ${tokens[currentIndex.currentIndex].column}`);
     }
     currentIndex.currentIndex++; // Consume '('
 
@@ -434,7 +473,7 @@ function parseFor(currentIndex: { currentIndex: number }, tokens: Token[]): ASTN
 
     // Check for semicolon after initialization
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.SEMICOLON) {
-        throw new Error("Expected ';' after initialization in 'for' loop");
+        throw new Error("Expected ';' at line " + tokens[currentIndex.currentIndex].line + " and column " + tokens[currentIndex.currentIndex].column);
     }
     currentIndex.currentIndex++; // Consume ';'
 
@@ -443,7 +482,7 @@ function parseFor(currentIndex: { currentIndex: number }, tokens: Token[]): ASTN
     //console.log(condition);
 
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.SEMICOLON) {
-        throw new Error("Expected ';' after condition in 'for' loop");
+        throw new Error("Expected ';' at line " + tokens[currentIndex.currentIndex].line + " and column " + tokens[currentIndex.currentIndex].column);
     }
     currentIndex.currentIndex++; // Consume ';' after condition
 
@@ -459,12 +498,12 @@ function parseFor(currentIndex: { currentIndex: number }, tokens: Token[]): ASTN
     }
     //console.log(increment);
     if (increment === null) {
-        throw new Error("Expected increment in 'for' loop");
+        throw new Error("Unexpect value at line " + tokens[currentIndex.currentIndex].line + " and column " + tokens[currentIndex.currentIndex].column);
     }
 
-    //console.log(tokens[currentIndex.currentIndex]);
+    
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.CLOSE_PAREN) {
-        throw new Error("Expected ')' after increment in 'for' loop");
+        throw new Error("Expected ')' at the end of 'stroke' statement at line " + tokens[currentIndex.currentIndex].line + " and column " + tokens[currentIndex.currentIndex].column);
     }
     currentIndex.currentIndex++; // Consume ')'
 
@@ -484,7 +523,7 @@ function parseIf(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNo
     currentIndex.currentIndex++; // Advance past 'if'
 
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.OPEN_PAREN) {
-        throw new Error("Expected '(' after 'if'");
+        throw new Error("Expected '(' after 'bet' at line " + tokens[currentIndex.currentIndex].line + " and column " + tokens[currentIndex.currentIndex].column);
     }
 
     currentIndex.currentIndex++; // Consume '('
@@ -508,8 +547,15 @@ function parseIf(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNo
         };
     }
 
+    // get the last token so I can get the line and column
+    currentIndex.currentIndex--;
+    const line = tokens[currentIndex.currentIndex].line;
+    const column = tokens[currentIndex.currentIndex].column;
+    // goes forward to the next token
+    currentIndex.currentIndex++;
+
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.CLOSE_PAREN) {
-        throw new Error("Expected ')' after condition in 'if' statement");
+        throw new Error("Expected ')' after Condition in 'bet' Statement at line " + line + " and column " + column);
     }
 
     currentIndex.currentIndex++; // Consume ')'
@@ -528,7 +574,7 @@ function parseIfElse(currentIndex: { currentIndex: number }, tokens: Token[]): A
     currentIndex.currentIndex++; // Advance past 'if-else'
 
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.OPEN_PAREN) {
-        throw new Error("Expected '(' after 'if-else'");
+        throw new Error("Expected '(' after 'betagain' at line " + tokens[currentIndex.currentIndex].line + " and column " + tokens[currentIndex.currentIndex].column);
     }
 
     currentIndex.currentIndex++; // Consume '('
@@ -553,8 +599,15 @@ function parseIfElse(currentIndex: { currentIndex: number }, tokens: Token[]): A
         };
     }
 
+    // get the last token so I can get the line and column
+    currentIndex.currentIndex--;
+    const line = tokens[currentIndex.currentIndex].line;
+    const column = tokens[currentIndex.currentIndex].column;
+    // goes forward to the next token
+    currentIndex.currentIndex++;
+
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.CLOSE_PAREN) {
-        throw new Error("Expected ')' after condition in 'if' statement");
+        throw new Error("Expected ')' after condition in 'betagain' statement at line " + line + " and column " + column);
     }
 
     currentIndex.currentIndex++; // Consume ')'
@@ -602,7 +655,7 @@ function parseWhile(currentIndex: { currentIndex: number }, tokens: Token[]): AS
     currentIndex.currentIndex++; // Advance past 'while'
 
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.OPEN_PAREN) {
-        throw new Error("Expected '(' after 'while'");
+        throw new Error("Expected '(' after 'edge' at line " + tokens[currentIndex.currentIndex].line + " and column " + tokens[currentIndex.currentIndex].column);
     }
 
     currentIndex.currentIndex++; // Consume '('
@@ -627,8 +680,15 @@ function parseWhile(currentIndex: { currentIndex: number }, tokens: Token[]): AS
         };
     }
 
+    // get the last token so I can get the line and column
+    currentIndex.currentIndex--;
+    const line = tokens[currentIndex.currentIndex].line;
+    const column = tokens[currentIndex.currentIndex].column;
+    // goes forward to the next token
+    currentIndex.currentIndex++;
+
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.CLOSE_PAREN) {
-        throw new Error("Expected ')' after condition in 'while' loop");
+        throw new Error("Expected ')' after Condition in 'edge' loop at line " + line + " and column " + column);
     }
 
     currentIndex.currentIndex++; // Consume ')'
@@ -643,7 +703,6 @@ function parseWhile(currentIndex: { currentIndex: number }, tokens: Token[]): AS
         body,
     };
 }
-
 
 function parseCondition(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
     const leftOperand = parseExpression(0, currentIndex, tokens); // Parse the left operand (e.g., X)
@@ -681,7 +740,7 @@ function parseCondition(currentIndex: { currentIndex: number }, tokens: Token[])
             }
     
     }else if (comparisonOperator?.type !== TOKEN_TYPES.COMPARISONOPERATOR) {
-        throw new Error("Expected comparison operator in condition");
+        throw new Error("Expected Comparison operator in Condition at line " + comparisonOperator.line + " and column " + comparisonOperator.column);
     }
     currentIndex.currentIndex++; // Consume the comparison operator (e.g., '==')
     
@@ -714,22 +773,16 @@ function parseLogicalOperator(currentIndex: { currentIndex: number }, tokens: To
 function parseCase(currentIndex: { currentIndex: number }, tokens: Token[]): ASTCaseNode{
     currentIndex.currentIndex++; // Advance past 'case'
 
-    // Parse the condition by getting the comparison expression
-    let condition = parseComparisonExpression(currentIndex, tokens);
+    if (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.OPEN_PAREN) {
+        currentIndex.currentIndex++; // Consume '('
+    }
+    
+    let condition = parseExpression(0,currentIndex, tokens);
 
-    while (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.LOGICALOPERATOR) {
-        const logicalOperator = (tokens[currentIndex.currentIndex] as Token & { value: string }).value; // Store the operator (e.g., && or ||)
-        currentIndex.currentIndex++; // Consume '&&' or '||'
+    console.log("Final Condition: ", condition);
 
-        const nextCondition = parseComparisonExpression( currentIndex, tokens); // Parse the second condition
-
-        // Combine the conditions into a new AST node
-        condition = {
-            type: ASTNodeType.LOGICALOPERATOR,
-            value: logicalOperator,
-            left: condition,
-            right: nextCondition,
-        };
+    if (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.CLOSE_PAREN) {
+        currentIndex.currentIndex++; // Consume ')'
     }
 
     // Parse the body
@@ -747,7 +800,7 @@ function parseDefault(currentIndex: { currentIndex: number }, tokens: Token[]): 
 
     // Ensure the body starts with ':'
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.DOUBLE_DOT) {
-        throw new Error("Expected ':' after 'default'");
+        throw new Error("Expected ':' after 'well' at line " + tokens[currentIndex.currentIndex].line + " and column " + tokens[currentIndex.currentIndex].column);
     }
     currentIndex.currentIndex++; // Consume ':'
 
@@ -768,10 +821,17 @@ function parseDefault(currentIndex: { currentIndex: number }, tokens: Token[]): 
         }
     }
 
+    //get the last token so I can get the line
+    currentIndex.currentIndex--;
+    const line = tokens[currentIndex.currentIndex].line;
+    const column = tokens[currentIndex.currentIndex].column;
+
+    currentIndex.currentIndex++; // goes forward to the next token
+
     // Ensure the body ends with 'bruh'
     const endToken = tokens[currentIndex.currentIndex];
     if (!endToken || endToken.type !== TOKEN_TYPES.CLOSE_BRACE) {
-        throw new Error(`Expected '}' to end 'default' block, but got '${endToken?.type}'`);
+        throw new Error(`Expected '}' to end 'well' statement at line ${line} and column ${column}`);
     }
     // currentIndex.currentIndex++; // doesnt consume '}' so it can end 
 
@@ -786,7 +846,7 @@ function parseSwitch(currentIndex: { currentIndex: number }, tokens: Token[]): A
     currentIndex.currentIndex++; // Advance past 'switch'
 
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.OPEN_PAREN) {
-        throw new Error("Expected '(' after 'switch'");
+        throw new Error("Expected '(' after 'chat' at line " + tokens[currentIndex.currentIndex].line);
     }
 
     currentIndex.currentIndex++; // Consume '('
@@ -795,14 +855,14 @@ function parseSwitch(currentIndex: { currentIndex: number }, tokens: Token[]): A
     const condition = parseExpression(0, currentIndex, tokens);
 
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.CLOSE_PAREN) {
-        throw new Error("Expected ')' after condition in 'switch' statement");
+        throw new Error("Expected ')' after Condition in 'chat' statement at line " + tokens[currentIndex.currentIndex].line);
     }
 
     currentIndex.currentIndex++; // Consume ')'
 
     // Ensure the body starts with '{'
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.OPEN_BRACE) {
-        throw new Error("Expected '{' after condition in 'switch' statement");
+        throw new Error("Expected '{' after ')' in 'chat' statement at line " + tokens[currentIndex.currentIndex].line);
     }
 
     currentIndex.currentIndex++; // Consume '{'
@@ -820,13 +880,21 @@ function parseSwitch(currentIndex: { currentIndex: number }, tokens: Token[]): A
             defaultCase = parseDefault(currentIndex, tokens);
             break; // Exit the loop after parsing the default case
         } else {
-            throw new Error(`Unexpected token '${currentToken.type}' in 'switch' statement`);
+            break; // Exit the loop after reaching the end of the switch statement
         }
     }
+    // Getting the last token so I can get the line
+    currentIndex.currentIndex--; 
+
+    const line = tokens[currentIndex.currentIndex].line;
+    const column = tokens[currentIndex.currentIndex].column;
+
+    // goes forward to the next token
+    currentIndex.currentIndex++; 
 
     // Ensure the body ends with '}'
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.CLOSE_BRACE) {
-        throw new Error("Expected '}' after cases in 'switch' statement.");
+        throw new Error("Expected '}' at the end of 'bruh' to end 'chat' statement at line " + line + " and column " + column);
     }
     currentIndex.currentIndex++; // Consume '}'
 
@@ -846,13 +914,13 @@ function parseDo(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNo
 
 
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.WHILE) {
-        throw new Error("Expected 'while' after 'do' block");
+        throw new Error("Expected 'edge' after 'slay' block at line " + tokens[currentIndex.currentIndex].line);
     }
 
     currentIndex.currentIndex++; // Consume 'while'
 
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.OPEN_PAREN) {
-        throw new Error("Expected '(' after 'while'");
+        throw new Error("Expected '(' after 'edge' at line " + tokens[currentIndex.currentIndex].line);
     }
 
     currentIndex.currentIndex++; // Consume '('
@@ -876,8 +944,15 @@ function parseDo(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNo
         };
     }
 
+    //get the last token so I can get the line and column
+    currentIndex.currentIndex--; 
+    const line = tokens[currentIndex.currentIndex].line;
+    const colunm = tokens[currentIndex.currentIndex].column;
+    //goes forward to the next token
+    currentIndex.currentIndex++;
+
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.CLOSE_PAREN) {
-        throw new Error("Expected ')' after condition in 'do-while' loop");
+        throw new Error("Expected ')' after Condition in 'slay-edge' loop at line " + line + " and column " + colunm);
     }
 
     currentIndex.currentIndex++; // Consume ')'
@@ -1041,10 +1116,12 @@ function READ_FILE(currentIndex: { currentIndex: number }, tokens: Token[], pare
         return parseUnitaryExpression(currentIndex, tokens);
     }
 
-    // Throw error for unexpected tokens
-    throw new Error(
-        `Unexpected token '${currentToken.type}' of type '${currentToken.type}' at position ${currentIndex}`
-    );
+    if (!currentToken.value){
+        throw new Error(`Unexpected '${currentToken.type}' at line ${currentToken.line} and column ${currentToken.column}`);
+    }else {
+        // Throw error for unexpected tokens
+        throw new Error(`Unexpected token ${currentToken.value} of type '${currentToken.type}' at line ${currentToken.line} and column ${currentToken.column}`);
+    }
 }
 
 export function parse(tokens: Token[]): ASTNode {

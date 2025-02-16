@@ -100,22 +100,15 @@ yap (X)
 
 ```plaintext
 
-create X = "Good"
+create X = "bad"
 create Y = 6
 
 chat (X) {
     if "bad":
+        yap("this is " X)
         bruh
-    if  "Good":
-        yap (X " Friends")
-        chat (Y) {
-            if  Y <= 5 : 
-                yap (Y " Friends")
-                bruh
-            if Y >= 3:
-                yap (Y " is indeed more than 3")
-                bruh
-        }
+if  ((Y <= 3 && Y != 7) || (Y == 6 && Y != 0)):
+        yap (Y)
         bruh
 }
 

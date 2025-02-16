@@ -1,9 +1,11 @@
+create X = "bad"
 create Y = 6
 
-bet (Y != 6)
-{
-    write (Y)
-}badcall
-{
-    write("já tá ?")
+chat (X) {
+    if "bad":
+        yap("this is " X)
+        bruh
+if  ((Y <= 3 && Y != 7) || (Y == 6 && Y != 0)):
+        yap (Y)
+        bruh
 }
