@@ -438,9 +438,8 @@ function parseFor(currentIndex: { currentIndex: number }, tokens: Token[]): ASTN
     }
     currentIndex.currentIndex++; // Consume ';'
 
-    // Parse condition (this should be a comparison, e.g., X == 1)
-    const condition = parseCondition(currentIndex, tokens);
-    //console.log(condition);
+    // Parse the Expression (this should be a comparison, e.g., X == 1)
+    const condition = parseExpression(0,currentIndex, tokens);
 
     if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.SEMICOLON) {
         throw new Error("Expected ';' at line " + tokens[currentIndex.currentIndex].line + " and column " + tokens[currentIndex.currentIndex].column);
@@ -591,23 +590,7 @@ function parseWhile(currentIndex: { currentIndex: number }, tokens: Token[]): AS
 
     // Parse the condition
 
-    let condition = parseCondition(currentIndex, tokens);
-
-    // Check for logical operators (&&, ||) and chain conditions
-    while (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.LOGICALOPERATOR) {
-        const logicalOperator = (tokens[currentIndex.currentIndex] as Token & { value: string }).value; // Store the operator (e.g., && or ||)
-        currentIndex.currentIndex++; // Consume '&&' or '||'
-
-        const nextCondition = parseCondition(currentIndex, tokens); // Parse the second condition
-
-        // Combine the conditions into a new AST node
-        condition = {
-            type: ASTNodeType.LOGICALOPERATOR,
-            value: logicalOperator,
-            left: condition,
-            right: nextCondition,
-        };
-    }
+    let condition = parseExpression(0,currentIndex, tokens);
 
     // get the last token so I can get the line and column
     currentIndex.currentIndex--;
@@ -631,57 +614,6 @@ function parseWhile(currentIndex: { currentIndex: number }, tokens: Token[]): AS
         condition,
         body,
     };
-}
-
-function parseCondition(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
-    const leftOperand = parseExpression(0, currentIndex, tokens); // Parse the left operand (e.g., X)
-    
-    const comparisonOperator = tokens[currentIndex.currentIndex];
-
-    if (leftOperand?.type === ASTNodeType.TRUE || leftOperand?.type === ASTNodeType.FALSE) {
-        return {
-            type: ASTNodeType.COMPARISONOPERATOR,
-            left: leftOperand,
-            right: null,
-            value: leftOperand.value,
-        }as ASTNode;
-    }else if (leftOperand?.type === ASTNodeType.LITERAL) { // I am checking if the literal is a variable true or false that is wrong 
-                                                            // I should check if its a literal and see if there is a right operand anyway
-            if (comparisonOperator?.type === TOKEN_TYPES.COMPARISONOPERATOR) {
-                currentIndex.currentIndex++; // Consume the comparison operator (e.g., '==')
-    
-                const rightOperand = parseExpression(0, currentIndex, tokens); // Parse the right operand (e.g., 1)
-
-                return {
-                    type: ASTNodeType.COMPARISONOPERATOR,
-                    left: leftOperand,
-                    right: rightOperand,
-                    value: comparisonOperator.value,
-                }as ASTNode;
-            }else {
-            
-                return {
-                    type: ASTNodeType.COMPARISONOPERATOR,
-                    left: leftOperand,
-                    right: null,
-                    value: leftOperand.value,
-                }as ASTNode;
-            }
-    
-    }else if (comparisonOperator?.type !== TOKEN_TYPES.COMPARISONOPERATOR) {
-        throw new Error("Expected Comparison operator in Condition at line " + comparisonOperator.line + " and column " + comparisonOperator.column);
-    }
-    currentIndex.currentIndex++; // Consume the comparison operator (e.g., '==')
-    
-    const rightOperand = parseExpression(0, currentIndex, tokens); // Parse the right operand (e.g., 1)
-
-    // this method should work for any number like 1 <= 2
-    return {
-        type: ASTNodeType.COMPARISONOPERATOR,
-        left: leftOperand,
-        right: rightOperand,
-        value: comparisonOperator.value,
-    }as ASTNode;
 }
 
 function parseLogicalOperator(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
@@ -852,24 +784,9 @@ function parseDo(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNo
 
     currentIndex.currentIndex++; // Consume '('
 
-    // Parse the condition
-    let condition = parseCondition(currentIndex, tokens);
+    // Parse the EXPRESSION
+    let condition = parseExpression(0,currentIndex, tokens);
 
-    //Logical operators
-    while (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.LOGICALOPERATOR) {
-        const logicalOperator = (tokens[currentIndex.currentIndex] as Token & { value: string }).value; // Store the operator (e.g., && or ||)
-        currentIndex.currentIndex++; // Consume '&&' or '||'
-
-        const nextCondition = parseCondition(currentIndex, tokens); // Parse the second condition
-
-        // Combine the conditions into a new AST node
-        condition = {
-            type: ASTNodeType.LOGICALOPERATOR,
-            value: logicalOperator,
-            left: condition,
-            right: nextCondition,
-        };
-    }
 
     //get the last token so I can get the line and column
     currentIndex.currentIndex--; 

@@ -2,14 +2,9 @@ create X = L
 create Y = 6
 create Z = 0
 
-bet ( Y != 7 && (L || W))
-{
-        yap(Y)
 
-}betagain((Y == 6 && Y <=3) && (Y <=3 || W))
+stroke (create I = 0; I <= Y; I++)
 {
-        yap(X)
-
-}badcall{
-        yap("GG")
+    write (Y)
+    yap (I)
 }
