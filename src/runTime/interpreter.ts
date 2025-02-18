@@ -39,12 +39,10 @@ const BinaryOperators: Record<string, (left: Value, right: Value) => Value> = {
 };
 
 const ComparisonOperators: Record<string, (left: Value, right: Value) => Value> = {
-    "==": (left, right) => {
-        return {
-            type: ValueTypes.BOOLEAN,
-            value: left.value === right.value,
-        };
-    },
+    "==": (left, right) => ({
+        type: ValueTypes.BOOLEAN,
+        value: left.value === right.value,
+    }),
     "!=": (left, right) => ({
         type: ValueTypes.BOOLEAN,
         value: left.value !== right.value,
@@ -342,22 +340,28 @@ export function interpret(node: ASTNode): Value {
         */
         case ASTNodeType.COMPARISONOPERATOR: {
             
-            if (node.left.type === ASTNodeType.TRUE) {
+            /*if (node.left.type === ASTNodeType.TRUE) {
                 
                 return { type: ValueTypes.BOOLEAN, value: true };
 
-            }else if(node.left.type === ASTNodeType.LITERAL && variables[node.left.value].type === ValueTypes.BOOLEAN){
+            }
+            
+            if(node.left.type === ASTNodeType.LITERAL && variables[node.left.value].type === ValueTypes.BOOLEAN){
                 if (variables[node.left.value].value === false){
                     throw new Error("It cannot be false");
                 }
                 return { type: ValueTypes.BOOLEAN, value: true };
-            }else{
-                
-                if (node.left.type !== ASTNodeType.LITERAL && node.left.type !== ASTNodeType.NUMBER) {
-                    throw new Error("Left side of comparison must be a literal or a number");
-                }
-                
-                let leftValue: number = 0;
+            }*/
+                    
+
+            if (node.left.type !== ASTNodeType.LITERAL && node.left.type !== ASTNodeType.NUMBER && node.left.type !== ASTNodeType.STRING && 
+                node.left.type !== ASTNodeType.TRUE && node.left.type !== ASTNodeType.FALSE) {
+                throw new Error("Left side of comparison must be a literal or a number or a boolean or a string");
+            }
+            
+            let leftValue = null;
+
+            if(node.left !== null){
                 if (node.left.type === ASTNodeType.LITERAL) {
 
                     const leftVariableName = node.left.value; // This should be the name of the variable, e.g., 'X'
@@ -367,59 +371,88 @@ export function interpret(node: ASTNode): Value {
                     if (!leftVariable) {
                         throw new Error(`Variable '${leftVariableName}' is not defined.`);
                     }
-                
-                    // Ensure the left variable is a number
-                    if (leftVariable.type !== ValueTypes.NUMBER) {
-                        throw new Error(`Left side of comparison must be a number`);
-                    }
+                    
                     leftValue = leftVariable.value;
-                }else if (node.left.type === ASTNodeType.NUMBER) {
+                }
+
+                if (node.left.type === ASTNodeType.TRUE){
+                    leftValue = true;
+                }
+
+                if (node.left.type === ASTNodeType.FALSE){
+                    leftValue = false;
+                }
+
+                if (node.left.type === ASTNodeType.NUMBER) {
                     leftValue = parseFloat(node.left.value); // Convert string to number
-                } else {
-                    throw new Error("Left side of comparison must be a number or a literal");
+                    
                 }
-                
-                // Resolve the right side of the comparison
-                let rightValue: number = 0;
-    
-                // Check if the right side is a literal or a number
-                if (node.right !== null) {
-                    if (node.right.type === ASTNodeType.LITERAL) {
-                        
-                        const rightVariableName = node.right.value; // This should be the name of the variable, e.g., 'X'
-                        const rightVariable = variables[rightVariableName]; // Retrive the variable's value from the variables table
-    
-                        if (!rightVariable) {
-                            throw new Error(`Variable '${rightVariableName}' is not defined.`);
-                        }
-    
-                        if (rightVariable.type !== ValueTypes.NUMBER) {
-                            throw new Error(`Right side of comparison must be a number`);
-                        }
-    
-                        rightValue = rightVariable.value;
-                    } else if (node.right.type === ASTNodeType.NUMBER) {
-                        rightValue = parseFloat(node.right.value); // Convert string to number
-                    } else {
-                        throw new Error("Right side of comparison must be a number or a literal");
+                if (node.left.type === ASTNodeType.STRING) {
+                    leftValue = node.left.value; 
+                }   
+            }   
+            // Resolve the right side of the comparison
+            let rightValue = null;
+
+            // Check if the right side and if it is different from null
+            if (node.right !== null) {
+                if (node.right.type === ASTNodeType.LITERAL) {
+                    
+                    const rightVariableName = node.right.value; // This should be the name of the variable, e.g., 'X'
+                    const rightVariable = variables[rightVariableName]; // Retrive the variable's value from the variables table
+
+                    if (!rightVariable) {
+                        throw new Error(`Variable '${rightVariableName}' is not defined.`);
                     }
+
+                    rightValue = rightVariable.value;
+
+                } 
+
+                if (node.right.type === ASTNodeType.TRUE){
+                    rightValue = true;
                 }
-                
-            
-                // Extract the comparison operator
-                const operator = ComparisonOperators[node.value];
-            
-                if (!operator) {
-                    throw new Error(`Unknown comparison operator ${node.value}`);
+
+                if (node.right.type === ASTNodeType.FALSE){
+                    rightValue = false;
                 }
+
+                if (node.right.type === ASTNodeType.NUMBER) {
+                    rightValue = parseFloat(node.right.value); // Convert string to number
+
+                }
+                if (node.right.type === ASTNodeType.STRING) {
+                    rightValue = node.right.value;      
+
+                } 
+            }
             
-                // Perform the comparison
-                const result = operator({type: ValueTypes.NUMBER, value:leftValue}, { type: ValueTypes.NUMBER, value: rightValue });
+            // Extract the comparison operator
+            const operator = ComparisonOperators[node.value];
             
-                return result;
+            if (!operator) {
+                throw new Error(`Unknown comparison operator ${node.value}`);
             }
 
-            
+            if (leftValue === null || rightValue === null) {
+                throw new Error("Cannot compare null values");
+            }
+
+            const result = operator(
+                typeof leftValue === "number"
+                    ? { type: ValueTypes.NUMBER, value: leftValue as number }
+                    : typeof leftValue === "boolean"
+                    ? { type: ValueTypes.BOOLEAN, value: leftValue as boolean }
+                    : { type: ValueTypes.STRING, value: leftValue as string },
+
+                typeof rightValue === "number"
+                    ? { type: ValueTypes.NUMBER, value: rightValue as number }
+                    : typeof rightValue === "boolean"
+                    ? { type: ValueTypes.BOOLEAN, value: rightValue as boolean }
+                    : { type: ValueTypes.STRING, value: rightValue as string }
+            );
+
+            return result;
         }
         
         case ASTNodeType.UNITARYOPERATOR: {

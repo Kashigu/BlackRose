@@ -1,5 +1,5 @@
 ```plaintext
-// Variable Creation
+// ---------------------------------------Variable Creation
 create X = "Y is equal to "
 
 create Y = 10
@@ -8,14 +8,93 @@ create V = W    // "W is true"
 ```
 
 ```plaintext
-// Print
+// ---------------------------------------Console.log 
+create ola = "2231231"
 
-write (X Y)
-// Y is equal to 10
+write (ola
+ " friends"
+)
+
 ```
 
 ```plaintext
-// If statement
+// ---------------------------------------For loop
+create Y = 5
+stroke (create I = 0; I <= Y; I++)
+{
+    write (Y)
+    yap (I)
+}
+```
+
+```plaintext
+// ---------------------------------------While Statement 
+
+edge (Y < 20)
+{
+    yap ("Y is " Y)     // "Y is 10"
+    bruh                // "Break"
+}
+
+```plaintext
+// --------------------------------------Invertion 
+create Y = W
+
+Y = !Y
+
+write ("The value of Y is " Y)
+
+```
+
+```plaintext
+// ---------------------------------------Do While
+create X = 3
+
+slay
+{
+    yap (X)
+    
+    X++
+} edge (X <= 5)
+
+yap (X)
+
+```
+
+```plaintext
+// -------------------------------------Switch Statement
+create X = "Good"
+
+chat (X) {
+    if  "Good": 
+        yap (X " Friends")
+        bruh
+    if  "Bad": 
+        yap (X " Friends")
+        bruh
+}
+```
+
+```plaintext
+// ----------------------------------Complex Switch Statement
+
+create X = "bad"
+create Y = 6
+
+chat (X) {
+    if "bad":
+        yap("this is " X)
+        bruh
+if  ((Y <= 3 && Y != 7) || (Y == 6 && Y != 0)):
+        yap (Y)
+        bruh
+}
+
+```
+
+```plaintext
+// -----------------------------------If statement
+create Y = "Rack"
 bet (Y < 15)
 {
     yap ("Y is indeed less then 15 ")
@@ -31,85 +110,21 @@ badcall
 ```
 
 ```plaintext
-// For loop
-create Y = 5
-stroke (create I = 0; I <= Y; I++)
-{
-    write (Y)
-    yap (I)
-}
-```
+// ----------------------------------Complex IF Statement
 
-```plaintext
-// While Statement 
-
-edge (Y < 20)
-{
-    yap ("Y is " Y)     // "Y is 10"
-    bruh                // "Break"
-}
-
-```plaintext
-
-create X = "Good"
-
-chat (X) {
-    if  "Good": 
-        yap (X " Friends")
-        bruh
-    if  "Bad": 
-        yap (X " Friends")
-        bruh
-}
-```
-
-```plaintext
-
-create Y = W
-
-Y = !Y
-
-write ("The value of Y is " Y)
-
-```
-
-```plaintext
-
-create ola = "2231231"
-
-write (ola
- " friends"
-)
-
-```
-
-```plaintext
-
-create X = 3
-
-slay
-{
-    yap (X)
-    
-    X++
-} edge (X <= 5)
-
-yap (X)
-
-```
-
-```plaintext
-
-create X = "bad"
+create X = L
 create Y = 6
+create Z = 0
 
-chat (X) {
-    if "bad":
-        yap("this is " X)
-        bruh
-if  ((Y <= 3 && Y != 7) || (Y == 6 && Y != 0)):
-        yap (Y)
-        bruh
+bet ( Y != 7 && (L || W))
+{
+        yap(Y)
+
+}betagain((Y == 6 && Y <=3) && (Y <=3 || W))
+{
+        yap(X)
+
+}badcall{
+        yap("GG")
 }
-
 ```

@@ -490,23 +490,7 @@ function parseIf(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNo
     currentIndex.currentIndex++; // Consume '('
 
     // Parse the first condition
-    let condition = parseCondition(currentIndex, tokens);
-
-    // Check for logical operators (&&, ||) and chain conditions
-    while (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.LOGICALOPERATOR) {
-        const logicalOperator = (tokens[currentIndex.currentIndex] as Token & { value: string }).value; // Store the operator (e.g., && or ||)
-        currentIndex.currentIndex++; // Consume '&&' or '||'
-
-        const nextCondition = parseCondition(currentIndex, tokens); // Parse the second condition
-
-        // Combine the conditions into a new AST node
-        condition = {
-            type: ASTNodeType.LOGICALOPERATOR,
-            value: logicalOperator,
-            left: condition,
-            right: nextCondition,
-        };
-    }
+    let condition = parseExpression(0,currentIndex, tokens);
 
     // get the last token so I can get the line and column
     currentIndex.currentIndex--;
@@ -542,23 +526,7 @@ function parseIfElse(currentIndex: { currentIndex: number }, tokens: Token[]): A
 
     // Parse the condition
 
-    let condition = parseCondition(currentIndex, tokens);
-
-    // Check for logical operators (&&, ||) and chain conditions
-    while (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.LOGICALOPERATOR) {
-        const logicalOperator = (tokens[currentIndex.currentIndex] as Token & { value: string }).value; // Store the operator (e.g., && or ||)
-        currentIndex.currentIndex++; // Consume '&&' or '||'
-
-        const nextCondition = parseCondition(currentIndex, tokens); // Parse the second condition
-
-        // Combine the conditions into a new AST node
-        condition = {
-            type: ASTNodeType.LOGICALOPERATOR,
-            value: logicalOperator,
-            left: condition,
-            right: nextCondition,
-        };
-    }
+    let condition = parseExpression(0,currentIndex, tokens);
 
     // get the last token so I can get the line and column
     currentIndex.currentIndex--;

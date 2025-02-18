@@ -1,11 +1,15 @@
-create X = "bad"
+create X = L
 create Y = 6
+create Z = 0
 
-chat (X) {
-    if "bad":
-        yap("this is " X)
-        bruh
-if  ((Y <= 3 && Y != 7) || (Y == 6 && Y != 0)):
-        yap (Y)
-        bruh
+bet ( Y != 7 && (L || W))
+{
+        yap(Y)
+
+}betagain((Y == 6 && Y <=3) && (Y <=3 || W))
+{
+        yap(X)
+
+}badcall{
+        yap("GG")
 }
