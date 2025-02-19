@@ -26,7 +26,10 @@ export enum ASTNodeType {
         SWITCH = 'Switch',
         CASE = 'Case',
         DEFAULT = 'Default',
-        DO = 'Do'
+        DO = 'Do',
+        FUNCTION = 'Function',
+        FUNCTIONCALL = 'FunctionCall',
+        RETURN = 'Return',
 }
   
 interface ASTValueNode<T extends ASTNodeType, K> {
@@ -67,6 +70,18 @@ interface AST_X_Declaration_Assignment_Node<X extends ASTNodeType> {
     value: ASTNode
 }
 
+interface ASTFunctionNode{
+    type: ASTNodeType.FUNCTION,
+    name: string,
+    parameters: string[],
+    body: ASTBlockNode | null,
+}
+
+interface ASTFunctionCallNode {
+    type: ASTNodeType.FUNCTIONCALL,
+    name: string,
+    arguments: ASTNode[]
+}
 
 // This one is special because I dont wanna change the whole code (I will do it later I swear)
 export interface ASTCaseNode {
@@ -142,6 +157,8 @@ export type ASTNode =
             AST_X_BODY_NODE<ASTNodeType.DEFAULT> |
             AST_X_Declaration_Assignment_Node<ASTNodeType.VARIABLEDECLARATION> |
             AST_X_Declaration_Assignment_Node<ASTNodeType.ASSIGNMENT> |
+            ASTFunctionNode |
+            ASTFunctionCallNode |
             ASTSwitchNode |
             ASTComparisonOperatorNode |
             ASTUnitaryOperatorNode |

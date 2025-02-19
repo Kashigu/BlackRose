@@ -23,5 +23,7 @@ export const tokenStringMap: Array<{
     { key: 'if', value: { type: TOKEN_TYPES.CASE } }, // if appears if then it is a case statement
     { key: 'well', value: { type: TOKEN_TYPES.DEFAULT } }, // if appears well then it is a default statement
     { key: 'slay', value: { type: TOKEN_TYPES.DO } }, // if appears slay then it is a do statement
+    { key: 'cook', value: { type: TOKEN_TYPES.FUNCTION } }, // if appears cook then it is a function statement
+    { key: 'spit', value: { type: TOKEN_TYPES.RETURN } }, // if appears spit then it is a return statement
 
  ]

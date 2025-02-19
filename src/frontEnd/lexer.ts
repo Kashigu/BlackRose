@@ -4,12 +4,19 @@ import { ValidBinaryOperators, ValidComparisonOperators, ValidUnitaryOperators, 
 
 function lookAHeadString(str: string, currentPosition: number , input:string): boolean {
     const parts = str.split('');
+    const matchLength = parts.length;
 
     for (let i = 0; i < parts.length; i++) {
         // if the current token does not match the current part of the string
         if (input[currentPosition + i] !== parts[i]) {
             return false;
         }
+    }
+
+    // Ensure the keyword is not part of a longer identifier (e.g., "WriteTest")
+    const nextChar = input[currentPosition + matchLength];
+    if (nextChar && /[a-zA-Z0-9_]/.test(nextChar)) {
+        return false;
     }
 
     return true;
@@ -104,6 +111,14 @@ export function tokenize(input: string): Token[] {
         // Handle semi-colons
         if (input[currentPosition] === ';') {
             output.push({ type: TOKEN_TYPES.SEMICOLON , line: currentLine, column: currentColumn });
+            currentPosition++;
+            currentColumn++;
+            continue;
+        }
+
+        // Handle commas
+        if (input[currentPosition] === ',') {
+            output.push({ type: TOKEN_TYPES.COMMA, line: currentLine, column: currentColumn });
             currentPosition++;
             currentColumn++;
             continue;

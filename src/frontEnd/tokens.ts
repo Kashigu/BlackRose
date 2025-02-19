@@ -32,7 +32,10 @@ export enum TOKEN_TYPES  {
     SWITCH = "Switch", // switch statement
     CASE = "Case", // case statement
     DEFAULT = "Default", // default statement
-    DO = "Do" // do statement
+    DO = "Do", // do statement
+    FUNCTION = "Function", // function statement
+    RETURN = "Return", // return statement
+    COMMA = "Comma", // ,
 }
 
 //Create a TokenNode with the type of the token
@@ -66,6 +69,8 @@ export type  Token =
                      TokenNode<TOKEN_TYPES.ELSE> |
                      TokenNode<TOKEN_TYPES.IFELSE> |
                      TokenNode<TOKEN_TYPES.OPEN_BRACE> | TokenNode<TOKEN_TYPES.CLOSE_BRACE> |
+                     TokenNode<TOKEN_TYPES.FUNCTION> | TokenNode<TOKEN_TYPES.RETURN> |
+                     TokenNode<TOKEN_TYPES.COMMA> |
                      
                      TokenNodeValue<TOKEN_TYPES.COMPARISONOPERATOR> | TokenNodeValue<TOKEN_TYPES.UNITARYOPERATOR> |
                      TokenNodeValue<TOKEN_TYPES.LOGICALOPERATOR> | TokenNodeValue<TOKEN_TYPES.UNARYOPERATOR> |
