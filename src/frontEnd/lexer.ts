@@ -15,8 +15,14 @@ function lookAHeadString(str: string, currentPosition: number , input:string): b
 
     // Ensure the keyword is not part of a longer identifier (e.g., "WriteTest")
     const nextChar = input[currentPosition + matchLength];
-    if (nextChar && /[a-zA-Z0-9_]/.test(nextChar)) {
-        return false;
+    console.log(`Next Character: ${nextChar}`);
+    if (nextChar && nextChar.match(/[a-zA-Z0-9_]/)) {
+        const backchar = input[currentPosition + matchLength - 1];
+        console.log(`Back Character: ${backchar}`);
+        // Only return false if backchar is a valid identifier character and not an '='
+        if (backchar && backchar.match(/[a-zA-Z0-9_]/) && backchar !== "=") {
+            return false;
+        }
     }
 
     return true;
@@ -49,6 +55,31 @@ function lookAHead(input: string, currentPosition:number ,match: RegExp, matchNe
 
     return bucket;
 }
+
+function validOperator(
+    operators: string[], 
+    operatorType: TOKEN_TYPES.ASSIGNMENTOPERATOR | TOKEN_TYPES.BINARYOPERATOR | TOKEN_TYPES.COMPARISONOPERATOR | TOKEN_TYPES.LOGICALOPERATOR | TOKEN_TYPES.UNITARYOPERATOR | TOKEN_TYPES.UNARYOPERATOR, 
+    currentPosition: number, 
+    currentLine: number, 
+    currentColumn: number, 
+    input: string, 
+    output: Token[]
+): number { // Return the updated position
+    const matchedOperator = operators.find(op => lookAHeadString(op, currentPosition, input));
+    console.log(`Matched Operator: ${matchedOperator}`);
+    if (matchedOperator) {
+        output.push({
+            type: operatorType,
+            value: matchedOperator,
+            line: currentLine,
+            column: currentColumn
+        });
+        currentPosition += matchedOperator.length; // Consume the matched operator
+        currentColumn += matchedOperator.length;
+    }
+    return currentPosition; // Return the updated currentPosition
+}
+
 
 
 // Tokenize the code
@@ -154,58 +185,42 @@ export function tokenize(input: string): Token[] {
             continue;
         }
 
-        // Handle first the Comparison Operators
-        // Check if the value is on the list and then push it to the function
+        // Handle Firstly the Comparison Operators
         if (ValidComparisonOperators.some(op => lookAHeadString(op, currentPosition, input))) {
-            const matchedOperator = ValidComparisonOperators.find(op => lookAHeadString(op, currentPosition, input))!;
-            output.push({ type: TOKEN_TYPES.COMPARISONOPERATOR, value: matchedOperator , line: currentLine, column: currentColumn });
-            currentPosition += matchedOperator.length; // Consume the matched operator
-            currentColumn += matchedOperator.length;
+            console.log(`Before validOperator - Position: ${currentPosition}, Character: ${input[currentPosition]}`);
+            currentPosition = validOperator(ValidComparisonOperators, TOKEN_TYPES.COMPARISONOPERATOR, currentPosition, currentLine, currentColumn, input, output);
+            console.log(`After validOperator - Position: ${currentPosition}, Character: ${input[currentPosition]}`);
+    
             continue;
         }
 
-        // Handle Valid Assignment Operators
-        if (ValidAssignmentOperators.some(op => lookAHeadString(op, currentPosition, input))) {
-            const matchedOperator = ValidAssignmentOperators.find(op => lookAHeadString(op, currentPosition, input))!;
-            output.push({ type: TOKEN_TYPES.ASSIGNMENTOPERATOR, value: matchedOperator , line: currentLine, column: currentColumn });
-            currentPosition += matchedOperator.length; // Consume the matched operator
-            currentColumn += matchedOperator.length;
-            continue;
-        }
-
-        // Handle Unary Operators
-        if (ValidUnaryOperators.some(op => lookAHeadString(op, currentPosition, input))) {
-            const matchedOperator = ValidUnaryOperators.find(op => lookAHeadString(op, currentPosition, input))!;
-            output.push({ type: TOKEN_TYPES.UNARYOPERATOR, value: matchedOperator , line: currentLine, column: currentColumn });
-            currentPosition += matchedOperator.length; // Consume the matched operator
-            currentColumn += matchedOperator.length;
-            continue;
-        }
-
-        // Handle ValidLogicalOperators
+        // Handle Secondly ValidLogicalOperators
         if (ValidLogicalOperators.some(op => lookAHeadString(op, currentPosition, input))) {
-            const matchedOperator = ValidLogicalOperators.find(op => lookAHeadString(op, currentPosition, input))!;
-            output.push({ type: TOKEN_TYPES.LOGICALOPERATOR, value: matchedOperator , line: currentLine, column: currentColumn });
-            currentPosition += matchedOperator.length; // Consume the matched operator
-            currentColumn += matchedOperator.length;
+            currentPosition = validOperator(ValidLogicalOperators, TOKEN_TYPES.LOGICALOPERATOR, currentPosition, currentLine, currentColumn, input, output);
             continue;
         }
 
-        // Handle Secondly the Unitary Operators
+        // Handle Thirdly the Unitary Operators
         if (ValidUnitaryOperators.some(op => lookAHeadString(op, currentPosition, input))) {
-            const matchedOperator = ValidUnitaryOperators.find(op => lookAHeadString(op, currentPosition, input))!;
-            output.push({ type: TOKEN_TYPES.UNITARYOPERATOR, value: matchedOperator , line: currentLine, column: currentColumn });
-            currentPosition += matchedOperator.length; // Consume the matched operator
-            currentColumn += matchedOperator.length;
+            currentPosition = validOperator(ValidUnitaryOperators, TOKEN_TYPES.UNITARYOPERATOR, currentPosition, currentLine, currentColumn, input, output);
             continue;
         }
 
-        // Handle Thirdly the Binary Operators
+        // Handle Fourthly Valid Assignment Operators
+        if (ValidAssignmentOperators.some(op => lookAHeadString(op, currentPosition, input))) {
+            currentPosition = validOperator(ValidAssignmentOperators, TOKEN_TYPES.ASSIGNMENTOPERATOR, currentPosition, currentLine, currentColumn, input, output);
+            continue;
+        }
+
+        // Handle Fifthly Valid Unary Operators
+        if (ValidUnaryOperators.some(op => lookAHeadString(op, currentPosition, input))) {
+            currentPosition = validOperator(ValidUnaryOperators, TOKEN_TYPES.UNARYOPERATOR, currentPosition, currentLine, currentColumn, input, output);
+            continue;
+        }
+
+        // Handle Sixthly Binary Operators
         if (ValidBinaryOperators.some(op => lookAHeadString(op, currentPosition, input))) {
-            const matchedOperator = ValidBinaryOperators.find(op => lookAHeadString(op, currentPosition, input))!;
-            output.push({ type: TOKEN_TYPES.BINARYOPERATOR, value: matchedOperator , line: currentLine, column: currentColumn });
-            currentPosition += matchedOperator.length; // Consume the matched operator
-            currentColumn += matchedOperator.length;
+            currentPosition = validOperator(ValidBinaryOperators, TOKEN_TYPES.BINARYOPERATOR, currentPosition, currentLine, currentColumn, input, output);
             continue;
         }
 
@@ -304,7 +319,9 @@ export function tokenize(input: string): Token[] {
             continue;
         }
 
-        throw new Error(`Unexpected token at line ${currentLine} and column ${currentColumn}`);
+        console.log(`Current Position: ${currentPosition}, Character: ${input[currentPosition]}`);
+
+        throw new Error(`Unexpected token ${input[currentPosition]} at line ${currentLine} and column ${currentColumn} in lexer`);
     }
 
     return output;

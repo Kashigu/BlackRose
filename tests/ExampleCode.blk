@@ -120,7 +120,7 @@ bet ( Y != 7 && (L || W))
 {
         yap(Y)
 
-}betagain((Y == 6 && Y <=3) && (Y <=3 || W))
+}betagain((Y == 6 && Y <= 3) && (Y <= 3 || W))
 {
         yap(X)
 
