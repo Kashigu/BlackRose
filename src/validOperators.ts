@@ -5,4 +5,4 @@ export const ValidComparisonOperators = ["==", "!=", "<=", ">=","<", ">",];
 export const ValidLogicalOperators = ["&&", "||"];
 export const ValidUnaryOperators = ["!"];
 export const ValidUnitaryOperators = ["++", "--"];
-export const ValidAssignmentOperators = ["=","+=","-=", "*=", "/=",];
+export const ValidAssignmentOperators = ["+=","-=", "*=", "/=","="];

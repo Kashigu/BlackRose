@@ -74,7 +74,7 @@ interface ASTFunctionNode{
     type: ASTNodeType.FUNCTION,
     name: string,
     parameters: string[],
-    body: ASTBlockNode | null,
+    body: ASTBlockNode,
 }
 
 interface ASTFunctionCallNode {

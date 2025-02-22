@@ -46,6 +46,11 @@ function parsePrimary(currentIndex: {currentIndex:number}, tokens:Token[]): ASTN
             return parseAssignmentDeclaration(currentIndex, tokens);
         }
 
+        // Check if the next token is open parenthesis
+        if (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.OPEN_PAREN) {
+            return parseFunctionCall(currentIndex, tokens, currentToken.value);
+        }
+
         return {
             type: ASTNodeType.LITERAL,
             value: currentToken.value,
@@ -808,6 +813,82 @@ function parseDo(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNo
     };
 }
 
+function parseFunction(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
+    currentIndex.currentIndex++; // Advance past 'function'
+
+    const functionNameToken = tokens[currentIndex.currentIndex];
+    if (!functionNameToken || functionNameToken.type !== TOKEN_TYPES.LITERAL) {
+        throw new Error(`Expected Function Name after 'cook', but got ${functionNameToken?.type} at line ${functionNameToken?.line} and column ${functionNameToken?.column}`);
+    }
+    const functionName = functionNameToken.value;
+    currentIndex.currentIndex++; // Consume the function name
+
+    if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.OPEN_PAREN) {
+        throw new Error(`Expected '(' after Function Name, but got ${tokens[currentIndex.currentIndex]?.type} at line ${tokens[currentIndex.currentIndex]?.line} and column ${tokens[currentIndex.currentIndex]?.column}`);
+    }
+    currentIndex.currentIndex++; // Consume '('
+
+    const parameters: string[] = [];
+    while (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.CLOSE_PAREN) {
+        const parameterToken = tokens[currentIndex.currentIndex];
+        if (!parameterToken || parameterToken.type !== TOKEN_TYPES.LITERAL) {
+            throw new Error(`Expected Parameter Name, but got ${parameterToken?.type} at line ${parameterToken?.line} and column ${parameterToken?.column}`);
+        }
+        parameters.push(parameterToken.value);
+        currentIndex.currentIndex++; // Consume the parameter name
+
+        // If next token is a comma, consume it and continue
+        if (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.COMMA) {
+            currentIndex.currentIndex++; // Consume ','
+
+            // Prevent trailing comma before `)`
+            if (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.CLOSE_PAREN) {
+                throw new Error(`Unexpected ',' before ')' in cook '${functionName}' at line ${tokens[currentIndex.currentIndex]?.line}, column ${tokens[currentIndex.currentIndex]?.column}`);
+            }
+        }
+    }
+    currentIndex.currentIndex++; // Consume ')'
+
+    const body = parseBlock(currentIndex, tokens);
+
+    return {
+        type: ASTNodeType.FUNCTION,
+        name: functionName,
+        parameters,
+        body,
+    };
+
+}
+
+function parseFunctionCall(currentIndex: { currentIndex: number }, tokens: Token[], functionName: string): ASTNode {
+    currentIndex.currentIndex++; // Consume '('
+
+    const args: ASTNode[] = [];
+
+    // Parse function arguments (expressions like literals or numbers)
+    while (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.CLOSE_PAREN) {
+        const argument = parsePrimary(currentIndex, tokens); // Parse argument (number, literal, etc.)
+        args.push(argument);
+
+        // If next token is a comma, consume it and continue parsing arguments
+        if (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.COMMA) {
+            currentIndex.currentIndex++; // Consume ','
+        }
+    }
+
+    if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.CLOSE_PAREN) {
+        throw new Error(`Expected ')' after function call '${functionName}', but got ${tokens[currentIndex.currentIndex]?.type} at line ${tokens[currentIndex.currentIndex]?.line}, column ${tokens[currentIndex.currentIndex]?.column}`);
+    }
+    currentIndex.currentIndex++; // Consume ')'
+
+    return {
+        type: ASTNodeType.FUNCTIONCALL,
+        name: functionName,
+        arguments: args,
+    };
+}
+
+
 
 // Function to read the file
 function READ_FILE(currentIndex: { currentIndex: number }, tokens: Token[], parenStack: number[]): ASTNode | null {
@@ -873,6 +954,10 @@ function READ_FILE(currentIndex: { currentIndex: number }, tokens: Token[], pare
             type: ASTNodeType.COMMENT,
             value: commentContent.trim() // Trim any unwanted spaces
         };
+    }
+    // Handle Functions 
+    if (currentToken.type === TOKEN_TYPES.FUNCTION) {
+        return parseFunction(currentIndex, tokens);
     }
 
     // Handle variable declaration

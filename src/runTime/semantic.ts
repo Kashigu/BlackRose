@@ -282,8 +282,26 @@ export function analyze(node: ASTNode): void {
             analyze(node.operand); // Validate the operand
             break;
 
+        case ASTNodeType.FUNCTION:
+            // Validate the function body
+            if (!node.body) {
+                throw new Error("FUNCTION must have a body.");
+            }
+            analyze(node.body);
+            break;
+        
+        case ASTNodeType.FUNCTIONCALL:
+            // Validate the function arguments
+            if (node.arguments) {
+                for (const arg of node.arguments) {
+                    analyze(arg);
+                }
+            }
+            break;
+        
+
         default:
-            throw new Error(`Unknown node type ${node.type}`);
+            throw new Error(`Unknown node type ${node.type} in semantic analysis.`);
     }
 }
 

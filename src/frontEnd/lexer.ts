@@ -15,10 +15,8 @@ function lookAHeadString(str: string, currentPosition: number , input:string): b
 
     // Ensure the keyword is not part of a longer identifier (e.g., "WriteTest")
     const nextChar = input[currentPosition + matchLength];
-    console.log(`Next Character: ${nextChar}`);
     if (nextChar && nextChar.match(/[a-zA-Z0-9_]/)) {
         const backchar = input[currentPosition + matchLength - 1];
-        console.log(`Back Character: ${backchar}`);
         // Only return false if backchar is a valid identifier character and not an '='
         if (backchar && backchar.match(/[a-zA-Z0-9_]/) && backchar !== "=") {
             return false;
@@ -66,7 +64,6 @@ function validOperator(
     output: Token[]
 ): number { // Return the updated position
     const matchedOperator = operators.find(op => lookAHeadString(op, currentPosition, input));
-    console.log(`Matched Operator: ${matchedOperator}`);
     if (matchedOperator) {
         output.push({
             type: operatorType,
@@ -186,11 +183,8 @@ export function tokenize(input: string): Token[] {
         }
 
         // Handle Firstly the Comparison Operators
-        if (ValidComparisonOperators.some(op => lookAHeadString(op, currentPosition, input))) {
-            console.log(`Before validOperator - Position: ${currentPosition}, Character: ${input[currentPosition]}`);
+        if (ValidComparisonOperators.some(op => lookAHeadString(op, currentPosition, input))) { 
             currentPosition = validOperator(ValidComparisonOperators, TOKEN_TYPES.COMPARISONOPERATOR, currentPosition, currentLine, currentColumn, input, output);
-            console.log(`After validOperator - Position: ${currentPosition}, Character: ${input[currentPosition]}`);
-    
             continue;
         }
 

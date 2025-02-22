@@ -1,10 +1,17 @@
-create X = L
-create Y = 6
-create Z = 0
+create X = 1
 
 
-stroke (create I = 0; I <= Y; I++)
+cook Write (A, B)
 {
-    write (Y)
-    yap (I)
+   stroke(create I = 0; A <= B; I++)
+   {
+    yap("Value of I is " I)
+    yap("Value of A is " A)
+    A++
+    yap("Value of B is " B)
+   }
 }
+
+Write(2, 5)
+
+Write(0,10)

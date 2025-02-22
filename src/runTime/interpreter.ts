@@ -2,7 +2,7 @@ import { ValueTypes, Value } from "./values";
 import { ASTNode, ASTNodeType } from "../frontEnd/ast";
 import { DeclaredVariables } from "./semantic";
 
-const variables: Record<string, Value> = {}; // Variable storage
+let variables: Record<string, Value> = {}; // Variable storage
 
 const BinaryOperators: Record<string, (left: Value, right: Value) => Value> = {
     "+": (left, right) => {
@@ -88,7 +88,6 @@ export function interpret(node: ASTNode): Value {
             return value;
         }
 
-
         case ASTNodeType.VARIABLEDECLARATION: {
             const variableName = node.name;
             const value = interpret(node.value);
@@ -96,7 +95,6 @@ export function interpret(node: ASTNode): Value {
             //console.log(`Variable '${variableName}' created with value ${value.value}`);
             return value;
         }
-
 
         case ASTNodeType.NUMBER:
             const number = parseFloat(node.value); // Convert string to number
@@ -133,7 +131,6 @@ export function interpret(node: ASTNode): Value {
         case ASTNodeType.LITERAL: {
             // Handle literal node, return as a ValueTypes.LITERAL type
 
-            //console.log("Literal: ",node.value);
             return { type: ValueTypes.LITERAL, value: String(variables[node.value].value) };
         }
 
@@ -143,7 +140,7 @@ export function interpret(node: ASTNode): Value {
             // Loop through each child of the WRITE node
             for (const child of node.children) {
                 const evaluatedChild = interpret(child); // Evaluate the child node
-        
+                
                 // Check the type of the evaluated child and concatenate
                 if (evaluatedChild.type === ValueTypes.STRING || evaluatedChild.type === ValueTypes.NUMBER || evaluatedChild.type === ValueTypes.LITERAL) {
                     output += String(evaluatedChild.value); // Concatenate the value to the output string
@@ -500,9 +497,9 @@ export function interpret(node: ASTNode): Value {
         
             if (node.children) {
                 for (const child of node.children) {
-                    //console.log("Interpreting block child");
+                    
                     const result = interpret(child); // Interpret the child node
-                    //console.log("Child result: ", result);
+                    
         
                     // Propagate BREAK if encountered
                     if (result && result.type === ValueTypes.BREAK) {
@@ -710,11 +707,54 @@ export function interpret(node: ASTNode): Value {
             variables[variableName] = { type: ValueTypes.BOOLEAN, value: !variable.value };
             return variables[variableName]; // Return new value
         }
-        
+
+        case ASTNodeType.FUNCTION: {
+            // Store the function in the variables table
+            variables[node.name] = {
+                type: ValueTypes.FUNCTION,
+                value: {
+                    parameters: node.parameters,
+                    body: node.body,
+                },
+            };
+            return { type: ValueTypes.NULL, value: null };
+            
+        }
+
+        case ASTNodeType.FUNCTIONCALL: {
+            
+            const func = variables[node.name]; // Retrieve the function from the variables table
+
+            // Check if the function is defined
+            if (!func || func.type !== ValueTypes.FUNCTION) {
+                throw new Error(`Function '${node.name}' is not defined.`);
+            }
+
+            // Check if the number of arguments matches the number of parameters
+            if (node.arguments.length !== func.value.parameters.length) {
+                throw new Error(`Function '${node.name}' expects ${func.value.parameters.length} arguments, got ${node.arguments.length}`);
+            }
+
+            // Create a new scope for the function
+            // This prevents global variables from being overwritten by function parameters.
+            const prevScope = { ...variables }; // Save current scope (variables)
+
+            // Assign the function arguments to their correspondent parameters
+            for (let i = 0; i < func.value.parameters.length; i++) {
+                variables[func.value.parameters[i]] = interpret(node.arguments[i]); // Bind arguments
+            }
+
+            const result = interpret(func.value.body); // Execute the function body
+
+            // This ensures that function parameters and local variables do not affect the outer scope.
+            variables = prevScope; 
+
+            return result;
+        }
             
         
         default:
-            throw new Error(`Unknown node type ${node.type}`);
+            throw new Error(`Unknown node type ${node.type} in interpreter`);
     }
 }
 
