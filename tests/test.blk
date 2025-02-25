@@ -1,17 +1,24 @@
 create X = 1
 
+create A = 1
 
 cook Write (A, B)
 {
-   stroke(create I = 0; A <= B; I++)
-   {
-    yap("Value of I is " I)
-    yap("Value of A is " A)
-    A++
-    yap("Value of B is " B)
-   }
+   write (A)
 }
+
+cook Add (D,B)
+{
+  create C = A+B
+  A = 300
+  yap (C)
+  yap (A)
+}
+
+yap (A)
 
 Write(2, 5)
 
-Write(0,10)
+Add(0,10)
+
+yap (A)

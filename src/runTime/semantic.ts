@@ -1,6 +1,5 @@
 import { ASTNode, ASTNodeType } from "../frontEnd/ast";
-import { TOKEN_TYPES } from "../frontEnd/tokens";
-import { ValidBinaryOperators, ValidComparisonOperators, ValidUnitaryOperators, ValidLogicalOperators, ValidUnaryOperators, ValidAssignmentOperators } from "../validOperators";
+import { ValidBinaryOperators, ValidComparisonOperators, ValidUnitaryOperators, ValidLogicalOperators, ValidUnaryOperators } from "../validOperators";
 
 
 let pendingIfElse: ASTNode | null = null;
@@ -29,11 +28,10 @@ export function analyze(node: ASTNode): void {
             if (!node.name) {
                 throw new Error("Variable declaration must have a variable name.");
             }
-            if (declaredVariables.has(node.name)) {
-                throw new Error(`Variable ${node.name} is already declared.`);
+            declaredVariables.add(node.name); // Add the declared variable
+            if (node.value) {
+                analyze(node.value); // Validate the assigned value
             }
-            declaredVariables.add(node.name); // Add the declared variable to the set
-            analyze(node.value); // Validate the assigned value
             break;
             
         case ASTNodeType.BINARYOPERATOR:

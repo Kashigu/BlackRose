@@ -83,13 +83,21 @@ export function interpret(node: ASTNode): Value {
         case ASTNodeType.ASSIGNMENT: {
             const variableName = node.name;
             const value = interpret(node.value);
+            if (!DeclaredVariables().has(variableName)) {
+                throw new Error(`Variable ${variableName} is not declared.`);
+            }
             //console.log(`Variable ${variableName} to ${value.value}`);
             variables[variableName] = value; // Store variable
+            
             return value;
         }
 
         case ASTNodeType.VARIABLEDECLARATION: {
             const variableName = node.name;
+            if (!DeclaredVariables().has(variableName)) {
+                throw new Error(`Variable ${variableName} is not declared.`);
+            }
+            DeclaredVariables().add(variableName);
             const value = interpret(node.value);
             variables[variableName] = value;
             //console.log(`Variable '${variableName}' created with value ${value.value}`);
@@ -735,19 +743,33 @@ export function interpret(node: ASTNode): Value {
                 throw new Error(`Function '${node.name}' expects ${func.value.parameters.length} arguments, got ${node.arguments.length}`);
             }
 
-            // Create a new scope for the function
-            // This prevents global variables from being overwritten by function parameters.
-            const prevScope = { ...variables }; // Save current scope (variables)
+            // Save only a copy of variables that are function parameters
+            const prevScope: Record<string, any> = {};
 
-            // Assign the function arguments to their correspondent parameters
-            for (let i = 0; i < func.value.parameters.length; i++) {
-                variables[func.value.parameters[i]] = interpret(node.arguments[i]); // Bind arguments
+            // Goes through all the function parameters one by one
+            for (const param of func.value.parameters) {
+                // If the parameter name is equal to a variable name, store the variable value
+                if (param in variables) {
+                    prevScope[param] = variables[param]; // Store original values of the global variable so that they can be restored later
+                }
             }
 
-            const result = interpret(func.value.body); // Execute the function body
+            // Assign arguments to function parameters
+            for (let i = 0; i < func.value.parameters.length; i++) {
+                variables[func.value.parameters[i]] = interpret(node.arguments[i]);
+            }
 
-            // This ensures that function parameters and local variables do not affect the outer scope.
-            variables = prevScope; 
+            const result = interpret(func.value.body); // Execute function body
+
+            // Restore only the original function parameters
+            for (const param of func.value.parameters) {
+                // if the parameter name is equal to a variable name, restore the variable value
+                if (param in prevScope) {
+                    variables[param] = prevScope[param]; // Restore previous value
+                } else {
+                    delete variables[param]; // Remove function parameter if it didn't exist before
+                }
+            }
 
             return result;
         }
@@ -757,4 +779,3 @@ export function interpret(node: ASTNode): Value {
             throw new Error(`Unknown node type ${node.type} in interpreter`);
     }
 }
-
