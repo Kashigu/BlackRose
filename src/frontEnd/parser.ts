@@ -117,7 +117,7 @@ function parsePrimary(currentIndex: {currentIndex:number}, tokens:Token[]): ASTN
     }else {
         throw new Error(`Unexpected "${tokens[currentIndex.currentIndex].value}" at line ${tokens[currentIndex.currentIndex].line} and column ${tokens[currentIndex.currentIndex].column}`);
     }
- }
+}
 
 function parseUnitaryExpression(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
     // Goes back to the previous token to get left 
@@ -888,6 +888,18 @@ function parseFunctionCall(currentIndex: { currentIndex: number }, tokens: Token
     };
 }
 
+function parseReturn(currentIndex: { currentIndex: number }, tokens: Token[]): ASTNode {
+    currentIndex.currentIndex++; // Advance past 'return'
+    
+    // Parse the return value
+    const returnValue = parseExpression(0, currentIndex, tokens);
+
+    return {
+        type: ASTNodeType.RETURN,
+        value: returnValue,
+    };
+}
+
 
 
 // Function to read the file
@@ -1043,6 +1055,10 @@ function READ_FILE(currentIndex: { currentIndex: number }, tokens: Token[], pare
     // Unitary operators
     if (currentToken.type === TOKEN_TYPES.UNITARYOPERATOR) {
         return parseUnitaryExpression(currentIndex, tokens);
+    }
+
+    if (currentToken.type === TOKEN_TYPES.RETURN){
+        return parseReturn(currentIndex, tokens);
     }
 
     if (!currentToken.value){

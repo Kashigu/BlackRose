@@ -9,16 +9,14 @@ function Write (A: number, B: number)
 
 function Add (D: number,B: number)
 {
-  const C = A+B
-  A = 300
-  console.log (C)
-  console.log (A)
+  return D + B
 }
 
 console.log (A)
 
 Write(2, 5)
 
-Add(0,10)
+const P = Add(0,10)
+console.log (P)
 
 console.log (A)

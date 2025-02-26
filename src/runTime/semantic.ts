@@ -297,6 +297,12 @@ export function analyze(node: ASTNode): void {
             }
             break;
         
+        case ASTNodeType.RETURN:
+            // Validate the return value
+            if (node.value) {
+                analyze(node.value);
+            }
+            break;
 
         default:
             throw new Error(`Unknown node type ${node.type} in semantic analysis.`);

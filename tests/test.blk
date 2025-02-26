@@ -9,16 +9,15 @@ cook Write (A, B)
 
 cook Add (D,B)
 {
-  create C = A+B
-  A = 300
-  yap (C)
-  yap (A)
+  spit D + B
 }
 
 yap (A)
 
 Write(2, 5)
 
-Add(0,10)
+create P = Add(0,10)
+
+yap(P)
 
 yap (A)

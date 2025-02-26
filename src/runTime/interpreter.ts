@@ -773,6 +773,12 @@ export function interpret(node: ASTNode): Value {
 
             return result;
         }
+
+        case ASTNodeType.RETURN: {
+            // Evaluate the return value
+            const value = interpret(node.value);
+            return value; // Return the value
+        }
             
         
         default:

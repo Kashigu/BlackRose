@@ -142,6 +142,7 @@ export type ASTNode =
             ASTValueNode<ASTNodeType.COMMENT, string> |
             ASTValueNode<ASTNodeType.TRUE, string> |
             ASTValueNode<ASTNodeType.FALSE, string> |
+            ASTValueNode<ASTNodeType.RETURN, any> |
             AST_X_Node<ASTNodeType.BREAK> |
             AST_X_Node<ASTNodeType.CONTINUE> |
             AST_X_Children<ASTNodeType.PROGRAM> |
