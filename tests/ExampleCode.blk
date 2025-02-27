@@ -128,3 +128,16 @@ bet ( Y != 7 && (L || W))
         yap("GG")
 }
 ```
+
+```plaintext   
+// ------------------------------------Functions 
+cook Add (D,B)
+{
+  write (B)
+  spit D 
+}
+
+create P = Add(0,10)
+
+yap(P)
+```
