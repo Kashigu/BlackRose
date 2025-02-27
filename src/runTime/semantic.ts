@@ -36,7 +36,13 @@ export function analyze(node: ASTNode): void {
             
         case ASTNodeType.BINARYOPERATOR:
             analyze(node.left); // Validate left operand
+            if (node.left.type === ASTNodeType.STRING) {
+                throw new Error("Left operand cannot be a string.");
+            }
             analyze(node.right); // Validate right operand
+            if (node.right.type === ASTNodeType.STRING) {
+                throw new Error("Right operand cannot be a string.");
+            }
             if (!ValidBinaryOperators.includes(node.value)) {
                 throw new Error(`Unknown operator ${node.value}`);
             }
