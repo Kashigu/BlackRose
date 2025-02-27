@@ -26,17 +26,7 @@ BlackRose is a programming language that I created to understand how compilers w
 | slay           | do            | ✅           |
 | cook           | function      | ✅           |
 | spit           | return        | ✅           |
-|                | goto          | ❌           |
-|                | long          | ❌           |
-|                | short         | ❌           |
-|                | signed        | ❌           |
-|                | sizeof        | ❌           |
-|                | static        | ❌           |
-|                | struct        | ❌           |
 | chat           | switch        | ✅           |
-|                | union         | ❌           |
-|                | unsigned      | ❌           |
-|                | volatile      | ❌           |
 | W              | true          | ✅           |
 | L              | false         | ✅           |
 
@@ -99,4 +89,4 @@ stroke (create I = 0; I <= Y; I++)
 ```
 
 ## Important Notice
-This project is intended for educational purposes only. It is a demonstration of my comprehension with how compilers work.
+This project is intended for educational purposes only. It is a demonstration of my comprehension with how Compilers and Programming Languages work.
