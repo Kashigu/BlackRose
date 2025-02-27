@@ -12,7 +12,7 @@ BlackRose is a programming language that I created to understand how compilers w
 
 |    BlackRose   | TS Equivalent | Implemented? |
 | -------------- | ------------- | ------------ |
-| create         | const         | ✅           |
+| create         | let           | ✅           |
 | write/yap      | console.log   | ✅           |
 | stroke         | for           | ✅           |
 | bet            | if            | ✅           |
