@@ -37,6 +37,14 @@ function parsePrimary(currentIndex: {currentIndex:number}, tokens:Token[]): ASTN
         
     }
 
+    if (currentToken.type === TOKEN_TYPES.NULL) {
+        currentIndex.currentIndex++; // Consume 'null'
+        return {
+            type: ASTNodeType.NULL,
+            value: null,
+        };
+    }
+
     // Handle literals
     if (currentToken.type === TOKEN_TYPES.LITERAL) {    
         currentIndex.currentIndex++; // Consume the literal token
@@ -952,7 +960,7 @@ function READ_FILE(currentIndex: { currentIndex: number }, tokens: Token[], pare
         currentIndex.currentIndex++; // Consume 'null'
         return {
             type: ASTNodeType.NULL,
-            value: 'null'
+            value: null,
         };
     }
 

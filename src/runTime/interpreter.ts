@@ -6,19 +6,47 @@ let variables: Record<string, Value> = {}; // Variable storage
 
 const BinaryOperators: Record<string, (left: Value, right: Value) => Value> = {
     "+": (left, right) => {
+        // Check if both values can be converted to numbers
+        const leftNum = Number(left.value);
+        const rightNum = Number(right.value);
+        const isLeftNumber = !Number.isNaN(leftNum);
+        const isRightNumber = !Number.isNaN(rightNum);
+
+        let result: Value;
+        
+        if (isLeftNumber && isRightNumber) {
+            // Both are valid numbers, do numeric addition
+            result = {
+                type: ValueTypes.NUMBER,
+                value: leftNum + rightNum,
+            };
+        }else {
+            // Otherwise, treat as string concatenation
+            result = {
+                type: ValueTypes.STRING,
+                value: String(left.value ?? '') + String(right.value ?? ''),
+            };
+        }
+        return result;
+    },
+    "-": (left, right) => {
+        if (isNaN(Number(left.value)) || isNaN(Number(right.value))) {
+            throw new Error(`Invalid operands for '-': ${left.value} and ${right.value}`);
+        }
         return {
             type: ValueTypes.NUMBER,
-            value: Number(left.value) + Number(right.value),    
+            value: Number(left.value) - Number(right.value),
         };
     },
-    "-": (left, right) => ({
-        type: ValueTypes.NUMBER,
-        value: Number(left.value) - Number(right.value),
-    }),
-    "*": (left, right) => ({
-        type: ValueTypes.NUMBER,
-        value: Number(left.value) * Number(right.value),
-    }),
+    "*": (left, right) => {
+        if (isNaN(Number(left.value)) || isNaN(Number(right.value))) {
+            throw new Error(`Invalid operands for '*': ${left.value} and ${right.value}`);
+        }
+        return {
+            type: ValueTypes.NUMBER,
+            value: Number(left.value) * Number(right.value),
+        };
+    },
     "+=": (left, right) => {
         return {
             type: ValueTypes.NUMBER,
@@ -27,10 +55,12 @@ const BinaryOperators: Record<string, (left: Value, right: Value) => Value> = {
     },
 
     "/": (left, right) => {
+        if (isNaN(Number(left.value)) || isNaN(Number(right.value))) {
+            throw new Error(`Invalid operands for '/': ${left.value} and ${right.value}`);
+        }
         if (Number(right.value) === 0) {
             throw new Error("Cannot divide by zero");
         }
-
         return {
             type: ValueTypes.NUMBER,
             value: Number(left.value) / Number(right.value),
@@ -137,8 +167,10 @@ export function interpret(node: ASTNode): Value {
         }
 
         case ASTNodeType.LITERAL: {
-            // Handle literal node, return as a ValueTypes.LITERAL type
-
+            // Ensure the variable has a value
+            if (!variables[node.value]) {
+                throw new Error(`Variable '${node.value}' is not defined.`);
+            }
             return { type: ValueTypes.LITERAL, value: String(variables[node.value].value) };
         }
 
@@ -331,6 +363,10 @@ export function interpret(node: ASTNode): Value {
                 default:
                     throw new Error(`Unknown logical operator '${node.value}'`);
             }
+        }
+
+        case ASTNodeType.NULL: {
+            return { type: ValueTypes.NULL, value: null };
         }
         
 

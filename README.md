@@ -27,6 +27,7 @@ BlackRose is a programming language that I created to understand how compilers w
 | cook           | function      | ✅           |
 | spit           | return        | ✅           |
 | chat           | switch        | ✅           |
+| null           | null          | ✅           |
 | W              | true          | ✅           |
 | L              | false         | ✅           |
 

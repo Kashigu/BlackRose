@@ -2,6 +2,8 @@ const X = 1
 
 let A = 1
 
+let V = 1
+
 function Write (A: number, B: number)
 {
    console.log (A)
@@ -9,7 +11,7 @@ function Write (A: number, B: number)
 
 function Add (D: number,B: number)
 {
-  return D + B
+  return D - V
 }
 
 console.log (A)

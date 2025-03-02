@@ -1,6 +1,11 @@
 create X = 1
 
+yap (X)
+
 create A = 1
+create V = null
+
+V=2
 
 cook Write (A, B)
 {
@@ -9,14 +14,14 @@ cook Write (A, B)
 
 cook Add (D,B)
 {
-  spit D + B
+  spit D + V
 }
 
 yap (A)
 
 Write(2, 5)
 
-create P = Add(0,10)
+create P = Add(10,10)
 
 yap(P)
 

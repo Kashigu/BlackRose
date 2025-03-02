@@ -7,7 +7,7 @@ const declaredVariables = new Set<string>(); // Tracks explicitly created variab
 
 
 export function analyze(node: ASTNode): void {
-    switch (node.type) {
+    switch (node.type) {      
         case ASTNodeType.PROGRAM:
             for (const child of node.children) {
                 analyze(child); // Analyze each child
@@ -60,6 +60,10 @@ export function analyze(node: ASTNode): void {
 
         case ASTNodeType.COMMENT:
             // No validation required for comments
+            break;
+        
+        case ASTNodeType.NULL:
+            // No further validation required for null values
             break;
 
         case ASTNodeType.WRITE:
@@ -308,10 +312,10 @@ export function analyze(node: ASTNode): void {
             if (node.value) {
                 analyze(node.value);
             }
-            break;
-
+            break;    
+            
         default:
-            throw new Error(`Unknown node type ${node.type} in semantic analysis.`);
+            throw new Error(`Unknown node type ${(node as ASTNode).type} in semantic analysis.`);
     }
 }
 

@@ -138,7 +138,7 @@ export type ASTNode =
             ASTValueNode<ASTNodeType.STRING, string> |
             ASTValueNode<ASTNodeType.LITERAL, string> |
             ASTValueNode<ASTNodeType.NUMBER, string> |
-            ASTValueNode<ASTNodeType.NULL, string> |
+            ASTValueNode<ASTNodeType.NULL, null> |
             ASTValueNode<ASTNodeType.COMMENT, string> |
             ASTValueNode<ASTNodeType.TRUE, string> |
             ASTValueNode<ASTNodeType.FALSE, string> |
