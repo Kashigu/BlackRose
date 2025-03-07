@@ -1,10 +1,10 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 import { tokenize } from './frontEnd/lexer'; 
 import { parse } from './frontEnd/parser'; 
 import { analyze } from './runTime/semantic';
-import { interpret } from './runTime/interpreter'; 
+import { interpret } from './runTime/interpreter';
 
 // Function to read the .blk file
 function readBLKFile(filePath: string): string | null {
@@ -24,11 +24,9 @@ function runBLKFile(filePath: string): void {
         try {
             // Tokenize the code using your lexer
             const tokens = tokenize(code); 
-            //console.log({ tokens }); // It's good for debugging
 
             // Parse the tokens into an AST using your parser
             const ast = parse(tokens); 
-            //console.log('AST:', JSON.stringify(ast, null, 2)); // It's good for debugging
 
             analyze(ast);
 
@@ -44,7 +42,26 @@ function runBLKFile(filePath: string): void {
     }
 }
 
-const filePath = path.resolve(__dirname, '..', 'tests', 'test.blk'); // Navigate up one level from src and go into tests
+// Accept folder and file name from command-line arguments
+const args = process.argv.slice(2); // Capture command-line arguments
 
-// Run the code from a .blk file
+if (args.length !== 2) {
+    console.error("Please provide both the folder name and the .blk file name.");
+    process.exit(1);
+}
+
+// Get the folder and file name from the arguments
+const folderName = args[0];
+const fileName = args[1];
+
+// Ensure the file name ends with .blk
+if (!fileName.endsWith('.blk')) {
+    console.error("Please provide a .blk file.");
+    process.exit(1);
+}
+
+// Resolve the file path dynamically
+const filePath = path.resolve(__dirname,'..',folderName, fileName);
+
+// Run the .blk file
 runBLKFile(filePath);

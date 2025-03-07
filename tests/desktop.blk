@@ -1,0 +1,3 @@
+create X = "Welcome to BlackRose"
+
+yap (X)
