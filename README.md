@@ -89,5 +89,12 @@ stroke (create I = 0; I <= Y; I++)
 }
 ```
 
+## How to Install
+Clone the repository 
+Make sure you have ts-node installed globally on your system or it will never work if you dont have it run:
+npm install -g ts-node
+Inside of the folder run npm link
+
+
 ## Important Notice
 This project is intended for educational purposes only. It is a demonstration of my comprehension with how Compilers and Programming Languages work.

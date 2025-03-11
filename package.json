@@ -20,6 +20,6 @@
     "readline-sync": "^1.4.10"
   },
   "bin":{
-    "blackrose": "./bin/cli.ts"
+    "blackrose": "./bin/blackrose.cmd"
   }
 }
