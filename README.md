@@ -90,18 +90,23 @@ stroke (create I = 0; I <= Y; I++)
 ```
 
 ## How to Install
-Clone the repository 
-Make sure you have ts-node installed globally on your system or else it will never work if you dont have it run:
-npm install -g ts-node
-Inside of the folder run npm install and npm link
+- Clone the repository 
+- Make sure you have ts-node installed globally on your system or else it will never work if you dont have it run:
+- npm install -g ts-node
+- Inside of the folder run npm install and npm link
 
-If you receive a message about ExecutionPolicy go to your Windows Powershell in Administrator mode and write this command:
-Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
-If answered write Y 
+- If you receive a message about ExecutionPolicy go to your Windows Powershell in Administrator mode and write this command:
+- Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+- If answered write Y 
 
-If you desire to go back just run:
-Set-ExecutionPolicy Restricted -Scope CurrentUser
-If answered write Y 
+- If you desire to go back just run:
+- Set-ExecutionPolicy Restricted -Scope CurrentUser
+- If answered write Y 
+
+### How to Use
+
+After the installation process just run on your console
+blackrose "path of the folder" filename.blk
 
 ## Important Notice
 This project is intended for educational purposes only. It is a demonstration of my comprehension with how Compilers and Programming Languages work.
