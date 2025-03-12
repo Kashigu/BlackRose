@@ -106,7 +106,7 @@ stroke (create I = 0; I <= Y; I++)
 ### How to Use
 
 After the installation process just run on your console
-blackrose "path of the folder" filename.blk
+`blackrose "path of the folder" filename.blk`
 
 ## Important Notice
 This project is intended for educational purposes only. It is a demonstration of my comprehension with how Compilers and Programming Languages work.
