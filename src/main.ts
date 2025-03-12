@@ -10,7 +10,7 @@ function readBLKFile(filePath: string): string | null {
     try {
         return fs.readFileSync(filePath, 'utf-8');
     } catch (error) {
-        console.error(`Error reading file: ${filePath}`, error);
+        console.error(`Error reading file: ${filePath}`);
         return null;
     }
 }
