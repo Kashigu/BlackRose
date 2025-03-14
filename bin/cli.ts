@@ -7,7 +7,7 @@ const folderName = args[0];
 const fileName = args[1];
 
 if (folderName == "-h" || folderName == "--help") {
-    console.log('Usage: blackrose "<folder-name>" <file-name.blk> \n');
+    console.log('Usage: blackrose "<path-to-folder-name>" <file-name.blk> \n');
     console.log('Options:');
     console.log('  -h, --help     Show usage information');
     console.log('  -v, --version  Display the version number');
@@ -20,8 +20,14 @@ if (folderName == "-v" || folderName == "--version") {
     process.exit(0);
 }
 
+if (args.length == 1 && folderName.endsWith('.blk')) {
+    runBLKFile(folderName);
+    process.exit(0);
+
+}
+
 if (args.length != 2) {
-    console.error('Usage: blackrose "<folder-name>" <file-name.blk>');
+    console.error('Usage: blackrose "<path-to-folder-name>" <file-name.blk>');
     process.exit(1);
 }
 
