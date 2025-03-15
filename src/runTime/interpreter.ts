@@ -175,7 +175,7 @@ export function interpret(node: ASTNode): Value {
         }
 
         case ASTNodeType.WRITE: {
-            let output = ""; // Initialize an empty string for the output
+            let output = ""; // Initialize an empty string 
         
             // Loop through each child of the WRITE node
             for (const child of node.children) {
@@ -816,6 +816,12 @@ export function interpret(node: ASTNode): Value {
             return value; // Return the value
         }
             
+        case ASTNodeType.ARRAY: {
+            const array = node.children.map(interpret).map(item => item.value );
+            const arrayString = "[" + array.join(", ") + "]";
+            return { type: ValueTypes.ARRAY, value: arrayString };        
+        }
+
         
         default:
             throw new Error(`Unknown node type ${node.type} in interpreter`);

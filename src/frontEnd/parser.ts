@@ -117,6 +117,32 @@ function parsePrimary(currentIndex: {currentIndex:number}, tokens:Token[]): ASTN
     
         throw new Error(`Expected ')' after expression at line ${currentToken.line} and column ${currentToken.column}`);
     }
+
+    if (currentToken.type === TOKEN_TYPES.OPEN_RETOS) {
+        currentIndex.currentIndex++; // Consume '['
+        let elements: ASTNode[] = [];
+        
+        while (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.CLOSE_RETOS) {
+            let expr = parseExpression(0, currentIndex, tokens);
+            elements.push(expr);
+    
+            if (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.COMMA) {
+                currentIndex.currentIndex++; // Consume ','
+            } else {
+                break; // No more elements
+            }
+        }
+    
+        if (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.CLOSE_RETOS) {
+            currentIndex.currentIndex++; // Consume ']'
+            return {
+                type: ASTNodeType.ARRAY,
+                children: elements,
+            };
+        }
+    
+        throw new Error(`Expected ']' after expression at line ${currentToken.line} and column ${currentToken.column}`);
+    }
     
 
     if ( tokens[currentIndex.currentIndex].value === undefined)
@@ -168,7 +194,7 @@ function parseExpression(precedence: number, currentIndex: { currentIndex: numbe
         operator = tokens[currentIndex.currentIndex];
     }
 
-    // Handle binary, comparison, and logical operators in the same loop
+    // Handle binary and logical operators in the same loop
     while (
         operator &&
         (operator.type === TOKEN_TYPES.BINARYOPERATOR ||
@@ -189,7 +215,7 @@ function parseExpression(precedence: number, currentIndex: { currentIndex: numbe
 
         operator = tokens[currentIndex.currentIndex]; // Update to the next operator
     }    
-
+    
     return left;
 }
 

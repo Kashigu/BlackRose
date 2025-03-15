@@ -314,6 +314,14 @@ export function analyze(node: ASTNode): void {
             }
             break;    
             
+        case ASTNodeType.ARRAY:
+            // Validate the array elements aka children
+            if (node.children) {
+                for (const element of node.children) {
+                    analyze(element);
+                }
+            }
+            break;
         default:
             throw new Error(`Unknown node type ${(node as ASTNode).type} in semantic analysis.`);
     }

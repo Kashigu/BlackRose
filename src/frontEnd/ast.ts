@@ -30,6 +30,7 @@ export enum ASTNodeType {
         FUNCTION = 'Function',
         FUNCTIONCALL = 'FunctionCall',
         RETURN = 'Return',
+        ARRAY = 'Array',
 }
   
 interface ASTValueNode<T extends ASTNodeType, K> {
@@ -41,7 +42,7 @@ interface AST_X_Node<X extends ASTNodeType> {
     type: X;
 }
 
-interface AST_X_Children<X extends ASTNodeType> {
+interface AST_X_Children<X extends ASTNodeType> { // This is for nodes that have children
     type: X,
     children: ASTNode[]
 }
@@ -143,6 +144,7 @@ export type ASTNode =
             ASTValueNode<ASTNodeType.TRUE, string> |
             ASTValueNode<ASTNodeType.FALSE, string> |
             ASTValueNode<ASTNodeType.RETURN, any> |
+            AST_X_Children<ASTNodeType.ARRAY> |
             AST_X_Node<ASTNodeType.BREAK> |
             AST_X_Node<ASTNodeType.CONTINUE> |
             AST_X_Children<ASTNodeType.PROGRAM> |

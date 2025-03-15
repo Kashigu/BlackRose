@@ -144,6 +144,20 @@ export function tokenize(input: string): Token[] {
             continue;
         }
 
+        if (input[currentPosition] === '['){
+            output.push({ type: TOKEN_TYPES.OPEN_RETOS, line: currentLine, column: currentColumn });
+            currentPosition++;
+            currentColumn++;
+            continue;
+        }
+
+        if (input[currentPosition] === ']'){
+            output.push({ type: TOKEN_TYPES.CLOSE_RETOS, line: currentLine, column: currentColumn });
+            currentPosition++;
+            currentColumn++;
+            continue;
+        }
+
         // Handle commas
         if (input[currentPosition] === ',') {
             output.push({ type: TOKEN_TYPES.COMMA, line: currentLine, column: currentColumn });

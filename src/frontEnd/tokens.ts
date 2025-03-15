@@ -36,6 +36,8 @@ export enum TOKEN_TYPES  {
     FUNCTION = "Function", // function statement
     RETURN = "Return", // return statement
     COMMA = "Comma", // ,
+    OPEN_RETOS = "Open_Retos", // [
+    CLOSE_RETOS = "Close_Retos", // ]
 }
 
 //Create a TokenNode with the type of the token
@@ -71,6 +73,7 @@ export type  Token =
                      TokenNode<TOKEN_TYPES.OPEN_BRACE> | TokenNode<TOKEN_TYPES.CLOSE_BRACE> |
                      TokenNode<TOKEN_TYPES.FUNCTION> | TokenNode<TOKEN_TYPES.RETURN> |
                      TokenNode<TOKEN_TYPES.COMMA> |
+                     TokenNode<TOKEN_TYPES.OPEN_RETOS> | TokenNode<TOKEN_TYPES.CLOSE_RETOS> |
                      
                      TokenNodeValue<TOKEN_TYPES.COMPARISONOPERATOR> | TokenNodeValue<TOKEN_TYPES.UNITARYOPERATOR> |
                      TokenNodeValue<TOKEN_TYPES.LOGICALOPERATOR> | TokenNodeValue<TOKEN_TYPES.UNARYOPERATOR> |
