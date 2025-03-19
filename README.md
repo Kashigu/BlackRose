@@ -38,7 +38,7 @@ It supports these type of variable like:
 - Number
 - Float
 - Null
-- Array (with mix types ([1, "text", W]))
+- Array ( with mix types ( [1, "text", W] ) )
 
 
 ### Operators
