@@ -69,7 +69,7 @@ export function analyze(node: ASTNode): void {
         case ASTNodeType.WRITE:
             const child = node.children[0];
             analyze(child); // Validate the child 
-            if (child.type !== ASTNodeType.STRING && child.type !== ASTNodeType.LITERAL) {
+            if (child.type !== ASTNodeType.STRING && child.type !== ASTNodeType.LITERAL && child.type !== ASTNodeType.ARRAYCALL) {
                 throw new Error("WRITE node must have a STRING child.");
             }
             break;
@@ -322,6 +322,21 @@ export function analyze(node: ASTNode): void {
                 }
             }
             break;
+        case ASTNodeType.ARRAYCALL:
+            // Validate the array index
+            if (!node.name) {
+                throw new Error("ArrayCall must have a name.");
+            }
+            if (!node.value) {
+                throw new Error("ArrayCall must have a value.");
+            }
+            if (node.value.type !== ASTNodeType.NUMBER && node.value.type !== ASTNodeType.LITERAL) {
+                throw new Error("Array index must be a number.");
+            }
+        
+            analyze(node.value);
+            break;
+            
         default:
             throw new Error(`Unknown node type ${(node as ASTNode).type} in semantic analysis.`);
     }

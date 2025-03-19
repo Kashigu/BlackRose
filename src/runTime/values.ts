@@ -3,6 +3,7 @@ export enum ValueTypes {
     LITERAL = 'Literal',
     NUMBER = 'Number',
     ARRAY = 'Array',
+    ARRAYCALL = 'ArrayCall',
     NULL = 'Null',
     BOOLEAN = 'Boolean',
     BREAK = 'Break',
@@ -37,4 +38,5 @@ export type Value = ValueNodeValue<ValueTypes.STRING, string> |
                     ValueNodeValue<ValueTypes.CONTINUE, null> |
                     ValueNodeValue<ValueTypes.BREAK, null>|
                     ValueNodeValue<ValueTypes.ARRAY, any> |
+                    ValueNodeValue<ValueTypes.ARRAYCALL, any> |
                     FunctionValue;

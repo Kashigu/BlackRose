@@ -59,6 +59,11 @@ function parsePrimary(currentIndex: {currentIndex:number}, tokens:Token[]): ASTN
             return parseFunctionCall(currentIndex, tokens, currentToken.value);
         }
 
+        // Check if the next token is an array call
+        if (tokens[currentIndex.currentIndex]?.type === TOKEN_TYPES.OPEN_RETOS) {
+            return parseArrayCall(currentIndex, tokens, currentToken.value);
+        }
+
         return {
             type: ASTNodeType.LITERAL,
             value: currentToken.value,
@@ -118,7 +123,8 @@ function parsePrimary(currentIndex: {currentIndex:number}, tokens:Token[]): ASTN
         throw new Error(`Expected ')' after expression at line ${currentToken.line} and column ${currentToken.column}`);
     }
 
-    if (currentToken.type === TOKEN_TYPES.OPEN_RETOS) {
+    // Handle array declarations
+    if (currentToken.type === TOKEN_TYPES.OPEN_RETOS) { 
         currentIndex.currentIndex++; // Consume '['
         let elements: ASTNode[] = [];
         
@@ -245,6 +251,7 @@ function parseWrite(currentIndex: { currentIndex: number }, tokens: Token[]): AS
         {
 
         const token = tokens[currentIndex.currentIndex];
+        
 
         if (token.type === TOKEN_TYPES.STRING) {
             children.push({
@@ -252,14 +259,19 @@ function parseWrite(currentIndex: { currentIndex: number }, tokens: Token[]): AS
                 value: token.value,
             });
             currentIndex.currentIndex++; // Consume string token
-        } else if (token.type === TOKEN_TYPES.LITERAL) {
+        }else if (token.type === TOKEN_TYPES.LITERAL && tokens[currentIndex.currentIndex + 1]?.type === TOKEN_TYPES.OPEN_RETOS) {
+            currentIndex.currentIndex++; // Consume literal token THIS NEEDS TO BE HERE 
+                                         // if not it will cause problems on the parseArrayCall specially on the parseExpression then parsePrimary
+            children.push(parseArrayCall(currentIndex, tokens, token.value));
+        }else if (token.type === TOKEN_TYPES.LITERAL) {
             children.push({
                 type: ASTNodeType.LITERAL,
                 value: token.value,
             });
             currentIndex.currentIndex++; // Consume literal token
-        } else {
-            throw new Error(`Unauthorized value '${token.value}' at line ${token.line}`);
+            
+        }else {
+            throw new Error(`Unauthorized value '${token.type}' at line ${token.line}`);
         }
     }
 
@@ -919,6 +931,23 @@ function parseFunctionCall(currentIndex: { currentIndex: number }, tokens: Token
         type: ASTNodeType.FUNCTIONCALL,
         name: functionName,
         arguments: args,
+    };
+}
+
+function parseArrayCall(currentIndex: { currentIndex: number }, tokens: Token[], arrayName: string): ASTNode {
+    currentIndex.currentIndex++; // Consume '['
+
+    let index = parseExpression(0, currentIndex, tokens); // Parse the array index
+
+    if (tokens[currentIndex.currentIndex]?.type !== TOKEN_TYPES.CLOSE_RETOS) {
+        throw new Error(`Expected ']' after array index in '${arrayName}', but got ${tokens[currentIndex.currentIndex]?.type} at line ${tokens[currentIndex.currentIndex]?.line}, column ${tokens[currentIndex.currentIndex]?.column}`);
+    }
+    currentIndex.currentIndex++; // Consume ']'
+
+    return {
+        type: ASTNodeType.ARRAYCALL,
+        name: arrayName,
+        value: index,
     };
 }
 

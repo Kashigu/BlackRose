@@ -100,6 +100,14 @@ let blockDepth = 0;
 let hasExecuted = false; // Flag to check if the if statement has been executed
 let matchFound = false; // Flag to check if a match was found in the switch statement
 
+// This function is to be able to print arrays inside of arrays
+function formatArray(arr: any[]): string { 
+    return "[" + arr.map(item => 
+        Array.isArray(item) ? formatArray(item) : String(item)
+    ).join(", ") + "]";
+}
+
+
 export function interpret(node: ASTNode): Value {
     switch (node.type) {
         case ASTNodeType.PROGRAM: {
@@ -171,6 +179,10 @@ export function interpret(node: ASTNode): Value {
             if (!variables[node.value]) {
                 throw new Error(`Variable '${node.value}' is not defined.`);
             }
+            if (variables[node.value].type === ValueTypes.ARRAY) {
+                return { type: ValueTypes.ARRAY, value: variables[node.value].value };
+
+            }
             return { type: ValueTypes.LITERAL, value: String(variables[node.value].value) };
         }
 
@@ -178,16 +190,19 @@ export function interpret(node: ASTNode): Value {
             let output = ""; // Initialize an empty string 
         
             // Loop through each child of the WRITE node
-            for (const child of node.children) {
-                const evaluatedChild = interpret(child); // Evaluate the child node
+            for (const child of node.children) {                                    //I will allow this to be with "[" and "]" for arrays 
                 
+                const evaluatedChild = interpret(child); // Evaluate the child node
+
                 // Check the type of the evaluated child and concatenate
-                if (evaluatedChild.type === ValueTypes.STRING || evaluatedChild.type === ValueTypes.NUMBER || evaluatedChild.type === ValueTypes.LITERAL) {
+                if (evaluatedChild.type === ValueTypes.ARRAY) {
+                    output += formatArray(evaluatedChild.value); // Concatenate the value to the output string
+                } else if (evaluatedChild.type === ValueTypes.STRING || evaluatedChild.type === ValueTypes.NUMBER || evaluatedChild.type === ValueTypes.LITERAL || evaluatedChild.type === ValueTypes.ARRAYCALL) {
                     output += String(evaluatedChild.value); // Concatenate the value to the output string
                 } else if (evaluatedChild.type === ValueTypes.NULL) {
                     output += ""; // Add nothing if it's a NULL value
                 } else {
-                    throw new Error("WRITE can only handle strings, numbers, or literals.");
+                    throw new Error("write or yap can only handle strings, numbers, or literals.");
                 }
             }
         
@@ -817,12 +832,42 @@ export function interpret(node: ASTNode): Value {
         }
             
         case ASTNodeType.ARRAY: {
-            const array = node.children.map(interpret).map(item => item.value );
-            const arrayString = "[" + array.join(", ") + "]";
-            return { type: ValueTypes.ARRAY, value: arrayString };        
+            const array = node.children.map(interpret);
+            const values = array.map((value) => value.value);
+            return { type: ValueTypes.ARRAY, value: values };     // This will return the array as a string so can be printed on the write statement    
         }
 
-        
+        case ASTNodeType.ARRAYCALL: {
+            const arrayName = node.name; // Gets the name of the array
+            let index = interpret(node.value).value; // Gets the index of the array
+
+            if (arrayName === null || arrayName == undefined ) {
+                throw new Error("Array name is not defined");
+            }
+
+            const array = variables[arrayName];
+            
+            index = Number(index); // Convert the index to a number because of literals
+
+            if (index < 0 || index >= array.value.length) {
+                throw new Error(`Index ${index} out of bounds for array '${arrayName}'`);
+            }
+
+            /* This way is working but its not the most efficient way
+            for (let i = 0; i < array.value.length; i++) {
+                if (index === i) {
+                    return { type: ValueTypes.ARRAY, value: array.value[i] };
+                }
+            }
+            */
+            const result = array.value[index];
+
+            return {
+                type: ValueTypes.ARRAYCALL,
+                value: result,
+            };
+            
+        }
         default:
             throw new Error(`Unknown node type ${node.type} in interpreter`);
     }

@@ -31,10 +31,12 @@ export enum ASTNodeType {
         FUNCTIONCALL = 'FunctionCall',
         RETURN = 'Return',
         ARRAY = 'Array',
+        ARRAYCALL = 'ArrayCall' // this is to call a certain number of an array ex: array[0]
 }
   
 interface ASTValueNode<T extends ASTNodeType, K> {
     type: T,
+    name?: string,  // I will allow this to happen just because of the arrays I need to know the name of the array so I can call and the value is the number of the index I want to call
     value: K
 }
 
@@ -144,6 +146,7 @@ export type ASTNode =
             ASTValueNode<ASTNodeType.TRUE, string> |
             ASTValueNode<ASTNodeType.FALSE, string> |
             ASTValueNode<ASTNodeType.RETURN, any> |
+            ASTValueNode<ASTNodeType.ARRAYCALL, ASTNode> |
             AST_X_Children<ASTNodeType.ARRAY> |
             AST_X_Node<ASTNodeType.BREAK> |
             AST_X_Node<ASTNodeType.CONTINUE> |
