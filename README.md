@@ -31,6 +31,15 @@ BlackRose is a programming language that I created to understand how compilers w
 | W              | true          | ✅           |
 | L              | false         | ✅           |
 
+### Supports
+
+It supports every type of variable like:
+- String
+- Number
+- Float
+- Null
+- Array (with mix types ([1, "text", W]))
+
 
 ### Operators
 
