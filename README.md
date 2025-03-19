@@ -33,7 +33,7 @@ BlackRose is a programming language that I created to understand how compilers w
 
 ### Supports
 
-It supports every type of variable like:
+It supports this type of variable like:
 - String
 - Number
 - Float
