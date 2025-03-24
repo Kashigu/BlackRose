@@ -2,23 +2,22 @@ import { Token, TOKEN_TYPES } from './tokens';
 import { tokenStringMap } from './tokenStringMap';
 import { ValidBinaryOperators, ValidComparisonOperators, ValidUnitaryOperators, ValidLogicalOperators, ValidAssignmentOperators, ValidUnaryOperators } from "../validOperators";
 
-function lookAHeadString(str: string, currentPosition: number , input:string): boolean {
-    const parts = str.split('');
-    const matchLength = parts.length;
+function lookAHeadString(str: string, currentPosition: number , input:string , match:RegExp): boolean {
+    const matchLength = str.length; // Get the length of the string to match
 
-    for (let i = 0; i < parts.length; i++) {
+    for (let i = 0; i < matchLength; i++) {
         // if the current token does not match the current part of the string
-        if (input[currentPosition + i] !== parts[i]) {
+        if (input[currentPosition + i] !== str[i]) {
             return false;
         }
     }
 
     // Ensure the keyword is not part of a longer identifier (e.g., "WriteTest")
     const nextChar = input[currentPosition + matchLength];
-    if (nextChar && nextChar.match(/[a-zA-Z0-9_]/)) {
+    if (nextChar && nextChar.match(match)) {
         const backchar = input[currentPosition + matchLength - 1];
         // Only return false if backchar is a valid identifier character and not an '='
-        if (backchar && backchar.match(/[a-zA-Z0-9_]/) && backchar !== "=") {
+        if (backchar && backchar.match(match) && backchar !== "=") {
             return false;
         }
     }
@@ -28,25 +27,23 @@ function lookAHeadString(str: string, currentPosition: number , input:string): b
 
 function lookAHead(input: string, currentPosition:number ,match: RegExp, matchNext?: RegExp ): string[] {
     const bucket: string[] = [];
+    const length = input.length;
 
-    while (true) {
-        // Check if we reached the end of the input
+    while (currentPosition + bucket.length < length) {
+        
         const nextIndex = currentPosition + bucket.length;
         const nextToken = input[nextIndex];
-        if (!nextToken) {
-            break;
-        }
-        // m is either a string or a regex
-        let m: string | RegExp = match;
 
-        // if matchNext is provided and the bucket is not empty, use matchNext
-        if (matchNext && bucket.length) {
-            m = matchNext;
-        }
-        // if matchNext is provided and the bucket is empty, use match
-        if (m && !m.test(nextToken)) {
+        // If the next token does not match the regex, break
+        if (!nextToken || !match.test(nextToken)) {
             break;
         }
+
+        // If matchNext is provided, and the bucket is not empty, use matchNext
+        if (matchNext && bucket.length > 0 && !matchNext.test(nextToken)) {
+            break;
+        }
+
         // push the next token to the bucket
         bucket.push(nextToken);
     }
@@ -63,7 +60,7 @@ function validOperator(
     input: string, 
     output: Token[]
 ): number { // Return the updated position
-    const matchedOperator = operators.find(op => lookAHeadString(op, currentPosition, input));
+    const matchedOperator = operators.find(op => input.startsWith(op, currentPosition));
     if (matchedOperator) {
         output.push({
             type: operatorType,
@@ -85,21 +82,32 @@ export function tokenize(input: string): Token[] {
     let currentPosition = 0;
     let currentLine = 1;
     let currentColumn = 1;
+    const numberRegex = /\d/;
+    const regex = new RegExp('[0-9]');
+    const regex1 = new RegExp('[0-9.]'); 
+    const literalRegex = /[a-zA-Z_]/;
+    const literalRegexNext = /[a-zA-Z0-9_]/;
 
     while (currentPosition < input.length) {
-
+        
         // Ignore whitespace
-        if (input[currentPosition] === ' ' || input[currentPosition] === '\t' || input[currentPosition] === '\r') { 
-            currentPosition++;
-            currentColumn++;
+        if ([' ', '\t', '\r'].includes(input[currentPosition])) { 
+            
+            while ([' ', '\t', '\r'].includes(input[currentPosition])) {
+                currentPosition++;
+                currentColumn++;
+            }
+            
             continue;
         }
 
         // Handle line breaks
         if (input[currentPosition] === '\n') {
-            currentPosition++;
-            currentLine++;
-            currentColumn = 1;
+            while (input[currentPosition] === '\n') {
+                currentPosition++;
+                currentLine++;
+                currentColumn = 1;
+            }
             continue;
         }
 
@@ -175,7 +183,7 @@ export function tokenize(input: string): Token[] {
         }
 
         // Handle comments First of all
-        if (lookAHeadString('//', currentPosition, input)) {
+        if (lookAHeadString('//', currentPosition, input, literalRegexNext)) {
             currentPosition += 2; // Consume the `//`
         
             // Collect characters until a line break
@@ -197,37 +205,37 @@ export function tokenize(input: string): Token[] {
         }
 
         // Handle Firstly the Comparison Operators
-        if (ValidComparisonOperators.some(op => lookAHeadString(op, currentPosition, input))) { 
+        if (ValidComparisonOperators.find(op => input.startsWith(op, currentPosition))) { 
             currentPosition = validOperator(ValidComparisonOperators, TOKEN_TYPES.COMPARISONOPERATOR, currentPosition, currentLine, currentColumn, input, output);
             continue;
         }
 
         // Handle Secondly ValidLogicalOperators
-        if (ValidLogicalOperators.some(op => lookAHeadString(op, currentPosition, input))) {
+        if (ValidLogicalOperators.find(op => input.startsWith(op, currentPosition))) { 
             currentPosition = validOperator(ValidLogicalOperators, TOKEN_TYPES.LOGICALOPERATOR, currentPosition, currentLine, currentColumn, input, output);
             continue;
         }
 
         // Handle Thirdly the Unitary Operators
-        if (ValidUnitaryOperators.some(op => lookAHeadString(op, currentPosition, input))) {
+        if (ValidUnitaryOperators.find(op => input.startsWith(op, currentPosition))) { 
             currentPosition = validOperator(ValidUnitaryOperators, TOKEN_TYPES.UNITARYOPERATOR, currentPosition, currentLine, currentColumn, input, output);
             continue;
         }
 
         // Handle Fourthly Valid Assignment Operators
-        if (ValidAssignmentOperators.some(op => lookAHeadString(op, currentPosition, input))) {
+        if (ValidAssignmentOperators.find(op => input.startsWith(op, currentPosition))) { 
             currentPosition = validOperator(ValidAssignmentOperators, TOKEN_TYPES.ASSIGNMENTOPERATOR, currentPosition, currentLine, currentColumn, input, output);
             continue;
         }
 
         // Handle Fifthly Valid Unary Operators
-        if (ValidUnaryOperators.some(op => lookAHeadString(op, currentPosition, input))) {
+        if (ValidUnaryOperators.find(op => input.startsWith(op, currentPosition))) { 
             currentPosition = validOperator(ValidUnaryOperators, TOKEN_TYPES.UNARYOPERATOR, currentPosition, currentLine, currentColumn, input, output);
             continue;
         }
 
         // Handle Sixthly Binary Operators
-        if (ValidBinaryOperators.some(op => lookAHeadString(op, currentPosition, input))) {
+        if (ValidBinaryOperators.find(op => input.startsWith(op, currentPosition))) { 
             currentPosition = validOperator(ValidBinaryOperators, TOKEN_TYPES.BINARYOPERATOR, currentPosition, currentLine, currentColumn, input, output);
             continue;
         }
@@ -266,10 +274,10 @@ export function tokenize(input: string): Token[] {
             continue;
         }
 
-        // Handle numbers
-        const numberRegex = /\d/;
+        // Handle numbers // create a regex ouside of the loop to avoid unnecessary recompilation
+        
         if (numberRegex.test(input[currentPosition])) {
-            const numberBucket = lookAHead(input, currentPosition, new RegExp('[0-9]'), new RegExp('[0-9.]')); // Collect digits
+            const numberBucket = lookAHead(input, currentPosition, regex, regex1); // Collect digits
 
             output.push({
                 type: TOKEN_TYPES.NUMBER,
@@ -286,7 +294,7 @@ export function tokenize(input: string): Token[] {
         // Check for tokens in tokenStringMap first
         let foundToken = false;
         for (const { key, value } of tokenStringMap) {
-            if (!lookAHeadString(key, currentPosition, input)) {
+            if (!lookAHeadString(key, currentPosition, input, literalRegexNext)) {
                 continue;
             }
 
@@ -306,11 +314,7 @@ export function tokenize(input: string): Token[] {
             continue;
         }
 
-        // Process LITERAL tokens only if no other token matches
-        const literalRegex = /[a-zA-Z_]/;
-        const literalRegexNext = /[a-zA-Z0-9_]/;
-
-        
+        // Process LITERAL tokens only if no other token matches 
         if (literalRegex.test(input[currentPosition])) {
             const bucket = lookAHead(input, currentPosition, literalRegex, literalRegexNext);
 
@@ -326,11 +330,13 @@ export function tokenize(input: string): Token[] {
 
             continue;
         }
+        
 
         console.log(`Current Position: ${currentPosition}, Character: ${input[currentPosition]}`);
 
         throw new Error(`Unexpected token ${input[currentPosition]} at line ${currentLine} and column ${currentColumn} in lexer`);
     }
+    
 
     return output;
 }

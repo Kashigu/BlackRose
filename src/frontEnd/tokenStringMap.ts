@@ -25,5 +25,4 @@ export const tokenStringMap: Array<{
     { key: 'slay', value: { type: TOKEN_TYPES.DO } }, // if appears slay then it is a do statement
     { key: 'cook', value: { type: TOKEN_TYPES.FUNCTION } }, // if appears cook then it is a function statement
     { key: 'spit', value: { type: TOKEN_TYPES.RETURN } }, // if appears spit then it is a return statement
-
  ]
