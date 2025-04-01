@@ -553,6 +553,8 @@ export function interpret(node: ASTNode): Value {
             //console.log("Block Depth: ", blockDepth);
         
             let lastResult: Value | null = null;
+
+            const prevScope = { ...variables }; // Save the current scope of variables
         
             if (node.children) {
                 for (const child of node.children) {
@@ -579,6 +581,10 @@ export function interpret(node: ASTNode): Value {
             }
         
             blockDepth--; // Decrement block depth
+
+            // Restore the previous scope of variables
+            variables = prevScope; // Restore the previous scope of variables
+
             //console.log("Returning from BLOCK: ", lastResult || { type: ValueTypes.NULL, value: null });
             return lastResult || { type: ValueTypes.NULL, value: null }; // Return the last result or NULL
         } 
