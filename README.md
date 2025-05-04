@@ -100,7 +100,7 @@ stroke (create I = 0; I <= Y; I++)
 
 ## How to Install
 - Clone the repository 
-- Make sure you have ts-node installed globally on your system or else it will never work if you dont have it run:
+- Make sure you have ts-node installed globally on your system or else it will never work if you don't have it run:
 - `npm install -g ts-node`
 - Inside of the folder run: `npm install` and `npm link`
 
@@ -117,5 +117,22 @@ stroke (create I = 0; I <= Y; I++)
 After the installation process just run on your console
 `blackrose "path of the folder" filename.blk`
 
+## 🤝 Contributing
+
+BlackRose is an educational project to help me and others learn about how compilers and programming languages work.
+
+If you're curious about compilers, interpreters, or just want to explore building a language, feel free to explore the code.
+
+Contributions are welcome — whether it's:
+- Reporting bugs 🐞
+- Suggesting syntax improvements 💡
+- Improving documentation 📚
+- Creating examples 🧪
+
+To get started, fork the repo and open a pull request or issue. I’ll be happy to review it!
+
+You can also reach out via the issue tracker if you want to discuss ideas.
+
 ## Important Notice
 This project is intended for educational purposes only. It is a demonstration of my comprehension with how Compilers and Programming Languages work.
+It is not intended for production use, but you're welcome to explore, learn from, or even contribute to the project.
